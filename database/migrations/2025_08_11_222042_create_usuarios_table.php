@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->string('apellido');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->integer('estado')->default(1); // 1 = activo, 0 = inactivo
+            $table->string('nombre',50);
+            $table->string('apellido',50);
+            $table->string('email',255)->unique();
+            $table->text('password');
+            $table->integer('estado')->default(1);
+            $table->text('foto_url');
             $table->unsignedBigInteger("id_rol");
             $table->foreign("id_rol")->references("id")->on("roles");
             $table->text('uid');
-            $table->timestamps();
         });
     }
 

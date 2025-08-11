@@ -5,12 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class roles extends Model
+class product_backlog extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'nombre',
+        'id_proyecto',
+        'creado_por',
+        'titulo',
+        'descripcion',
+        'prioridad',
+        'progreso',
         'estado',
         'uid',
     ];
