@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_equipo');
             $table->foreign('id_equipo')->references('id')->on('equipos');
             $table->unsignedBigInteger('id_usuario');
-            $table->foreign('id_usuario')->references('id')->on('usuarios');
+            $table->foreign('id_usuario')->references('id')->on('users');
             $table->unsignedBigInteger('id_rol');
             $table->foreign('id_rol')->references('id')->on('roles');
             $table->integer('estado')->default(1);
