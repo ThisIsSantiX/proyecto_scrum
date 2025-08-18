@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('progreso', 20);
             $table->integer('estado')->default(1);
             $table->text('uid');
+            $table->timestamps();
         });
     }
 

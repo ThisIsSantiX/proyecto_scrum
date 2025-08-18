@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('progreso',20);
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
+            $table->timestamps();
         });
     }
 

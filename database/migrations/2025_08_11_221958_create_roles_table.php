@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nombre');
             $table->integer('estado')->default(1); // 1 = activo, 0 = inactivo
             $table->text('uid');
+            $table->timestamps();
         });
     }
 

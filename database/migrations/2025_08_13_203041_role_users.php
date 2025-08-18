@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreign('role_id')->references('id')->on('roles');
             $table->integer('estado')->default(1);
             $table->text('uid');
+            $table->timestamps();
         });
     }
 
