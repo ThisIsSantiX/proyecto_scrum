@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_proyecto');
             $table->foreign('id_proyecto')->references('id')->on('proyectos');
             $table->unsignedBigInteger('creado_por');
-            $table->foreign('creado_por')->references('id')->on('usuarios');
+            $table->foreign('creado_por')->references('id')->on('users');
             $table->string('titulo', 50);
             $table->string('descripcion', 255);
             $table->string('prioridad', 10);

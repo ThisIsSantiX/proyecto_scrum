@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nombre', 50);
             $table->string('descripcion',255);
             $table->unsignedBigInteger('id_owner');
-            $table->foreign('id_owner')->references('id')->on('usuarios');
+            $table->foreign('id_owner')->references('id')->on('users');
             $table->integer('estado')->default(1); // 1 = activo, 0 = inactivo
             $table->text('uid');
             $table->integer('visibilidad')->default(1); // 1 = privado, 2 = publico
