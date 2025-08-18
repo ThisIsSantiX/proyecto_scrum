@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreign('id_proyecto')->references('id')->on('proyectos');
             $table->integer('estado')->default(1);
             $table->text('uid');
+            $table->timestamps();
         });
     }
 
