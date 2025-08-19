@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,26 +16,21 @@
         <link rel="stylesheet" href="{{ asset('assets/css/dark.min.css') }}" />
         <link rel="stylesheet" href="{{ asset('assets/css/customizer.min.css') }}" />
         <link rel="stylesheet" href="{{ asset('assets/css/rtl.min.css') }}" />
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
         @yield('css')
     </head>
-    <body class="   ">
-        <div class="position-relative iq-banner">
-            <div id="loading">
-                <div class="loader simple-loader">
-                    <div class="loader-body"></div>
-                </div>    </div>
+    <body class=" " data-bs-spy="scroll" data-bs-target="#elements-section" data-bs-offset="0" tabindex="0">
 
-            @include('layouts.layout.components.sidebar')
+        <div id="loading">
+            <div class="loader simple-loader">
+                <div class="loader-body"></div>
+            </div>    
+        </div>
 
-            <div class="flex-1 flex flex-col">
-                @include('layouts.layout.components.navbar')
-
-                <main class="container-fluid">
-                    @yield('content')
-                </main>
-            </div>
+        <div class="wrapper">
+            <section class="login-content">
+                @yield('content')
+            </section>
         </div>
         
         <script src="{{ asset('assets/js/core/libs.min.js') }}"></script>
@@ -49,9 +44,6 @@
         <script src="{{ asset('assets/js/plugins/form-wizard.js') }}"></script>
         <script src="{{ asset('assets/vendor/aos/dist/aos.js') }}"></script>
         <script src="{{ asset('assets/js/hope-ui.js') }}" defer></script>
-        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
         @yield('js')
     </body>
