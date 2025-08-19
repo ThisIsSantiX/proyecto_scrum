@@ -1,3 +1,4 @@
+@ -1,29 +0,0 @@
 @extends('layouts.layout.layout')   
 
 @section('title', 'Scrum')
