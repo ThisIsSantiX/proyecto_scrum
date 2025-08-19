@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,9 +15,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('pages.dashboard.index');
+    return view('pages.auth.login');
 });
 
-Route::get('proyectos', function () {
-    return view('pages.proyectos.index');
-});
+Route::get('/kanban', function () {return view('pages.kanban.index');})->name('kanban'); 
+
+// Authentication Routes
+Route::get('/login', [AuthController::class, 'index'])->name('login');
+Route::get('/register', [AuthController::class, 'register'])->name('register');
+
