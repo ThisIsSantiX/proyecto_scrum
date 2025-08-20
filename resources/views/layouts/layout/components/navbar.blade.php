@@ -217,7 +217,14 @@
             <li><a class="dropdown-item" href="../dashboard/app/user-profile.html">Profile</a></li>
             <li><a class="dropdown-item" href="../dashboard/app/user-privacy-setting.html">Privacy Setting</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="../dashboard/auth/sign-in.html">Logout</a></li>
+            <li>
+                <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    Cerrar Sesion
+                </a>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
+            </li>
             </ul>
         </li>
         </ul>
