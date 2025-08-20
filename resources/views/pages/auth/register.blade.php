@@ -62,19 +62,19 @@
                                     <div class="col-lg-12">
                                         <div class="form-group">
                                             <label for="email" class="form-label">Correo</label>
-                                            <input type="email" class="form-control" id="email" name="correo" placeholder="" required>
+                                            <input type="email" class="form-control" id="email" name="email" placeholder="" required>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
                                             <label for="password" class="form-label">Contraseña</label>
-                                            <input type="password" class="form-control" id="password" name="contrasena" placeholder="" required>
+                                            <input type="password" class="form-control" id="password" name="password" placeholder="" required>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
                                             <label for="confirm-password" class="form-label">Confirmar Contraseña</label>
-                                            <input type="password" class="form-control" id="confirm-password" name="password_confirmation" placeholder=" " required>
+                                            <input type="password" class="form-control" id="confirm-password" name="confirm-password" placeholder=" " required>
                                         </div>
                                     </div>
                             </div>

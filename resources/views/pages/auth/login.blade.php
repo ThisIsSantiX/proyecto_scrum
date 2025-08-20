@@ -50,13 +50,13 @@
                                 <div class="col-lg-12">
                                 <div class="form-group">
                                     <label for="email" class="form-label">Correo</label>
-                                    <input type="email" class="form-control" id="email" aria-describedby="email" placeholder="chanel@gmail.com ">
+                                    <input type="email" class="form-control" id="email" aria-describedby="email" placeholder="">
                                 </div>
                                 </div>
                                 <div class="col-lg-12">
                                 <div class="form-group">
                                     <label for="password" class="form-label">Contraseña</label>
-                                    <input type="password" class="form-control" id="password" aria-describedby="password" placeholder="12345 ">
+                                    <input type="password" class="form-control" id="password" aria-describedby="password" placeholder="">
                                 </div>
                                 </div>
                                 <div class="col-lg-12 d-flex justify-content-between">
