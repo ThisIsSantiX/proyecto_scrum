@@ -99,37 +99,28 @@
 @section('js')
     <script>
 
-        $(document).ready(function() {
-            $('#formLogin').submit(function(e) {
+    $(document).ready(function() {
+        const notyf = new Notyf({
+            duration: 3000,
+            position: { x: 'right', y: 'top' } 
+        });
+
+        $('#formLogin').submit(function(e) {
             e.preventDefault();
 
-            // Validar que todos los campos estén completos
             var email = $('#email').val().trim();
             var password = $('#password').val().trim();
 
             if (email === '' || password === '') {
-                Swal.fire({
-                title: 'Completa todos los campos',
-                icon: 'warning',
-                position: 'top-end',
-                toast: true,
-                showConfirmButton: false,
-                timer: 3000
-                });
+                notyf.error('Completa todos los campos');
                 return;
             }
 
-            Swal.fire({
-                title: 'Iniciando sesión...',
-                icon: 'info',
-                position: 'top-end',
-                toast: true,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                timerProgressBar: true,
-                didOpen: () => {
-                Swal.showLoading();
-                }
+            const loading = notyf.open({
+                type: 'info',
+                message: 'Iniciando sesión...',
+                background: '#3B82F6', 
+                duration: 0 // ⏳ 
             });
 
             $.ajax({
@@ -137,64 +128,53 @@
                 url: $(this).attr('action'),
                 data: $(this).serialize(),
                 success: function(response) {
-                if (response.status === 'success') {
-                    Swal.fire({
-                    title: 'Inicio de sesión exitoso',
-                    icon: 'success',
-                    position: 'top-end',
-                    toast: true,
-                    showConfirmButton: false,
-                    timer: 3000
-                    });
-                    setTimeout(function() {
-                    window.location.href = '/dashboard'; 
-                    }, 1700);
-                } else {
-                    Swal.fire({
-                    title: response.message,
-                    icon: response.icon,
-                    position: 'top-end',
-                    toast: true,
-                    showConfirmButton: false,
-                    timer: 3000
-                    });
-                }
+                    notyf.dismiss(loading);
+
+                    if (response.status === 'success') {
+                        notyf.success('Inicio de sesión exitoso');
+                        setTimeout(function() {
+                            window.location.href = '/dashboard'; 
+                        }, 1700);
+                    } else {
+                        notyf.error(response.message || 'Error en el inicio de sesión');
+                    }
+                },
+                error: function() {
+                    notyf.dismiss(loading);
+                    notyf.error('Error en el servidor');
                 }
             });
-            });
         });
+    });
 
-        // Envuelve el input de password en un contenedor con posición relativa
-        $('#password').closest('.form-group').css('position', 'relative');
 
-        // Agrega el icono del ojo dentro del input
-        $('#password').after(`
-            <span id="togglePassword" style="position: absolute; right: 20px; top: 38px; cursor: pointer; z-index: 2;">
-            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
-                <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
-            </svg>
-            </span>
-        `);
+    $('#password').closest('.form-group').css('position', 'relative');
 
-        // Ajusta el padding del input para que no tape el icono
-        $('#password').css('padding-right', '40px');
+    $('#password').after(`
+        <span id="togglePassword" style="position: absolute; right: 20px; top: 38px; cursor: pointer; z-index: 2;">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+            <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
+        </svg>
+        </span>
+    `);
 
-        $('#togglePassword').on('click', function() {
-            var passwordInput = $('#password');
-            var type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
-            passwordInput.attr('type', type);
+    $('#password').css('padding-right', '40px');
 
-            // Cambia el icono del ojo
-            $(this).html(type === 'password'
-            ? `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
-                <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
-                </svg>`
-            : `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M13.359 11.238l2.122 2.122a.5.5 0 0 1-.708.708l-2.122-2.122A7.027 7.027 0 0 1 8 13.5c-5 0-8-5.5-8-5.5a13.134 13.134 0 0 1 2.478-3.197l-1.147-1.147a.5.5 0 1 1 .708-.708l13 13a.5.5 0 0 1-.708.708l-1.147-1.147z"/>
-                </svg>`
-            );
-        });
+    $('#togglePassword').on('click', function() {
+        var passwordInput = $('#password');
+        var type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+        passwordInput.attr('type', type);
+
+        $(this).html(type === 'password'
+        ? `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+            <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
+            </svg>`
+        : `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M13.359 11.238l2.122 2.122a.5.5 0 0 1-.708.708l-2.122-2.122A7.027 7.027 0 0 1 8 13.5c-5 0-8-5.5-8-5.5a13.134 13.134 0 0 1 2.478-3.197l-1.147-1.147a.5.5 0 1 1 .708-.708l13 13a.5.5 0 0 1-.708.708l-1.147-1.147z"/>
+            </svg>`
+        );
+    });
     </script>
 @endsection

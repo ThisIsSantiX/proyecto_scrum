@@ -16,6 +16,7 @@
         <link rel="stylesheet" href="{{ asset('assets/css/dark.min.css') }}" />
         <link rel="stylesheet" href="{{ asset('assets/css/customizer.min.css') }}" />
         <link rel="stylesheet" href="{{ asset('assets/css/rtl.min.css') }}" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
         
 
         @yield('css')
@@ -48,6 +49,7 @@
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 
         @yield('js')
     </body>

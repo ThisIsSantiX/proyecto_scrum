@@ -82,16 +82,15 @@
             const email = document.getElementById('email').value.trim();
 
             if (email === '') {
-                Swal.fire({
-                    title: 'Completa el campo de correo',
-                    icon: 'warning',
-                    position: 'top-start',
-                    toast: true,
-                    showConfirmButton: false,
-                    timer: 3000
+                const notyf = new Notyf({
+                    duration: 3000,
+                    position: { x: 'left', y: 'top' }
                 });
+
+                notyf.error('Completa el campo de correo');
                 return;
             }
+
 
             window.location.href = "{{ route('confirmMail') }}";
         });
