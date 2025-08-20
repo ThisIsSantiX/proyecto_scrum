@@ -30,6 +30,7 @@ Route::put('/usuarios/{id}', [UserController::class, 'update'])->name('usuarios.
 Route::delete('/usuarios/{id}', [UserController::class, 'destroy'])->name('usuarios.destroy');
 Route::get('/usuarios/{id}/delete', [UserController::class, 'destroy'])->name('usuarios.delete');
 
+// casi
 
 Route::get('/kanban', function () {return view('pages.kanban.index');})->name('kanban'); 
 
