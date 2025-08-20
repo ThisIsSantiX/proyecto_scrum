@@ -3,6 +3,9 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;  
+use Illuminate\Support\Str;
+
 
 return new class extends Migration
 {
@@ -18,6 +21,38 @@ return new class extends Migration
             $table->text('uid');
             $table->timestamps();
         });
+
+
+        DB::table('roles')->insert([
+            [
+                'nombre' => 'Scrum master',
+                'estado' => 1,
+                'uid' => Str::uuid(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nombre' => 'Scrum team',
+                'estado' => 1,
+                'uid' => Str::uuid(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nombre' => 'Product owner',
+                'estado' => 1,
+                'uid' => Str::uuid(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nombre' => 'Usuario',
+                'estado' => 1,
+                'uid' => Str::uuid(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
 
     /**

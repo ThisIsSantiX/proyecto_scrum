@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head >
+    <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        
-        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>@yield('title', 'Scrum')</title>
 
@@ -18,6 +16,8 @@
         <link rel="stylesheet" href="{{ asset('assets/css/dark.min.css') }}" />
         <link rel="stylesheet" href="{{ asset('assets/css/customizer.min.css') }}" />
         <link rel="stylesheet" href="{{ asset('assets/css/rtl.min.css') }}" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+        
 
         @yield('css')
     </head>
@@ -46,6 +46,10 @@
         <script src="{{ asset('assets/js/plugins/form-wizard.js') }}"></script>
         <script src="{{ asset('assets/vendor/aos/dist/aos.js') }}"></script>
         <script src="{{ asset('assets/js/hope-ui.js') }}" defer></script>
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 
         @yield('js')
     </body>

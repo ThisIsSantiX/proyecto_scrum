@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,55 +14,17 @@ use App\Http\Controllers\UserController;
 |
 */
 
+
 Route::get('/', function () {
     return view('pages.auth.login');
 });
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Route::get('/kanban', function () {return view('pages.kanban.index');})->name('kanban'); 
-
-Route::get('/login', [AuthController::class, 'index'])->name('login');
-
 // Mostrar formulario de registro
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 // Procesar registro
 Route::post('/storeCuenta', [AuthController::class, 'store'])->name('storeCuenta');
-
-// Logout
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
 
 Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
 Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.create');
@@ -74,3 +35,16 @@ Route::get('/usuarios/{id}/edit', [UserController::class, 'edit'])->name('usuari
 Route::put('/usuarios/{id}', [UserController::class, 'update'])->name('usuarios.update');
 Route::delete('/usuarios/{id}', [UserController::class, 'destroy'])->name('usuarios.destroy');
 Route::get('/usuarios/{id}/delete', [UserController::class, 'destroy'])->name('usuarios.delete');
+
+Route::get('/kanban', function () {return view('pages.kanban.index');})->name('kanban'); 
+Route::get('/dashboard', function () {return view('pages.dashboard.index');})->name('dashboard'); 
+
+// Authentication Routes
+Route::get('/auth/login', [AuthController::class, 'index'])->name('login');
+Route::redirect('/', '/auth/login');
+Route::get('/auth/register', [AuthController::class, 'register'])->name('register');
+Route::post('/auth/login', [AuthController::class, 'authLogin'])->name('authLogin');
+Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
+Route::get('/auth/confirm-mail', [AuthController::class, 'confirmMail'])->name('confirmMail');
+

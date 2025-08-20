@@ -6,20 +6,16 @@ use Illuminate\Http\Request;
 
 class ProyectoController extends Controller
 {
-    
+    // Método para mostrar una lista de recursos
     public function index()
     {
-        
-        $proyectos = \App\Models\Proyecto::all(); 
-        return view('pages.proyectos.index', compact('proyectos'));
+        // lógica para mostrar todos los elementos
     }
 
+    // Método para mostrar el formulario de creación
     public function create()
     {
-       
-        return view('pages.proyectos.create');
-        
-
+        // lógica para mostrar el formulario
     }
 
     // Método para guardar un nuevo recurso
