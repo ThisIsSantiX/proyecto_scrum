@@ -3,9 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -15,31 +12,11 @@ class AuthController extends Controller
     {
         return view('pages.auth.login');
     }
-    // Esta función muestra la vista de registro
 
+    // Esta función muestra la vista de registro
     public function register()
     {
         return view('pages.auth.register');
-    }
-    // Procesar registro
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'apellido' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
-        ]);
-
-        User::create([
-            'nombre' => $request->nombre,
-            'apellido' => $request->apellido,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'estado' => 'activo',
-        ]);
-
-        return redirect()->route('login')->with('success', 'Cuenta creada correctamente');
     }
 
     public function showRecoveryForm()
@@ -94,4 +71,5 @@ class AuthController extends Controller
         return redirect('/login')->with('message', 'Sesión cerrada correctamente');
     }
 
+    
 }

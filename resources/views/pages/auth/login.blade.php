@@ -45,31 +45,19 @@
                         </a>
                         <h2 class="mb-2 text-center">Bienvenido a Scrum</h2>
                         <p class="text-center">Inicia sesion o registrate</p>
-
-                        <form action="{{ route('login') }}" method="POST">
-
                         <form role="form" id="formLogin" action="{{ route('authLogin') }}" method="POST">
                             @csrf
-
                             <div class="row">
                                 <div class="col-lg-12">
                                 <div class="form-group">
                                     <label for="email" class="form-label">Correo</label>
-
-                                    <input type="email" class="form-control" id="email" aria-describedby="email" placeholder="chanel@gmail.com ">
-
                                     <input type="email" class="form-control" name="email" id="email" aria-describedby="email" placeholder=" ">
-
                                 </div>
                                 </div>
                                 <div class="col-lg-12">
                                 <div class="form-group">
                                     <label for="password" class="form-label">Contraseña</label>
-
-                                    <input type="password" class="form-control" id="password" aria-describedby="password" placeholder="12345 ">
-
                                     <input type="password" class="form-control" name="password" id="password" aria-describedby="password" placeholder=" ">
-
                                 </div>
                                 </div>
                                 <div class="col-lg-12 d-flex justify-content-between">
