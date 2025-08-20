@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -29,6 +28,27 @@ class User extends Authenticatable
     ];
 
     /**
+     * Accesor para mostrar el rol como texto.
+     */
+    public function getRolTextoAttribute()
+    {
+        $roles = [
+            1 => 'Admin',
+            2 => 'Usuario',
+        ];
+
+        return $roles[$this->id_rol] ?? 'Desconocido';
+    }
+
+    /**
+     * Accesor para mostrar el estado como texto.
+     */
+    public function getEstadoTextoAttribute()
+    {
+        return $this->estado == 1 ? 'Activo' : 'Inactivo';
+    }
+    
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
@@ -45,5 +65,6 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'estado' => 'boolean', 
     ];
 }
