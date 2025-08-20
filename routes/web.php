@@ -14,13 +14,14 @@ use App\Http\Controllers\AuthController;
 |
 */
 
-Route::get('/', function () {
-    return view('pages.auth.login');
-});
-
 Route::get('/kanban', function () {return view('pages.kanban.index');})->name('kanban'); 
+Route::get('/dashboard', function () {return view('pages.dashboard.index');})->name('dashboard'); 
 
 // Authentication Routes
-Route::get('/login', [AuthController::class, 'index'])->name('login');
-Route::get('/register', [AuthController::class, 'register'])->name('register');
-
+Route::get('/auth/login', [AuthController::class, 'index'])->name('login');
+Route::redirect('/', '/auth/login');
+Route::get('/auth/register', [AuthController::class, 'register'])->name('register');
+Route::post('/auth/login', [AuthController::class, 'authLogin'])->name('authLogin');
+Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
+Route::get('/auth/confirm-mail', [AuthController::class, 'confirmMail'])->name('confirmMail');
