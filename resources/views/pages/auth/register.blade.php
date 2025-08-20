@@ -45,36 +45,36 @@
                         </a>
                         <h2 class="mb-2 text-center">Bienvenido a Scrum</h2>
                         <p class="text-center">Crea una cuenta</p>
-                        <form>
+                        <form  action="{{ route('storeCuenta') }}" method="POST">
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="full-name" class="form-label">Nombre</label>
-                                        <input type="text" class="form-control" id="full-name" placeholder=" ">
+                                        <input type="text" class="form-control" id="nombre" name="nombre"  placeholder="" required>
                                     </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
                                             <label for="last-name" class="form-label">Apellido</label>
-                                            <input type="text" class="form-control" id="last-name" placeholder=" ">
+                                            <input type="text" class="form-control" id="apellido" name="apellido"  placeholder="" required>
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group">
                                             <label for="email" class="form-label">Correo</label>
-                                            <input type="email" class="form-control" id="email" placeholder=" ">
+                                            <input type="email" class="form-control" id="email" name="correo" placeholder="" required>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
                                             <label for="password" class="form-label">Contraseña</label>
-                                            <input type="password" class="form-control" id="password" placeholder=" ">
+                                            <input type="password" class="form-control" id="password" name="contrasena" placeholder="" required>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
                                             <label for="confirm-password" class="form-label">Confirmar Contraseña</label>
-                                            <input type="text" class="form-control" id="confirm-password" placeholder=" ">
+                                            <input type="password" class="form-control" id="confirm-password" name="password_confirmation" placeholder=" " required>
                                         </div>
                                     </div>
                             </div>
@@ -104,5 +104,42 @@
 @endsection
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
 
+        let formData = {
+            nombre: document.getElementById('nombre').value,
+            apellido: document.getElementById('apellido').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            password_confirmation: document.getElementById('confirm-password').value,
+        };
+
+        axios.post("{{ route('storeCuenta') }}", formData, {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => {
+            alert("Cuenta creada con éxito");
+            window.location.href = "/login";
+        })
+        .catch(error => {
+            if(error.response && error.response.status === 422){
+                let errores = error.response.data.errors;
+                let mensaje = "Errores:\n";
+                for(const campo in errores){
+                    mensaje += `- ${errores[campo][0]}\n`;
+                }
+                alert(mensaje);
+            } else {
+                alert("Hubo un error inesperado");
+                console.error(error);
+            }
+        });
+    });
+</script>
 @endsection
+

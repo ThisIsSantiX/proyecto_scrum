@@ -19,8 +19,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-            $table->integer('estado')->default(1);
-            $table->text('foto_url');
+            $table->enum('estado', ['activo', 'inactivo'])->default('activo');
+            $table->string('foto_url');
             $table->text('uid');
             $table->timestamps();
         });
