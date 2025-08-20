@@ -15,6 +15,7 @@ use App\Http\Controllers\UserController;
 |
 */
 
+
 Route::get('/', function () {
     return view('pages.auth.login');
 });
@@ -31,17 +32,23 @@ Route::delete('/usuarios/{id}', [UserController::class, 'destroy'])->name('usuar
 Route::get('/usuarios/{id}/delete', [UserController::class, 'destroy'])->name('usuarios.delete');
 
 
-Route::get('/kanban', function () {return view('pages.kanban.index');})->name('kanban'); 
 
-Route::get('/login', [AuthController::class, 'index'])->name('login');
+Route::get('/kanban', function () {return view('pages.kanban.index');})->name('kanban'); 
+Route::get('/dashboard', function () {return view('pages.dashboard.index');})->name('dashboard'); 
 
 // Mostrar formulario de registro
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 // Procesar registro
 Route::post('/storeCuenta', [AuthController::class, 'store'])->name('storeCuenta');
-
 // Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
+// Auth Routes
+Route::get('/auth/login', [AuthController::class, 'index'])->name('login');
+Route::redirect('/', '/auth/login');
+Route::get('/auth/register', [AuthController::class, 'register'])->name('register');
+Route::post('/auth/login', [AuthController::class, 'authLogin'])->name('authLogin');
+Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
+Route::get('/auth/confirm-mail', [AuthController::class, 'confirmMail'])->name('confirmMail');
 
