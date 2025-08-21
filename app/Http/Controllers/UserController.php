@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\roles;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -29,45 +33,53 @@ class UserController extends Controller
      * Guardar usuario en BD
      */
     public function store(Request $request)
-{
-    $request->validate([
-        'nombre'    => 'required|string|max:50',
-        'apellido'  => 'required|string|max:50',
-        'email'     => 'required|email|unique:users,email',
-        'password'  => 'required|min:6|confirmed',
-        'estado'    => 'required|in:activo,inactivo',
-        'id_rol'    => 'required|integer',
-        'foto_url'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-    ]);
+    {
+        $request->validate([
+            'nombre'    => 'required|string|max:50',
+            'apellido'  => 'required|string|max:50',
+            'email'     => 'required|email|unique:users,email',
+            'password'  => 'required|min:6|confirmed',
+            'estado'    => 'required',
+            'foto_url'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
 
-    // Subir foto si existe
-    $fotoPath = null;
-    if ($request->hasFile('foto_url')) {
-        $fotoPath = $request->file('foto_url')->store('usuarios', 'public');
+        try {
+            DB::transaction(function () use ($request) {
+                // Subir foto si existe
+                $fotoPath = null;
+                if ($request->hasFile('foto_url')) {
+                    $fotoPath = $request->file('foto_url')->store('usuarios', 'public');
+                }
+
+                User::create([
+                    'nombre'    => $request->nombre,
+                    'apellido'  => $request->apellido,
+                    'email'     => $request->email,
+                    'password'  => Hash::make($request->password),
+                    'estado'    => $request->estado,
+                    'foto_url'  => $fotoPath,
+                    'uid'       => Str::uuid(),
+                ]);
+            });
+
+            return redirect()->route('usuarios.index')
+                ->with('success', 'Usuario creado correctamente.');
+        } catch (\Throwable $e) {
+            Log::error('[store Usuario] Error: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'No se pudo crear el usuario, inténtalo de nuevo.']);
+        }
     }
 
-    User::create([
-        'nombre'    => $request->nombre,
-        'apellido'  => $request->apellido,
-        'email'     => $request->email,
-        'password'  => Hash::make($request->password),
-        'estado'    => $request->estado === 'activo' ? 1 : 0, 
-        'id_rol'    => $request->id_rol,
-        'foto_url'  => $fotoPath,
-        'uid'       => uniqid("usr_"),
-    ]);
-    
-    return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente.');
-}
 
 
     /**
      * Mostrar un usuario específico
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        $user = User::findOrFail($id);
-        return view('pages.usuarios.detalle', compact('user'));
+        $usuarios = User::where('estado', 1)->paginate(5);
+
+        return response()->json($usuarios);
     }
 
     /**
@@ -113,19 +125,23 @@ class UserController extends Controller
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
-    public function destroy($id)
+    public function destroy($uid)
     {
-        $user = User::findOrFail($id);
-        $user->estado = 'inactivo';
-        $user->save();
-    
+        $usuario = user::where('uid', $uid)->first();
+
+        if (!$usuario) {
+            return response()->json(['success' => false, 'error' => 'Usuario no encontrada.']);
+        }
+
+        $usuario->status = 0;
+        $usuario->save();
+
         return response()->json(['success' => true]);
     }
-    public function delete($id)
+
+    public function showRoles()
     {
-        $user = User::findOrFail($id);
-        $user->delete();
-    
-        return redirect()->route('usuarios.index')->with('success', 'Usuario eliminado correctamente.');
+        $roles = roles::where('estado', 1)->get(); 
+        return response()->json($roles);
     }
 }    

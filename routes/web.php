@@ -29,13 +29,14 @@ Route::post('/storeCuenta', [AuthController::class, 'store'])->name('storeCuenta
 
 Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
 Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.create');
-Route::post('/usuarios', [UserController::class, 'store'])->name('usuarios.store');
+Route::post('/usuarios/store', [UserController::class, 'store'])->name('usuarios.store');
 Route::get('/usuarios/{id}', [UserController::class, 'show'])->name('usuarios.detalle');
 Route::get('/usuarios/{id}', [UserController::class, 'show'])->name('usuarios.show');
 Route::get('/usuarios/{id}/edit', [UserController::class, 'edit'])->name('usuarios.edit');
 Route::put('/usuarios/{id}', [UserController::class, 'update'])->name('usuarios.update');
 Route::delete('/usuarios/{id}', [UserController::class, 'destroy'])->name('usuarios.destroy');
 Route::get('/usuarios/{id}/delete', [UserController::class, 'destroy'])->name('usuarios.delete');
+Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
 
 Route::get('/kanban', function () {return view('pages.kanban.index');})->name('kanban'); 
 Route::get('/dashboard', function () {return view('pages.dashboard.index');})->name('dashboard'); 
@@ -44,6 +45,7 @@ Route::get('/dashboard', function () {return view('pages.dashboard.index');})->n
 Route::get('/auth/login', [AuthController::class, 'index'])->name('login');
 Route::redirect('/', '/auth/login');
 Route::get('/auth/register', [AuthController::class, 'register'])->name('register');
+Route::post('/auth/register', [AuthController::class, 'authRegister'])->name('register');
 Route::post('/auth/login', [AuthController::class, 'authLogin'])->name('authLogin');
 Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');

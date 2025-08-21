@@ -3,7 +3,24 @@
 @section('title', 'Scrum')
 
 @section('css')
+    <style>
+        .form-group {
+            position: relative;
+        }
 
+        .form-group .form-control {
+            padding-right: 40px; 
+        }
+
+        .form-group .togglePassword {
+            position: absolute;
+            top: 38px; 
+            right: 15px;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+    </style>
 @endsection
 
 @section('content')
@@ -45,55 +62,51 @@
                         </a>
                         <h2 class="mb-2 text-center">Bienvenido a Scrum</h2>
                         <p class="text-center">Crea una cuenta</p>
-                        <form>
+                        <form id="registerForm" action="route{{ ('register') }}" method="POST">
+                            @csrf
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="full-name" class="form-label">Nombre</label>
-                                        <input type="text" class="form-control" id="full-name" placeholder=" ">
+                                        <input type="text" class="form-control" id="full-name" placeholder="Cesar" required>
+                                        <div class="invalid-feedback">El nombre es obligatorio</div>
                                     </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="last-name" class="form-label">Apellido</label>
+                                        <input type="text" class="form-control" id="last-name" placeholder="Yepes" required>
+                                        <div class="invalid-feedback">El apellido es obligatorio</div>
                                     </div>
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <label for="last-name" class="form-label">Apellido</label>
-                                            <input type="text" class="form-control" id="last-name" placeholder=" ">
-                                        </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label for="email" class="form-label">Correo</label>
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="example@gmail.com" required>
+                                        <div class="invalid-feedback">Debes ingresar un correo válido</div>
                                     </div>
-                                    <div class="col-lg-12">
-                                        <div class="form-group">
-                                            <label for="email" class="form-label">Correo</label>
-
-                                            <input type="email" class="form-control" id="email" name="email" placeholder="" required>
-
-                                           
-
-                                        </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="password" class="form-label">Contraseña</label>
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required minlength="8">
+                                        <div class="invalid-feedback">Mínimo 8 caracteres</div>
+                                    </div> 
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group position-relative">
+                                        <label for="confirm-password" class="form-label">Confirmar Contraseña</label>
+                                        <input type="password" class="form-control" id="confirm-password" name="confirm-password" placeholder="••••••••" required>
+                                        <div class="invalid-feedback">Las contraseñas no coinciden</div>
                                     </div>
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <label for="password" class="form-label">Contraseña</label>
+                                </div>
 
-                                            <input type="password" class="form-control" id="password" name="password" placeholder="" required>
-
-                                          
-
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <label for="confirm-password" class="form-label">Confirmar Contraseña</label>
-
-                                            <input type="password" class="form-control" id="confirm-password" name="confirm-password" placeholder=" " required>
-
-                                           
-
-                                        </div>
-                                    </div>
                             </div>
                             <div class="d-flex justify-content-center">
                                 <button type="submit" class="btn btn-primary">Crear Cuenta</button>
                             </div>
                         </form>
+
                     </div>
                     </div>
                 </div>
@@ -116,5 +129,109 @@
 @endsection
 
 @section('js')
+    <script>
+        
 
+        $(document).ready(function () {
+            const notyf = new Notyf({
+                duration: 3000,
+                position: { x: 'right', y: 'top' }
+            });
+
+            $("#registerForm").on("submit", function (e) {
+                e.preventDefault();
+
+                $(".form-control").removeClass("is-invalid");
+
+                let data = {
+                    nombre: $("#full-name").val(),
+                    apellido: $("#last-name").val(),
+                    email: $("#email").val(),
+                    password: $("#password").val(),
+                    password_confirmation: $("#confirm-password").val(),
+                };
+
+                axios.post("{{ route('register') }}", data)
+                    .then(function (response) {
+                        notyf.success(response.data.message);
+
+                        setTimeout(() => {
+                            window.location.href = "/auth/login";
+                        }, 2000);
+                    })
+                    .catch(function (error) {
+                        if (error.response && error.response.status === 422) {
+                            let errors = error.response.data.errors;
+
+                            if (errors.nombre) {
+                                $("#full-name").addClass("is-invalid")
+                                    .siblings(".invalid-feedback").text(errors.nombre[0]);
+                            }
+                            if (errors.apellido) {
+                                $("#last-name").addClass("is-invalid")
+                                    .siblings(".invalid-feedback").text(errors.apellido[0]);
+                            }
+                            if (errors.email) {
+                                $("#email").addClass("is-invalid")
+                                    .siblings(".invalid-feedback").text(errors.email[0]);
+                            }
+                            if (errors.password) {
+                                $("#password").addClass("is-invalid")
+                                    .siblings(".invalid-feedback").text(errors.password[0]);
+                                $("#confirm-password").addClass("is-invalid")
+                                    .siblings(".invalid-feedback").text(errors.password[0]);
+                            }
+
+                            notyf.error("Revisa los campos marcados en rojo");
+                        } else {
+                            notyf.error("Ocurrió un error inesperado, intenta de nuevo.");
+                        }
+                    });
+            });
+        });
+
+        function addTogglePassword(inputId) {
+            const input = $('#' + inputId);
+
+            input.closest('.form-group').css('position', 'relative');
+
+            input.after(`
+                <span class="togglePassword" data-input="${inputId}" 
+                    style="position: absolute; right: 20px; top: 38px; cursor: pointer; z-index: 2;">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+                        <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
+                    </svg>
+                </span>
+            `);
+
+            input.css('padding-right', '40px');
+        }
+
+        addTogglePassword('password');
+        addTogglePassword('confirm-password');
+
+        $(document).on('click', '.togglePassword', function () {
+            const inputId = $(this).data('input');
+            const input = $('#' + inputId);
+            const type = input.attr('type') === 'password' ? 'text' : 'password';
+
+            input.attr('type', type);
+
+            $(this).html(
+                type === 'password'
+                    ? `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+                        <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
+                    </svg>`
+                    : `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M13.359 11.238l2.122 2.122a.5.5 0 0 1-.708.708l-2.122-2.122A7.027 7.027 0 0 1 8 13.5c-5 0-8-5.5-8-5.5a13.134 13.134 0 0 1 2.478-3.197l-1.147-1.147a.5.5 0 1 1 .708-.708l13 13a.5.5 0 0 1-.708.708l-1.147-1.147z"/>
+                    </svg>`
+            );
+        });
+
+        
+
+
+    </script>
 @endsection

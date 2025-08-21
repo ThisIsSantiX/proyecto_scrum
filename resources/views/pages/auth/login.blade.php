@@ -49,27 +49,25 @@
                             @csrf
                             <div class="row">
                                 <div class="col-lg-12">
-                                <div class="form-group">
-                                    <label for="email" class="form-label">Correo</label>
-                        
-                                    <input type="email" class="form-control" name="email" id="email" aria-describedby="email" placeholder=" ">
+                                    <div class="form-group">
+                                        <label for="email" class="form-label">Correo</label>
+                            
+                                        <input type="email" class="form-control" name="email" id="email" aria-describedby="email" placeholder=" ">
 
-                                </div>
+                                    </div>
                                 </div>
                                 <div class="col-lg-12">
-                                <div class="form-group">
-                                    <label for="password" class="form-label">Contraseña</label>
-
-         
-                                    <input type="password" class="form-control" name="password" id="password" aria-describedby="password" placeholder=" ">
-                                </div>
+                                    <div class="form-group">
+                                        <label for="password" class="form-label">Contraseña</label>
+                                        <input type="password" class="form-control" name="password" id="password" aria-describedby="password" placeholder=" ">
+                                    </div>
                                 </div>
                                 <div class="col-lg-12 d-flex justify-content-between">
-                                <div class="form-check mb-3">
-                                    <input type="checkbox" class="form-check-input" id="customCheck1">
-                                    <label class="form-check-label" for="customCheck1">Recuerdame</label>
-                                </div>
-                                <a href="{{ route('recoverypw') }}">Olvidaste tu contraseña?</a>
+                                    <div class="form-check mb-3">
+                                        <input type="checkbox" class="form-check-input" id="customCheck1">
+                                        <label class="form-check-label" for="customCheck1">Recuerdame</label>
+                                    </div>
+                                    <a href="{{ route('recoverypw') }}">Olvidaste tu contraseña?</a>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-center">
@@ -103,82 +101,82 @@
 @section('js')
     <script>
 
-    $(document).ready(function() {
-        const notyf = new Notyf({
-            duration: 3000,
-            position: { x: 'right', y: 'top' } 
-        });
-
-        $('#formLogin').submit(function(e) {
-            e.preventDefault();
-
-            var email = $('#email').val().trim();
-            var password = $('#password').val().trim();
-
-            if (email === '' || password === '') {
-                notyf.error('Completa todos los campos');
-                return;
-            }
-
-            const loading = notyf.open({
-                type: 'info',
-                message: 'Iniciando sesión...',
-                background: '#3B82F6', 
-                duration: 0 // ⏳ 
+        $(document).ready(function() {
+            const notyf = new Notyf({
+                duration: 3000,
+                position: { x: 'right', y: 'top' } 
             });
 
-            $.ajax({
-                type: 'POST',
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
-                success: function(response) {
-                    notyf.dismiss(loading);
+            $('#formLogin').submit(function(e) {
+                e.preventDefault();
 
-                    if (response.status === 'success') {
-                        notyf.success('Inicio de sesión exitoso');
-                        setTimeout(function() {
-                            window.location.href = '/dashboard'; 
-                        }, 1700);
-                    } else {
-                        notyf.error(response.message || 'Error en el inicio de sesión');
-                    }
-                },
-                error: function() {
-                    notyf.dismiss(loading);
-                    notyf.error('Error en el servidor');
+                var email = $('#email').val().trim();
+                var password = $('#password').val().trim();
+
+                if (email === '' || password === '') {
+                    notyf.error('Completa todos los campos');
+                    return;
                 }
+
+                const loading = notyf.open({
+                    type: 'info',
+                    message: 'Iniciando sesión...',
+                    background: '#3B82F6', 
+                    duration: 0 // ⏳ 
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    url: $(this).attr('action'),
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        notyf.dismiss(loading);
+
+                        if (response.status === 'success') {
+                            notyf.success('Inicio de sesión exitoso');
+                            setTimeout(function() {
+                                window.location.href = '/dashboard'; 
+                            }, 1700);
+                        } else {
+                            notyf.error(response.message || 'Error en el inicio de sesión');
+                        }
+                    },
+                    error: function() {
+                        notyf.dismiss(loading);
+                        notyf.error('Error en el servidor');
+                    }
+                });
             });
         });
-    });
 
 
-    $('#password').closest('.form-group').css('position', 'relative');
+        $('#password').closest('.form-group').css('position', 'relative');
 
-    $('#password').after(`
-        <span id="togglePassword" style="position: absolute; right: 20px; top: 38px; cursor: pointer; z-index: 2;">
-        <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
-            <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
-        </svg>
-        </span>
-    `);
+        $('#password').after(`
+            <span id="togglePassword" style="position: absolute; right: 20px; top: 38px; cursor: pointer; z-index: 2;">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+                <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
+            </svg>
+            </span>
+        `);
 
-    $('#password').css('padding-right', '40px');
+        $('#password').css('padding-right', '40px');
 
-    $('#togglePassword').on('click', function() {
-        var passwordInput = $('#password');
-        var type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
-        passwordInput.attr('type', type);
+        $('#togglePassword').on('click', function() {
+            var passwordInput = $('#password');
+            var type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+            passwordInput.attr('type', type);
 
-        $(this).html(type === 'password'
-        ? `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
-            <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
-            </svg>`
-        : `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M13.359 11.238l2.122 2.122a.5.5 0 0 1-.708.708l-2.122-2.122A7.027 7.027 0 0 1 8 13.5c-5 0-8-5.5-8-5.5a13.134 13.134 0 0 1 2.478-3.197l-1.147-1.147a.5.5 0 1 1 .708-.708l13 13a.5.5 0 0 1-.708.708l-1.147-1.147z"/>
-            </svg>`
-        );
-    });
+            $(this).html(type === 'password'
+            ? `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+                <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
+                </svg>`
+            : `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M13.359 11.238l2.122 2.122a.5.5 0 0 1-.708.708l-2.122-2.122A7.027 7.027 0 0 1 8 13.5c-5 0-8-5.5-8-5.5a13.134 13.134 0 0 1 2.478-3.197l-1.147-1.147a.5.5 0 1 1 .708-.708l13 13a.5.5 0 0 1-.708.708l-1.147-1.147z"/>
+                </svg>`
+            );
+        });
     </script>
 @endsection

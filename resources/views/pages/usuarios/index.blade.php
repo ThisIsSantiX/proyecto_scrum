@@ -1,7 +1,7 @@
 @extends('layouts.layout.layout')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="conatiner-fluid content-inner mt-5 py-0">
 
     {{-- Mensaje de eliminación temporal --}}
     <div id="delete-alert" class="alert alert-warning alert-dismissible fade show d-none" role="alert">
@@ -9,93 +9,139 @@
         <button type="button" class="btn-close" onclick="hideAlert()"></button>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0">Usuarios</h4>
-        <a href="{{ route('usuarios.create') }}" class="btn btn-primary">
-            <i class="bi bi-person-plus"></i> Nuevo Usuario
-        </a>
-    </div>
-
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
-        @forelse($users as $user)
-        <div class="col">
-            <div class="card shadow-sm h-100 border-0 rounded-3">
-                <div class="card-body text-center">
-                    {{-- Foto --}}
-                    @if($user->foto_url)
-                        <img src="{{ asset('storage/' . $user->foto_url) }}" alt="foto" class="rounded-circle mb-3" width="80" height="80">
-                    @else
-                        <div class="bg-secondary rounded-circle mb-3" style="width:80px; height:80px; line-height:80px; color:white;">
-                            Sin foto
-                        </div>
-                    @endif
-
-                    {{-- Nombre y correo --}}
-                    
-                    <h5 class="card-title mb-1">{{ $user->nombre }} {{ $user->apellido }}</h5>
-                    <p class="text-muted small mb-2">{{ $user->email }}</p>
-
-                    {{-- Rol y Estado --}}
-                    <div class="d-flex justify-content-center gap-2 mb-3">
-                        <span class="badge bg-info text-dark">{{ $user->rol_texto }}</span>
-                        <span class="badge {{ $user->estado ? 'bg-success' : 'bg-secondary' }}">
-                            {{ $user->estado_texto }}
-                        </span>
-                    </div>
-
-                    {{-- Acciones --}}
-                    <div class="d-flex justify-content-center gap-2">
-                        <a href="{{ route('usuarios.show', $user->id) }}" class="btn btn-sm btn-outline-info">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                        <a href="{{ route('usuarios.edit', $user->id) }}" class="btn btn-sm btn-outline-warning">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                        <button type="button" class="btn btn-sm btn-outline-danger" 
-                            onclick="deleteUser('{{ $user->id }}', this)">
-                            <i class="bi bi-trash"></i>
-                        </button>
-
-                    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="header-title">
+                <h4 class="card-title">Lista de Usuarios</h4>
+                </div>
+                <div>
+                <a href="{{ route('usuarios.create') }}" class="btn btn-sm btn-primary">+ Agregar Usuario</a>
                 </div>
             </div>
+            <div class="card-body px-0">
+                <div class="table-responsive">
+                <table id="user-list-table" class="table table-striped" role="grid" data-bs-toggle="data-table">
+                    <thead>
+                    <tr class="ligth">
+                        <th>Foto</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th style="min-width: 120px">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @forelse($users as $user)
+                    <tr>
+                        {{-- Foto --}}
+                        <td class="text-center">
+                        @if($user->foto_url)
+                            <img src="{{ asset($user->foto_url) }}" 
+                                alt="foto" 
+                                class="bg-soft-primary rounded img-fluid avatar-40">
+                        @else
+                            <img src="{{ $user->foto_url }}" 
+                                alt="foto" 
+                                class="bg-soft-primary rounded img-fluid avatar-40">
+                        @endif
+                        </td>
+
+                        {{-- Nombre --}}
+                        <td>{{ $user->nombre }} {{ $user->apellido }}</td>
+
+                        {{-- Email --}}
+                        <td>{{ $user->email }}</td>
+
+                        {{-- Rol --}}
+                        <td><span class="badge bg-info text-dark">{{ $user->rol_texto ?? 'Sin rol' }}</span></td>
+
+                        {{-- Estado --}}
+                        <td>
+                        <span class="badge {{ $user->estado ? 'bg-success' : 'bg-secondary' }}">
+                            {{ $user->estado_texto ?? ($user->estado ? 'Activo' : 'Inactivo') }}
+                        </span>
+                        </td>
+
+                        {{-- Acciones --}}
+                        <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Ver -->
+                            <a class="btn btn-sm btn-icon btn-success" data-bs-toggle="tooltip" title="Ver" 
+                            href="{{ route('usuarios.show', $user->id) }}">
+                                <span class="btn-inner">
+                                    <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M2 12C2 12 5.636 5 12 5C18.364 5 22 12 22 12C22 12 18.364 19 12 19C5.636 19 2 12 2 12Z" 
+                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M12 15C13.657 15 15 13.657 15 12C15 10.343 13.657 9 12 9C10.343 9 9 10.343 9 12C9 13.657 10.343 15 12 15Z" 
+                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                            </a>
+
+                            <!-- Editar -->
+                            <a class="btn btn-sm btn-icon btn-warning" data-bs-toggle="tooltip" title="Editar" 
+                            href="{{ route('usuarios.edit', $user->id) }}">
+                                <span class="btn-inner">
+                                    <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" 
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.4925 2.78906H7.75349C4.67849 2.78906 2.75049 4.96606 2.75049 8.04806V16.3621C2.75049 19.4441 4.66949 21.6211 7.75349 21.6211H16.5775C19.6625 21.6211 21.5815 19.4441 21.5815 16.3621V12.3341" 
+                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path fill-rule="evenodd" clip-rule="evenodd" 
+                                            d="M8.82812 10.921L16.3011 3.44799C17.2321 2.51799 18.7411 2.51799 19.6721 3.44799L20.8891 4.66499C21.8201 5.59599 21.8201 7.10599 20.8891 8.03599L13.3801 15.545C12.9731 15.952 12.4211 16.181 11.8451 16.181H8.09912L8.19312 12.401C8.20712 11.845 8.43412 11.315 8.82812 10.921Z" 
+                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M15.1655 4.60254L19.7315 9.16854" 
+                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                            </a>
+
+                            <!-- Eliminar -->
+                            <button type="button" class="btn btn-sm btn-icon btn-danger" data-bs-toggle="tooltip" title="Eliminar"
+                                    onclick="deleteUsuario('{{ $user->uid }}', this)">
+                                <span class="btn-inner">
+                                    <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" 
+                                        xmlns="http://www.w3.org/2000/svg" stroke="currentColor">
+                                        <path d="M19.3248 9.46826C19.3248 9.46826 18.7818 16.2033 18.4668 19.0403C18.3168 20.3953 17.4798 21.1893 16.1088 21.2143C13.4998 21.2613 10.8878 21.2643 8.27979 21.2093C6.96079 21.1823 6.13779 20.3783 5.99079 19.0473C5.67379 16.1853 5.13379 9.46826 5.13379 9.46826" 
+                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M20.708 6.23975H3.75" 
+                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M17.4406 6.23973C16.6556 6.23973 15.9796 5.68473 15.8256 4.91573L15.5826 3.69973C15.4326 3.13873 14.9246 2.75073 14.3456 2.75073H10.1126C9.53358 2.75073 9.02558 3.13873 8.87558 3.69973L8.63258 4.91573C8.47858 5.68473 7.80258 6.23973 7.01758 6.23973" 
+                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="text-center">
+                        <div class="alert alert-secondary mb-0">No hay usuarios registrados.</div>
+                        </td>
+                    </tr>
+                    @endforelse
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            </div>
         </div>
-        @empty
-        <div class="col-12">
-            <div class="alert alert-secondary text-center">No hay usuarios registrados.</div>
-        </div>
-        @endforelse
     </div>
+
+
 </div>
 
-<script>
 
-function deleteUser(userId, btn) {
-    if(!confirm('¿Deseas eliminar este usuario permanentemente?')) return;
+@endsection
 
-    fetch(`/usuarios/${userId}`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            const cardCol = btn.closest('.col'); // busca el contenedor de la tarjeta
-            if (cardCol) cardCol.remove(); // elimina del DOM
-            showAlert();
-        } else {
-            alert('No se pudo eliminar el usuario.');
-        }
-    })
-    .catch(error => console.error(error));
-}
-function showAlert() {
-    const alert = document.getElementById('delete-alert');
-    alert.classList.remove('d-none');
-}
-</script>
+@section('js')
+    <script>
 
+
+    </script>
 @endsection
