@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers;
 
+
+use App\Models\User;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -19,11 +25,13 @@ class AuthController extends Controller
         return view('pages.auth.register');
     }
 
+    // Esta función muestra el formulario de recuperación de contraseña
     public function showRecoveryForm()
     {
         return view('pages.auth.recoverypw');
     }
 
+    // Esta función muestra la vista de confirmación de correo electrónico
     public function confirmMail()
     {
         return view('pages.auth.confirm-mail');
@@ -61,6 +69,54 @@ class AuthController extends Controller
         }
     }
 
+    public function authRegister(Request $request)
+    {
+        // Validación de datos de entrada
+        $request->validate([
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|min:8|confirmed',
+            'nombre'   => 'required|string|max:255',
+            'apellido' => 'required|string|max:255'
+        ], [
+            'email.required'     => 'El correo es requerido',
+            'email.email'        => 'El correo no es válido',
+            'email.unique'       => 'El correo ya está registrado',
+            'password.required'  => 'La contraseña es requerida',
+            'password.min'       => 'La contraseña debe tener al menos 8 caracteres',
+            'password.confirmed' => 'Las contraseñas no coinciden',
+            'nombre.required'    => 'El nombre es requerido',
+            'apellido.required'  => 'El apellido es requerido'
+        ]);
+
+        try {
+            $user = DB::transaction(function () use ($request) {
+                return User::create([
+                    'nombre'   => $request->nombre,
+                    'apellido' => $request->apellido,
+                    'email'    => $request->email,
+                    'password' => Hash::make($request->password),
+                    'estado'   => 1,
+                    'foto_url' => "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff",
+                    'uid'      => Str::uuid(),
+                ]);
+            });
+
+            return response()->json([
+                'message' => 'Registro exitoso, ahora puedes iniciar sesión.',
+                'status'  => 'success',
+                'user'    => $user
+            ], 201);
+        } catch (\Throwable $e) {
+            Log::error('[authRegister] Error al registrar usuario: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'No se pudo completar el registro, inténtalo de nuevo.',
+                'status'  => 'error'
+            ], 500);
+        }
+    }
+
+
     // Funcion de cierre de sesión
     public function logout(Request $request)
     {
@@ -68,7 +124,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login')->with('message', 'Sesión cerrada correctamente');
+        return redirect('/auth/login')->with('message', 'Sesión cerrada correctamente');
     }
 
     

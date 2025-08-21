@@ -16,11 +16,13 @@
         <link rel="stylesheet" href="{{ asset('assets/css/dark.min.css') }}" />
         <link rel="stylesheet" href="{{ asset('assets/css/customizer.min.css') }}" />
         <link rel="stylesheet" href="{{ asset('assets/css/rtl.min.css') }}" />
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+
 
         @yield('css')
     </head>
-    <body class="   ">
+    <body class=" ">
         <div class="position-relative iq-banner">
             <div id="loading">
                 <div class="loader simple-loader">
@@ -53,6 +55,50 @@
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const body = document.body;
+                const toggleBtn = document.getElementById("darkModeToggle");
+                const moonIcon = document.getElementById("moonIcon");
+                const sunIcon = document.getElementById("sunIcon");
+
+                function applyTheme(isDark, save = false) {
+                    if (isDark) {
+                        body.classList.add("dark");
+                        moonIcon.style.display = "none";
+                        sunIcon.style.display = "block";
+                        if (save) localStorage.setItem("theme", "dark");
+                    } else {
+                        body.classList.remove("dark");
+                        moonIcon.style.display = "block";
+                        sunIcon.style.display = "none";
+                        if (save) localStorage.setItem("theme", "light");
+                    }
+                }   
+
+                const savedTheme = localStorage.getItem("theme");
+                if (savedTheme) {
+                    applyTheme(savedTheme === "dark");
+                } else {
+                    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+                    applyTheme(prefersDark.matches);
+
+                    prefersDark.addEventListener("change", e => {
+                        if (!localStorage.getItem("theme")) {
+                            applyTheme(e.matches);
+                        }
+                    });
+                }
+
+                toggleBtn.addEventListener("click", e => {
+                    e.preventDefault();
+                    const isDark = !body.classList.contains("dark");
+                    applyTheme(isDark, true);
+                });
+            });
+        </script>
 
 
         @yield('js')
