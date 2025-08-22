@@ -18,8 +18,21 @@
         <link rel="stylesheet" href="{{ asset('assets/css/rtl.min.css') }}" />
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
+        <style>
+            
+            .icon-21 {
+                height: 2rem;
+                width: 1.9rem;
+            }
 
+            .dropdown-toggle::after {
+                display: none !important;
+            
+            }
+
+        </style>
         @yield('css')
     </head>
     <body class=" ">
@@ -34,7 +47,7 @@
             <div class="flex-1 flex flex-col">
                 @include('layouts.layout.components.navbar')
 
-                <main class="container-fluid">
+                <main class="container-fluid bg-body-secondary bg-gradient min-vh-100">
                     @yield('content')
                 </main>
             </div>
