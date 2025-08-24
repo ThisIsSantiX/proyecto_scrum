@@ -1,7 +1,7 @@
 @extends('layouts.layout.layout')
 
 @section('content')
-<div class="conatiner-fluid content-inner mt-5 py-0">
+<div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
 
     {{-- Mensaje de eliminación temporal --}}
     <div id="delete-alert" class="alert alert-warning alert-dismissible fade show d-none" role="alert">

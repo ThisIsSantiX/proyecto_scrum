@@ -20,6 +20,30 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
+        @yield('css')
+    </head>
+    <body class=" ">
+        <div class="position-relative iq-banner">
+            {{-- <div id="loading">
+                <div class="loader simple-loader">
+                    <div class="loader-body"></div>
+                </div>    </div> --}}
+
+            @include('layouts.layout.components.sidebar')
+
+            <div class="flex-1 flex flex-col">
+                @include('layouts.layout.components.navbar')
+
+                <main class="container-fluid bg-body-secondary bg-gradient min-vh-100">
+                    <div class="mt-5">
+                            @yield('content')
+                    </div>
+                </main>
+
+            </div>
+        </div>
+
+        
         <style>
             
             .icon-21 {
@@ -32,26 +56,13 @@
             
             }
 
+            .navbar {
+                background-color: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+
         </style>
-        @yield('css')
-    </head>
-    <body class=" ">
-        <div class="position-relative iq-banner">
-            <div id="loading">
-                <div class="loader simple-loader">
-                    <div class="loader-body"></div>
-                </div>    </div>
-
-            @include('layouts.layout.components.sidebar')
-
-            <div class="flex-1 flex flex-col">
-                @include('layouts.layout.components.navbar')
-
-                <main class="container-fluid bg-body-secondary bg-gradient min-vh-100">
-                    @yield('content')
-                </main>
-            </div>
-        </div>
         
         <script src="{{ asset('assets/js/core/libs.min.js') }}"></script>
         <script src="{{ asset('assets/js/core/external.min.js') }}"></script>
@@ -69,7 +80,6 @@
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
-
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 const body = document.body;
@@ -111,6 +121,36 @@
                     applyTheme(isDark, true);
                 });
             });
+
+            // document.addEventListener("DOMContentLoaded", function () {
+            //     const sidebar = document.querySelector("aside.sidebar");
+            //     const toggleBtn = document.getElementById("sidebar-toggle");
+
+            //     if (!sidebar || !toggleBtn) return;
+
+            //     sidebar.style.transition = "none";
+
+            //     if (localStorage.getItem("sidebar") === "closed") {
+            //         sidebar.classList.add("sidebar-mini");
+            //     } else {
+            //         sidebar.classList.remove("sidebar-mini");
+            //     }
+
+            //     setTimeout(() => {
+            //         sidebar.style.transition = "";
+            //     }, 100);
+
+            //     toggleBtn.addEventListener("click", function () {
+            //         sidebar.classList.toggle("sidebar-mini");
+
+            //         if (sidebar.classList.contains("sidebar-mini")) {
+            //             localStorage.setItem("sidebar", "closed");
+            //         } else {
+            //             localStorage.setItem("sidebar", "open");
+            //         }
+            //     });
+            // });
+
         </script>
 
 
