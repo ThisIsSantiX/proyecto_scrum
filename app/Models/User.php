@@ -24,7 +24,6 @@ class User extends Authenticatable
         'password',
         'estado',
         'foto_url',
-        'id_rol',
         'uid',
     ];
 

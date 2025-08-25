@@ -3,7 +3,7 @@
 @section('content')
 
     
-    <div class="conatiner-fluid content-inner mt-5 py-0">
+    <div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
         <div class="row">
             {{-- Columna izquierda: Foto y rol --}}
             <div class="col-xl-3 col-lg-4">
@@ -44,14 +44,6 @@
                         <div class="img-extension mt-2">
                             <span>Formatos permitidos: <b>.jpg .png .jpeg</b></span>
                         </div>
-                    </div>
-
-                    {{-- Rol --}}
-                    <div class="form-group mt-3">
-                        <label class="form-label">Rol</label>
-                        <select name="id_rol" id="id_rol" class="form-select" required>
-                            <option value="">Selecciona un rol</option>
-                        </select>
                     </div>
 
                     {{-- Estado --}}
@@ -137,9 +129,6 @@
                     formData.append('foto_url', foto);
                 }
 
-                const rol = $('#id_rol').val();
-                formData.append('id_rol', rol);
-
                 const estado = $('#estado').val();
                 formData.append('estado', estado);
 
@@ -150,11 +139,8 @@
                 })
                 .then(response => {
                     notyf.success('Usuario guardado correctamente!');
-                    this.reset();
-                    $('#foto_url').val('');
-                    $('.profile-pic').attr('src', 'https://ui-avatars.com/api/?name=Nuevo+Usuario&background=random&color=fff');
-                    $('#id_rol').val('');
-                    $('#estado').val('1'); // Reset estado a activo
+            
+                    window.location.href = "{{ route('usuarios.index') }}";
                 })
                 .catch(error => {
                     console.error(error);
@@ -196,26 +182,6 @@
                 }
                 reader.readAsDataURL(file);
             }
-        });
-
-        $(document).ready(function () {
-            const select = $('#id_rol'); 
-            const notyf = new Notyf(); 
-
-            axios.get("{{ route('showRoles') }}")
-                .then(response => {
-                    const roles = response.data; 
-                    select.empty();
-                    select.append('<option value="">Seleccione un rol...</option>');
-
-                    roles.forEach(r => {
-                        select.append(`<option value="${r.id}">${r.nombre}</option>`);
-                    });
-                })
-                .catch(error => {
-                    console.error(error);
-                    notyf.error('No se pudieron cargar los roles.');
-                });
         });
 
     </script>

@@ -25,15 +25,16 @@ Route::get('/', function () {
 // usuarios ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/storeCuenta', [AuthController::class, 'store'])->name('storeCuenta');
+
+// Rutas para gestión de usuarios
 Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
 Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.create');
 Route::post('/usuarios/store', [UserController::class, 'store'])->name('usuarios.store');
-Route::get('/usuarios/{id}', [UserController::class, 'show'])->name('usuarios.detalle');
-Route::get('/usuarios/{id}', [UserController::class, 'show'])->name('usuarios.show');
-Route::get('/usuarios/{id}/edit', [UserController::class, 'edit'])->name('usuarios.edit');
-Route::put('/usuarios/{id}', [UserController::class, 'update'])->name('usuarios.update');
-Route::delete('/usuarios/{id}', [UserController::class, 'destroy'])->name('usuarios.destroy');
-Route::get('/usuarios/{id}/delete',[UserController::class, 'destroy'])->name('usuarios.delete');
+Route::get('/showUsuarios', [UserController::class, 'show'])->name('showUsuarios');
+Route::get('/usuarios/edit/{uid}', [UserController::class, 'edit'])->name('editUsuario');
+Route::put('/usuarios/update/{uid}', [UserController::class, 'update'])->name('updateUsuario');
+Route::delete('/usuarios/eliminar/{uid}', [UserController::class, 'destroy'])->name('deleteUsuario');
+
 Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
 Route::get('/usuarios/list', [UserController::class, 'showUsuarios'])->name('showUsuarios');
 // proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------

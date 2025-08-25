@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+
 class UserController extends Controller
 {
     /**
@@ -39,7 +40,6 @@ class UserController extends Controller
             'apellido'  => 'required|string|max:50',
             'email'     => 'required|email|unique:users,email',
             'password'  => 'required|min:6|confirmed',
-            'id_rol'    => 'required|exists:roles,id',
             'estado'    => 'required|in:1,0',
             'foto_url'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
@@ -47,9 +47,10 @@ class UserController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 // Subir foto si existe
-                $fotoPath = null;
                 if ($request->hasFile('foto_url')) {
                     $fotoPath = $request->file('foto_url')->store('usuarios', 'public');
+                } else {
+                    $fotoPath = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
                 }
 
                 User::create([
@@ -57,7 +58,6 @@ class UserController extends Controller
                     'apellido'  => $request->apellido,
                     'email'     => $request->email,
                     'password'  => Hash::make($request->password),
-                    'id_rol' => $request->id_rol,
                     'estado'    => $request->estado,
                     'foto_url'  => $fotoPath,
                     'uid'       => Str::uuid(),
@@ -74,12 +74,26 @@ class UserController extends Controller
 
 
 
+
     /**
      * Mostrar un usuario específico
      */
     public function show(Request $request)
     {
-        $usuarios = User::where('estado', 1)->paginate(5);
+        $query = User::select(
+                'users.*',
+                'role_users.role_id',
+                'roles.nombre as rol_texto'
+            )
+            ->leftJoin('role_users', 'users.id', '=', 'role_users.user_id')
+            ->leftJoin('roles', 'role_users.role_id', '=', 'roles.id')
+            ->where('users.estado', 1);
+
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('users.nombre', 'LIKE', '%' . $request->search . '%');
+        }
+
+        $usuarios = $query->paginate(10);
 
         return response()->json($usuarios);
     }
@@ -87,18 +101,20 @@ class UserController extends Controller
     /**
      * Mostrar formulario de edición
      */
-    public function edit($id)
+    public function edit($uid)
     {
-        $user = User::findOrFail($id);
-        return view('pages.usuarios.edit', compact('user'));
+        $user = User::where('uid', $uid)->firstOrFail();
+
+        $userRole = DB::table('role_users')
+            ->where('user_id', $user->id)
+            ->value('role_id'); 
+
+        return view('pages.usuarios.edit', compact('user', 'userRole'));
     }
 
-    /**
-     * Actualizar usuario en BD
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, $uid)
     {
-        $user = User::findOrFail($id);
+        $user = User::where('uid', $uid)->firstOrFail();
 
         $request->validate([
             'nombre'    => 'required|string|max:50',
@@ -106,23 +122,32 @@ class UserController extends Controller
             'email'     => 'required|email|unique:users,email,' . $user->id,
             'password'  => 'nullable|min:6|confirmed',
             'estado'    => 'required|in:1,0',
-            'id_rol' => 'required|string|max:50',
-            'foto_url'  => 'nullable|string',
+            'foto_url'  => 'nullable|file|image|max:2048',
+            'id_rol'    => 'required|integer|exists:roles,id',
+
         ]);
 
-        $data = $request->all();
+        $data = $request->only(['nombre', 'apellido', 'email', 'estado']);
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
-        } else {
-            unset($data['password']);
         }
-        
-        // Convertir estado antes de actualizar
-        $data['estado'] = $request->estado === 'activo' ? 1 : 0;
-        
+
+        // Procesar foto
+        if ($request->hasFile('foto_url')) {
+            $data['foto_url'] = $request->file('foto_url')->store('usuarios', 'public');
+        } elseif (!$user->foto_url) {
+            $data['foto_url'] = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
+        }
+
         $user->update($data);
-        
+
+        // Actualizar rol en tabla role_users
+        DB::table('role_users')
+            ->updateOrInsert(
+                ['user_id' => $user->id],
+                ['role_id' => $request->id_rol, 'estado' => $request->estado, 'uid' => $user->uid]
+            );
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente.');
     }
@@ -135,7 +160,7 @@ class UserController extends Controller
             return response()->json(['success' => false, 'error' => 'Usuario no encontrada.']);
         }
 
-        $usuario->status = 0;
+        $usuario->estado = 0;
         $usuario->save();
 
         return response()->json(['success' => true]);
