@@ -39,7 +39,8 @@ class UserController extends Controller
             'apellido'  => 'required|string|max:50',
             'email'     => 'required|email|unique:users,email',
             'password'  => 'required|min:6|confirmed',
-            'estado'    => 'required',
+            'id_rol'    => 'required|exists:roles,id',
+            'estado'    => 'required|in:1,0',
             'foto_url'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -56,6 +57,7 @@ class UserController extends Controller
                     'apellido'  => $request->apellido,
                     'email'     => $request->email,
                     'password'  => Hash::make($request->password),
+                    'id_rol' => $request->id_rol,
                     'estado'    => $request->estado,
                     'foto_url'  => $fotoPath,
                     'uid'       => Str::uuid(),
@@ -103,8 +105,8 @@ class UserController extends Controller
             'apellido'  => 'required|string|max:50',
             'email'     => 'required|email|unique:users,email,' . $user->id,
             'password'  => 'nullable|min:6|confirmed',
-            'estado'    => 'required|in:activo,inactivo',
-           'id_rol' => 'required|string|max:50',
+            'estado'    => 'required|in:1,0',
+            'id_rol' => 'required|string|max:50',
             'foto_url'  => 'nullable|string',
         ]);
 
@@ -144,4 +146,10 @@ class UserController extends Controller
         $roles = roles::where('estado', 1)->get(); 
         return response()->json($roles);
     }
+    public function showUsuarios()
+     {
+        $users = User::where('estado', 1)->get(); // solo activos
+        return response()->json($users);
+    }
+
 }    

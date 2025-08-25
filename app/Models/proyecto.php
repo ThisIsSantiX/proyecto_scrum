@@ -18,7 +18,7 @@ class proyecto extends Model
         'visibilidad',
         'progreso',
         'fecha_inicio',
-        'fecha_fin',
+        'fecha_fin',    
     ];
 
     protected $primaryKey = 'id';

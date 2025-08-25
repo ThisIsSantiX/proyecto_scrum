@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProyectoController;
+use App\Http\Controllers\RolesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,13 +22,9 @@ Route::get('/', function () {
     return view('pages.auth.login');
 });
 
-
-
-// Mostrar formulario de registro
+// usuarios ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/register', [AuthController::class, 'register'])->name('register');
-// Procesar registro
 Route::post('/storeCuenta', [AuthController::class, 'store'])->name('storeCuenta');
-
 Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
 Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.create');
 Route::post('/usuarios/store', [UserController::class, 'store'])->name('usuarios.store');
@@ -35,8 +33,39 @@ Route::get('/usuarios/{id}', [UserController::class, 'show'])->name('usuarios.sh
 Route::get('/usuarios/{id}/edit', [UserController::class, 'edit'])->name('usuarios.edit');
 Route::put('/usuarios/{id}', [UserController::class, 'update'])->name('usuarios.update');
 Route::delete('/usuarios/{id}', [UserController::class, 'destroy'])->name('usuarios.destroy');
-Route::get('/usuarios/{id}/delete', [UserController::class, 'destroy'])->name('usuarios.delete');
+Route::get('/usuarios/{id}/delete',[UserController::class, 'destroy'])->name('usuarios.delete');
 Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
+Route::get('/usuarios/list', [UserController::class, 'showUsuarios'])->name('showUsuarios');
+// proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
+Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
+Route::get('/proyectos/create', [ProyectoController::class, 'create'])->name('proyectos.create');
+Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
+Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.detalle');
+Route::get('/proyectos/{id}',[ProyectoController::class, 'show'])->name('proyectos.show');
+Route::get('/proyectos/{id}/edit', [ProyectoController::class, 'edit'])->name('proyectos.edit');
+Route::put('/proyectos/{id}', [ProyectoController::class, 'update'])->name('proyectos.update');
+Route::delete('/proyectos/{id}', [ProyectoController::class, 'destroy'])->name('proyectos.destroy');
+Route::get('/proyectos/{id}/delete', [ProyectoController::class, 'destroy'])->name('proyectos.delete');
+
+//sprints---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//Roles---------------------------------------------------------------------------------------------------------------------------------------------------
+
+Route::get('/roles', [RolesController::class, 'index'])->name('roles.index');
+Route::get('/roles/create', [RolesController::class, 'create'])->name('roles.create');
+Route::post('/roles/store', [RolesController::class, 'store'])->name('roles.store');
+Route::get('/roles/{id}',[RolesController::class, 'show'])->name('roles.show');
+Route::get('/roles/{id}/edit', [RolesController::class, 'edit'])->name('roles.edit');
+Route::put('/roles/{id}', [RolesController::class, 'update'])->name('roles.update');
+Route::delete('/roles/{id}', [RolesController::class, 'destroy'])->name('roles.destroy');
+Route::get('/roles/{id}/delete', [RolesController::class, 'destroy'])->name('roles.delete');
+
+
+
+
+
+
 
 Route::get('/kanban', function () {return view('pages.kanban.index');})->name('kanban'); 
 Route::get('/dashboard', function () {return view('pages.dashboard.index');})->name('dashboard'); 

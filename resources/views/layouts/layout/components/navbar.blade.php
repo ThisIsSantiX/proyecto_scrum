@@ -63,7 +63,7 @@
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item d-flex align-items-center py-2" href="#">
+                    <a class="dropdown-item d-flex align-items-center py-2" href="{{ route('proyectos.index') }}">
                     <i class="bi bi-grid me-2 fs-5"></i> 
                     <span class="fw-semibold">Proyecto</span>
                     </a>
