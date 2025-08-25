@@ -21,4 +21,16 @@ class sprint extends Model
     ];
 
     protected $primaryKey = 'id';
+
+    public function getEstadoTextoAttribute()
+    {
+        $mapa = [
+            0 => 'planificado',
+            1 => 'activo',
+            2 => 'completado',
+            3 => 'cancelado',
+        ];
+
+        return $mapa[$this->estado] ?? 'desconocido';
+    }
 }
