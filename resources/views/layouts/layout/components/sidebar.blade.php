@@ -72,6 +72,18 @@
                         <span class="item-name">Usuarios</span>
                     </a>
                 </li>
+            <li class="nav-item">
+                    <a class="nav-link {{ request()->is('roles*') ? 'active' : '' }}" href="{{ route('roles.index') }}">
+                        <i class="icon">
+                            <svg width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-20">
+                                <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z" fill="currentColor"/>
+                                <path d="M2 20c0-3.314 2.686-6 6-6h8c3.314 0 6 2.686 6 6v1H2v-1z" fill="currentColor"/>
+                            </svg>
+                        </i>
+                        <span class="item-name">Roles</span>
+                    </a>
+                </li>
+            
                 <li><hr class="hr-horizontal"></li>
                 <li class="nav-item static-item">
                     <a class="nav-link static-item disabled" href="#" tabindex="-1">

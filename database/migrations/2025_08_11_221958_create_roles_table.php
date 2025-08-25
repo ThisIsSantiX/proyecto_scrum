@@ -22,7 +22,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
         DB::table('roles')->insert([
             [
                 'nombre' => 'Scrum master',

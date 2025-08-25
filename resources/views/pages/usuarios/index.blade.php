@@ -3,6 +3,13 @@
 @section('content')
 <div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
 
+    {{-- Mensaje de éxito --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    @endif
     {{-- Mensaje de eliminación temporal --}}
     <div id="delete-alert" class="alert alert-warning alert-dismissible fade show d-none" role="alert">
         Usuario Eliminado
@@ -25,8 +32,6 @@
                     <div>
                         <a href="{{ route('usuarios.create') }}" class="btn btn-sm btn-primary">+ Agregar Usuario</a>
                     </div>
-                    
-
                 </div>
             <div class="card-body px-0">
                 <div class="table-responsive">
@@ -224,6 +229,6 @@
         $(document).ready(function() {
             showUsuarios();
         });
-
+        
     </script>
 @endsection

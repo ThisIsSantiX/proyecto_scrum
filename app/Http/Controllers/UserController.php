@@ -40,7 +40,7 @@ class UserController extends Controller
             'apellido'  => 'required|string|max:50',
             'email'     => 'required|email|unique:users,email',
             'password'  => 'required|min:6|confirmed',
-            'estado'    => 'required',
+            'estado'    => 'required|in:1,0',
             'foto_url'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -124,6 +124,7 @@ class UserController extends Controller
             'estado'    => 'required|in:1,0',
             'foto_url'  => 'nullable|file|image|max:2048',
             'id_rol'    => 'required|integer|exists:roles,id',
+
         ]);
 
         $data = $request->only(['nombre', 'apellido', 'email', 'estado']);
@@ -170,4 +171,10 @@ class UserController extends Controller
         $roles = roles::where('estado', 1)->get(); 
         return response()->json($roles);
     }
+    public function showUsuarios()
+     {
+        $users = User::where('estado', 1)->get(); // solo activos
+        return response()->json($users);
+    }
+
 }    
