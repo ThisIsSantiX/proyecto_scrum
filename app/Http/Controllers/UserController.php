@@ -171,10 +171,5 @@ class UserController extends Controller
         $roles = roles::where('estado', 1)->get(); 
         return response()->json($roles);
     }
-    public function showUsuarios()
-     {
-        $users = User::where('estado', 1)->get(); // solo activos
-        return response()->json($users);
-    }
 
 }    

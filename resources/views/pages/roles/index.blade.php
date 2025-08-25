@@ -1,7 +1,7 @@
 @extends('layouts.layout.layout')
 
 @section('content')
-<div class="conatiner-fluid content-inner mt-5 py-0">
+<div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
 
     {{-- Mensaje de éxito --}}
     @if(session('success'))
@@ -44,7 +44,7 @@
                     
 
                         {{-- Rol --}}
-                        <td><span class="badge bg-info text-dark">{{ $rol->nombre ?? 'Sin rol' }}</span></td>
+                        <td>{{ $rol->nombre ?? 'Sin rol' }}</td>
 
                         {{-- Estado --}}
                         <td>

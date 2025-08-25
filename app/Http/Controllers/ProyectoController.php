@@ -128,4 +128,10 @@ class ProyectoController extends Controller
         return response()->json(['success' => true]);
     }
     
+    public function showUsuarios()
+    {
+        $users = User::where('estado', 1)->get(); // solo activos
+        return response()->json($users);
+    }
+
 }
