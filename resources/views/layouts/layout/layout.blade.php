@@ -24,10 +24,11 @@
     </head>
     <body class=" ">
         <div class="position-relative iq-banner">
-            {{-- <div id="loading">
+            <div id="loading">
                 <div class="loader simple-loader">
                     <div class="loader-body"></div>
-                </div>    </div> --}}
+                </div>    
+            </div>
 
             @include('layouts.layout.components.sidebar')
 
@@ -61,6 +62,24 @@
                 backdrop-filter: blur(12px);
                 -webkit-backdrop-filter: blur(12px);
             }
+
+            #loading {
+                position: fixed;      /* Se queda fijo en la pantalla */
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
+                z-index: 9999;        /* Encima de todo */
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            body.dark #loading {
+                background: rgba(0, 0, 0, 0.9);
+            }
+
 
         </style>
         
@@ -151,6 +170,10 @@
             //     });
             // });
 
+            $(window).on("load", function () {
+                $("#loading").fadeOut("slow"); // Animación suave para ocultar
+            });
+            
         </script>
 
 

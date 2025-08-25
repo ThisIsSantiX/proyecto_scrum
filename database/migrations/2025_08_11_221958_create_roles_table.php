@@ -52,6 +52,13 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'nombre' => 'Admin',
+                'estado' => 1,
+                'uid' => Str::uuid(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 

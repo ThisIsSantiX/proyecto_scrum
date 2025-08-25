@@ -16,8 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('id_historia');
             $table->text('descripcion');
             $table->integer('estado'); 
-            $table->uuid('uid');
-            $table->foreign('id_historia')->references('id')->on('historias_usuario');
+            $table->text('uid');
+            $table->foreign('id_historia')->references('id')->on('historias_usuarios');
             $table->timestamps();
         });
     }

@@ -26,7 +26,7 @@ return new class extends Migration
 
         DB::table('role_users')->insert([
             'user_id' => 1,
-            'role_id' => 1,
+            'role_id' => 5,
             'estado' => 1,
             'uid' => Str::uuid(),
             'created_at' => now(),
