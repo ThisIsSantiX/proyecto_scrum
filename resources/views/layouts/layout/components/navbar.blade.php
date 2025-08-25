@@ -1,4 +1,4 @@
-    <nav class="nav navbar py-2 navbar-expand-lg navbar-light iq-navbar bg-transparent">
+    <nav class="nav navbar py-2 navbar-expand-lg navbar-light iq-navbar bg-transparent fixed-top">
         <div class="container-fluid navbar-inner">
             <a href="{{ route ('dashboard') }}" class="navbar-brand">
                 <!--Logo start-->
@@ -45,36 +45,35 @@
                 </span>
             </button>
 
-            <div class="dropdown ms-auto">
-                <button class="btn btn-primary btn-sm dropdown-toggle px-3" type="button" id="dropdownNew" data-bs-toggle="dropdown" aria-expanded="false">
-                    <svg viewBox="0 0 24 24" width="15px" height="24px" data-icon="Plus" focusable="false" class="svg-icon me-1">
-                    <path fill="currentColor" fill-rule="evenodd"
-                        d="M13,4 L13,10 C13,10.5522847 13.4477153,11 14,11 L20,11 C20.5522847,11 21,11.4477153 21,12 C21,12.5522847 20.5522847,13 20,13 L14,13 C13.4477153,13 13,13.4477153 13,14 L13,20 C13,20.5522847 12.5522847,21 12,21 C11.4477153,21 11,20.5522847 11,20 L11,14 C11,13.4477153 10.5522847,13 10,13 L4,13 C3.44771525,13 3,12.5522847 3,12 C3,11.4477153 3.44771525,11 4,11 L10,11 C10.5522847,11 11,10.5522847 11,10 L11,4 C11,3.44771525 11.4477153,3 12,3 C12.5522847,3 13,3.44771525 13,4 Z">
-                    </path>
-                    </svg>
-                    Nuevo...
-                </button>
-
-                <ul class="dropdown-menu dropdown-menu-start shadow rounded-3 bg-body-tertiary mt-1" aria-labelledby="dropdownNew">
-                <li>
-                    <a class="dropdown-item d-flex align-items-center py-2" href="#">
-                    <i class="bi bi-check-circle me-2 fs-5"></i> 
-                    <span class="fw-semibold">Tarea</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item d-flex align-items-center py-2" href="#">
-                    <i class="bi bi-grid me-2 fs-5"></i> 
-                    <span class="fw-semibold">Proyecto</span>
-                    </a>
-                </li>
-                </ul>
-
-
-            </div>
+            
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto align-items-center mb-2 mb-lg-0">
+                    <div class="dropdown ms-auto me-3">
+                        <button class="btn btn-primary btn-sm dropdown-toggle px-3" type="button" id="dropdownNew" data-bs-toggle="dropdown" aria-expanded="false">
+                            <svg viewBox="0 0 24 24" width="15px" height="24px" data-icon="Plus" focusable="false" class="svg-icon me-1">
+                            <path fill="currentColor" fill-rule="evenodd"
+                                d="M13,4 L13,10 C13,10.5522847 13.4477153,11 14,11 L20,11 C20.5522847,11 21,11.4477153 21,12 C21,12.5522847 20.5522847,13 20,13 L14,13 C13.4477153,13 13,13.4477153 13,14 L13,20 C13,20.5522847 12.5522847,21 12,21 C11.4477153,21 11,20.5522847 11,20 L11,14 C11,13.4477153 10.5522847,13 10,13 L4,13 C3.44771525,13 3,12.5522847 3,12 C3,11.4477153 3.44771525,11 4,11 L10,11 C10.5522847,11 11,10.5522847 11,10 L11,4 C11,3.44771525 11.4477153,3 12,3 C12.5522847,3 13,3.44771525 13,4 Z">
+                            </path>
+                            </svg>
+                            Nuevo...
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-start shadow rounded-3 bg-body-tertiary mt-1" aria-labelledby="dropdownNew">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center py-2" href="#">
+                                <i class="bi bi-check-circle me-2 fs-5"></i> 
+                                <span class="fw-semibold">Tarea</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center py-2" href="#">
+                                <i class="bi bi-grid me-2 fs-5"></i> 
+                                <span class="fw-semibold">Proyecto</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
 
                     <!-- Modo oscuro -->
                     <li class="nav-item">

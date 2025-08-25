@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->integer('estado')->default(1);
-            $table->text('foto_url');
+            $table->text('foto_url')->nullable();
             $table->text('uid');
             $table->timestamps();
         });
@@ -33,7 +33,7 @@ return new class extends Migration
             'email' => 'santi@gmail.com',
             'password' => bcrypt('12345678'),
             'estado' => 1,
-            'foto_url' => 'https://example.com/foto.jpg',
+            'foto_url' => 'https://ui-avatars.com/api/?name=Santiago+Torres&background=random&color=fff',
             'uid' => Str::uuid(),
             'created_at' => now(),
             'updated_at' => now(),
