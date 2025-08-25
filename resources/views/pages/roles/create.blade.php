@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="container-fluid content-inner mt-5 py-0">
+<div class="container-fluid content-inner pt-4 mt-5 py-0">
     <div class="row justify-content-center">
         <div class="col-xl-10 col-lg-12">
             <div class="card">
