@@ -1,11 +1,19 @@
 @extends('layouts.layout.layout')
 
 @section('content')
-<div class="conatiner-fluid content-inner mt-5 py-0">
+<div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
+
+    {{-- Mensaje de éxito --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    @endif
 
     {{-- Mensaje de eliminación temporal --}}
     <div id="delete-alert" class="alert alert-warning alert-dismissible fade show d-none" role="alert">
-        Proyecto Eliminado
+        Rol Eliminado
         <button type="button" class="btn-close" onclick="hideAlert()"></button>
     </div>
 
@@ -14,69 +22,44 @@
             <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="header-title">
-                <h4 class="card-title">Lista De Proyectos</h4>
+                <h4 class="card-title">Lista De Roles</h4>
                 </div>
                 <div>
-                <a href="{{ route('proyectos.create') }}" class="btn btn-sm btn-primary">+ Agregar Proyectos</a>
+                <a href="{{ route('roles.create') }}" class="btn btn-sm btn-primary">+ Agregar Roles</a>
                 </div>
             </div>
             <div class="card-body px-0">
                 <div class="table-responsive">
-                <table id="proyecto-list-table" class="table table-striped" role="grid" data-bs-toggle="data-table">
+                <table id="roles-list-table" class="table table-striped" role="grid" data-bs-toggle="data-table">
                     <thead>
                     <tr class="ligth">
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Visibilidad</th>
-                        <th>Progreso</th>
+                        <th>Rol</th>
                         <th>Estado</th>
-                        <th>Fecha Inicio</th>
-                        <th>Fecha Fin</th>
                         <th style="min-width: 120px">Acciones</th>
                     </tr>
                     </thead>
                     <tbody>
-                    @forelse($proyectos as $proyecto)
+                    @forelse($roles as $rol)
                     <tr>
-                        {{-- Nombre --}}
-                        <td>{{ $proyecto->nombre }}</td>
+                    
 
-                        {{-- descripcion --}}
-                        <td>{{ $proyecto->descripcion }}</td>
-
-                        {{-- visivilidad --}}
-                        <td>{{ $proyecto->visibilidad }}</td>
-
-                        {{-- progreso --}}
-                        <td>{{ $proyecto->progreso }}</td>
+                        {{-- Rol --}}
+                        <td>{{ $rol->nombre ?? 'Sin rol' }}</td>
 
                         {{-- Estado --}}
                         <td>
-                        <span class="badge {{ $proyecto->estado ? 'bg-success' : 'bg-secondary' }}">
-                            {{ $proyecto->estado_texto ?? ($proyecto->estado ? 'Activo' : 'Inactivo') }}
+                        <span class="badge {{ $rol->estado ? 'bg-success' : 'bg-secondary' }}">
+                            {{ $rol->estado_texto ?? ($rol->estado ? 'Activo' : 'Inactivo') }}
                         </span>
                         </td>
 
                         {{-- Acciones --}}
                         <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <!-- Ver -->
-                            <a class="btn btn-sm btn-icon btn-success" data-bs-toggle="tooltip" title="Ver" 
-                            href="{{ route('proyectos.show', $proyecto->uid) }}">
-                                <span class="btn-inner">
-                                    <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M2 12C2 12 5.636 5 12 5C18.364 5 22 12 22 12C22 12 18.364 19 12 19C5.636 19 2 12 2 12Z" 
-                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M12 15C13.657 15 15 13.657 15 12C15 10.343 13.657 9 12 9C10.343 9 9 10.343 9 12C9 13.657 10.343 15 12 15Z" 
-                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </span>
-                            </a>
-
+                        <div class="d-flex gap-2">  
                             <!-- Editar -->
-                            <a class="btn btn-sm btn-icon btn-warning" data-bs-toggle="tooltip" title="Editar" 
-                            href="{{ route('proyectos.edit', $proyecto->uid) }}">
+                            <a class="btn btn-sm btn-icon btn-warning"  data-bs-toggle="modal" 
+                            data-bs-target="#editRoleModal{{ $rol->id }}" 
+                            title="Editar">
                                 <span class="btn-inner">
                                     <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" 
                                         xmlns="http://www.w3.org/2000/svg">
@@ -90,10 +73,12 @@
                                     </svg>
                                 </span>
                             </a>
+                            <!-- Modal Editar Rol -->
+                            @include('pages.roles.edit')
 
                             <!-- Eliminar -->
                             <button type="button" class="btn btn-sm btn-icon btn-danger" data-bs-toggle="tooltip" title="Eliminar"
-                                    onclick="deleteProyecto('{{ $proyecto->uid }}', this)">
+                                    onclick="deleteRoles('{{ $rol->uid }}', this)">
                                 <span class="btn-inner">
                                     <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" 
                                         xmlns="http://www.w3.org/2000/svg" stroke="currentColor">
@@ -113,7 +98,7 @@
                     @empty
                     <tr>
                         <td colspan="6" class="text-center">
-                        <div class="alert alert-secondary mb-0">No Hay Proyectos Registrados.</div>
+                        <div class="alert alert-secondary mb-0">No Hay Roles Registrados.</div>
                         </td>
                     </tr>
                     @endforelse
@@ -134,6 +119,34 @@
 @section('js')
     <script>
 
+            function deleteRoles(uid, button) {
+                if(!confirm('¿Estás seguro de eliminar este rol?')) return;
+
+                // Enviar petición DELETE
+                axios.delete('/roles/' + uid)
+                    .then(response => {
+                        // Mostrar alerta temporal
+                        const alertDiv = document.getElementById('delete-alert');
+                        alertDiv.classList.remove('d-none');
+                        
+                        // Ocultar fila de la tabla
+                        const row = button.closest('tr');
+                        row.remove();
+
+                        // Opcional: ocultar alerta después de 3 segundos
+                        setTimeout(() => {
+                            alertDiv.classList.add('d-none');
+                        }, 3000);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('No se pudo eliminar el rol.');
+                    });
+            }
+            function hideAlert() {
+                const alertDiv = document.getElementById('delete-alert');
+                alertDiv.classList.add('d-none');
+            }
 
     </script>
 @endsection

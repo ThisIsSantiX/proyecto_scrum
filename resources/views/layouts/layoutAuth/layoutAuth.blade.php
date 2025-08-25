@@ -51,6 +51,28 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const body = document.body;
+                const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+                if (prefersDark.matches) {
+                    body.classList.add("dark");
+                } else {
+                    body.classList.remove("dark");
+                }
+
+                prefersDark.addEventListener("change", e => {
+                    if (e.matches) {
+                        body.classList.add("dark");
+                    } else {
+                        body.classList.remove("dark");
+                    }
+                });
+            });
+        </script>
+
+
         @yield('js')
     </body>
 </html>

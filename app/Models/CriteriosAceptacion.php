@@ -5,21 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class proyecto extends Model
-{
-    use HasFactory;
-
+class CriteriosAceptacion extends Model
+{   
     protected $fillable = [
-        'nombre',
+        'id_historia',
         'descripcion',
-        'id_owner',
         'estado',
         'uid',
-        'visibilidad',
-        'progreso',
-        'fecha_inicio',
-        'fecha_fin',    
     ];
 
-    protected $primaryKey = 'id';
+    use HasFactory;
 }

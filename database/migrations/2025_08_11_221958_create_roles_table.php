@@ -22,7 +22,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
         DB::table('roles')->insert([
             [
                 'nombre' => 'Scrum master',
@@ -47,6 +46,13 @@ return new class extends Migration
             ],
             [
                 'nombre' => 'Usuario',
+                'estado' => 1,
+                'uid' => Str::uuid(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nombre' => 'Admin',
                 'estado' => 1,
                 'uid' => Str::uuid(),
                 'created_at' => now(),

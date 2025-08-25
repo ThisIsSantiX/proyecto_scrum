@@ -24,7 +24,6 @@ class User extends Authenticatable
         'password',
         'estado',
         'foto_url',
-        'id_rol',
         'uid',
     ];
 
@@ -46,4 +45,18 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function getFotoUrlAttribute($value)
+    {
+        if ($value) {
+            return $value;
+        }
+
+        $nombre = $this->nombre ?? 'Usuario';
+        $apellido = $this->apellido ?? '';
+        $fullName = trim("{$nombre} {$apellido}");
+
+        return "https://ui-avatars.com/api/?name=" . urlencode($fullName) . "&background=random&color=fff";
+    }
+
 }
