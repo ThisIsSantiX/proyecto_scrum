@@ -20,7 +20,7 @@ class RolesController extends Controller
     // Método para mostrar el formulario de creación
     public function create()
     {
-         return view('pages.roles.create');
+        
     }
 
     // Método para guardar un nuevo recurso
@@ -49,36 +49,40 @@ class RolesController extends Controller
             }
 
     // Método para mostrar un recurso específico
-    public function show($id)
+    public function show( Request $request)
         {
-            $roles = Roles::where('estado', 1)->paginate(perPage: 5);
-            return response()->json($roles);
+            $query = Roles::where('estado', 1);
+
+                // Filtro de búsqueda
+                if ($request->has('search') && !empty($request->search)) {
+                    $query->where('nombre', 'LIKE', '%' . $request->search . '%');
+                }
+
+                // Paginación: 5 roles por página
+                $roles = $query->paginate(5);
+
+                return response()->json($roles);
         }
 
     // Método para mostrar el formulario de edición
     public function edit($id)
         {
-            $roles = Roles::findOrFail($id);
-            return view('pages.roles.edit', compact('roles'));
+            // $roles = Roles::where('uid', $id)->firstOrFail();
+            // return response()->json($roles);
         }
 
     // Método para actualizar un recurso existente
-    public function update(Request $request, $id)
-            {
-                $roles = Roles::findOrFail($id);
-
-                $request->validate([
-                    'estado' => 'required|in:0,1',
-                ]);
-
-                $data = $request->only( 'estado');
-                $data['estado'] = (int)$data['estado'];
-
-                $roles->update($data);
-
-                return redirect()->route('roles.index')
-                    ->with('success', 'Rol Actualizado Correctamente.');
-            }
+    public function update(Request $request, $uid)
+        {
+            $roles = Roles::where('uid', $uid)->firstOrFail();
+            $request->validate([
+                'nombre' => 'required|string|max:50',
+            ]);
+            $roles->update([
+                'nombre' => $request->nombre,
+            ]);
+            return redirect()->route('roles.index')->with('success', 'Rol actualizado correctamente.');
+        }
 
     // Método para eliminar un recurso
     public function destroy($uid)
@@ -93,5 +97,11 @@ class RolesController extends Controller
             $roles->save();
 
             return response()->json(['success' => true]);
+        }
+
+        public function showRoles()
+        {
+            $roles = roles::where('estado', 1)->get(); 
+            return response()->json($roles);
         }
 }
