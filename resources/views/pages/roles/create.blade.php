@@ -23,7 +23,7 @@
                     <form action="{{ route('roles.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="row g-4">
-                             <div class="col-md-4">
+                            <div class="col-md-4">
                                 <label class="form-label">Roles</label>
                                 <select name="nombre" id="nombre" class="form-select">
                                     <option value="">Seleccione Un Rol...</option>
