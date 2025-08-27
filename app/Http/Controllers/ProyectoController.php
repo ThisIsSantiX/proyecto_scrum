@@ -15,123 +15,231 @@ class ProyectoController extends Controller
      */
     public function index()
     {
-        $proyectos = Proyecto::all();
-        return view('pages.proyectos.index', compact('proyectos'));
+        return view('pages.proyectos.index');
     }
-
-    /**
-     * Mostrar formulario de creación
-     */
-    public function create()
-    {
-         $users = User::all(); // Lista de usuarios para asignar como responsable
-        return view('pages.proyectos.create', compact('users'));
-    }
-
     /**
      * Guardar proyecto en BD
      */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nombre'        => 'required|string|max:100',
-            'descripcion'   => 'required|string',
-            'id_owner'      => 'required|exists:users,id',
-            'estado'        => 'required|in:activo,inactivo',
-            'visibilidad'   => 'required|in:publico,privado',
-            'progreso'      => 'nullable|numeric|min:0|max:100',
-            'fecha_inicio'  => 'required|date',
-            'fecha_fin'     => 'nullable|date|after_or_equal:fecha_inicio',
-        ]);
-
-        try {
-            DB::transaction(function () use ($request) {
-                Proyecto::create([
-                    'nombre'        => $request->nombre,
-                    'descripcion'   => $request->descripcion,
-                    'id_owner'      => $request->id_owner,
-                    'estado'        => $request->estado === 'activo' ? 1 : 0,
-                    'visibilidad'   => $request->visibilidad,
-                    'progreso'      => $request->progreso ?? 0,
-                    'fecha_inicio'  => $request->fecha_inicio,
-                    'fecha_fin'     => $request->fecha_fin,
-                    'uid'           => Str::uuid(),
-                ]);
-            });
-
-            return redirect()->route('proyectos.index')
-                ->with('success', 'Proyecto creado correctamente.');
-        } catch (\Throwable $e) {
-            Log::error('[store Proyecto] Error: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'No se pudo crear el proyecto, inténtalo de nuevo.']);
-        }
-    }
-
-    /**
-     * Mostrar un proyecto especifico
-     */
+   // Función show (ya actualizada)
     public function show(Request $request)
     {
-        $proyectos = Proyecto::where('estado', 1)->paginate(5);
-        return response()->json($proyectos);
-    }
+        $query = Proyecto::select(
+                'proyectos.*',
+                'users.nombre as usuario_nombre',
+                'users.email as usuario_email'
+            )
+            ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
+            ->where('proyectos.estado', 1);
 
-    /**
-     * Mostrar formulario de edición
-     */
-    public function edit($id)
-    {
-        $proyecto = Proyecto::findOrFail($id);
-        return view('pages.proyectos.edit', compact('proyecto'));
-    }
-
-    /**
-     * Actualizar proyecto en BD
-     */
-    public function update(Request $request, $id)
-    {
-        $proyecto = Proyecto::findOrFail($id);
-
-        $request->validate([
-            'nombre'        => 'required|string|max:100',
-            'descripcion'   => 'required|string',
-            'id_owner'      => 'required|exists:users,id',
-            'estado'        => 'required|in:activo,inactivo',
-            'visibilidad'   => 'required|in:publico,privado',
-            'progreso'      => 'nullable|numeric|min:0|max:100',
-            'fecha_inicio'  => 'required|date',
-            'fecha_fin'     => 'nullable|date|after_or_equal:fecha_inicio',
-        ]);
-
-        $data = $request->all();
-
-        $data['estado'] = $request->estado === 'activo' ? 1 : 0;
-
-        $proyecto->update($data);
-
-        return redirect()->route('proyectos.index')
-            ->with('success', 'Proyecto actualizado correctamente.');
-    }
-
-   
-    public function destroy($uid)
-    {
-        $proyecto = Proyecto::where('uid', $uid)->first();
-
-        if (!$proyecto) {
-            return response()->json(['success' => false, 'error' => 'Proyecto no encontrado.']);
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where(function($q) use ($request) {
+                $q->where('proyectos.nombre', 'LIKE', '%' . $request->search . '%')
+                ->orWhere('users.nombre', 'LIKE', '%' . $request->search . '%');
+            });
         }
 
-        $proyecto->estado = 0;
-        $proyecto->save();
+        $proyectos = $query->get();
+        
+        return response()->json([
+            'success' => true,
+            'data' => $proyectos
+        ]);
+    }
 
-        return response()->json(['success' => true]);
-    }
-    
-    public function showUsuarios()
+    // Función store
+    public function store(Request $request)
     {
-        $users = User::where('estado', 1)->get(); // solo activos
-        return response()->json($users);
+        try {
+            $request->validate([
+                'nombre' => 'required|string|max:50',
+                'descripcion' => 'nullable|string|max:255',
+                'fecha_inicio' => 'nullable|date',
+                'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
+                'visibilidad' => 'required|integer|in:0,1'
+            ]);
+
+            $proyecto = new Proyecto();
+            $proyecto->nombre = $request->nombre;
+            $proyecto->descripcion = $request->descripcion;
+            $proyecto->id_owner = auth()->id(); // Usuario autenticado
+            $proyecto->estado = 1; // Activo por defecto
+            $proyecto->uid = Str::uuid(); // Generar UUID único
+            $proyecto->visibilidad = $request->visibilidad;
+            $proyecto->progreso = $request->progreso; 
+            $proyecto->fecha_inicio = $request->fecha_inicio;
+            $proyecto->fecha_fin = $request->fecha_fin;
+            
+            $proyecto->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Proyecto creado exitosamente',
+                'data' => $proyecto
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear el proyecto: ' . $e->getMessage()
+            ], 500);
+        }
     }
+
+    // Función detailsProyecto
+    public function detailsProyecto($uid)
+    {
+        try {
+            $proyecto = Proyecto::select(
+                    'proyectos.*',
+                    'users.nombre as usuario_nombre',
+                    'users.email as usuario_email'
+                )
+                ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
+                ->where('proyectos.uid', $uid)
+                ->first();
+
+            if (!$proyecto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Proyecto no encontrado'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $proyecto
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener el proyecto: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Función edit
+    public function edit($uid)
+    {
+        try {
+            $proyecto = Proyecto::where('uid', $uid)->first();
+
+            if (!$proyecto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Proyecto no encontrado'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $proyecto
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener el proyecto: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Función update
+    public function update(Request $request)
+    {
+        try {
+            $request->validate([
+                'uid' => 'required|exists:proyectos,uid', // Validamos uid
+                'nombre' => 'required|string|max:50',
+                'descripcion' => 'nullable|string|max:255',
+                'fecha_inicio' => 'nullable|date',
+                'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
+                'visibilidad' => 'required|integer|in:0,1',
+                'progreso' => 'nullable|string|max:20'
+            ]);
+
+            // Buscar proyecto por uid
+            $proyecto = Proyecto::where('uid', $request->uid)->firstOrFail();
+
+            // Verificar permisos
+            if ($proyecto->id_owner != auth()->id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes permisos para editar este proyecto'
+                ], 403);
+            }
+
+            // Actualizar campos
+            $proyecto->nombre = $request->nombre;
+            $proyecto->descripcion = $request->descripcion;
+            $proyecto->visibilidad = $request->visibilidad;
+            $proyecto->progreso = $request->progreso ?? $proyecto->progreso;
+            $proyecto->fecha_inicio = $request->fecha_inicio;
+            $proyecto->fecha_fin = $request->fecha_fin;
+
+            $proyecto->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Proyecto actualizado exitosamente',
+                'data' => $proyecto
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el proyecto: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    // Función destroy
+    public function destroy($uid)
+    {
+        try {
+            // Buscar proyecto por uid
+            $proyecto = Proyecto::where('uid', $uid)->firstOrFail();
+            
+            // Verificar que el usuario tenga permisos para eliminar
+            if ($proyecto->id_owner != auth()->id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes permisos para eliminar este proyecto'
+                ], 403);
+            }
+
+            // Soft delete - cambiar estado a 0 en lugar de eliminar físicamente
+            $proyecto->estado = 0;
+            $proyecto->save();
+
+            // O si prefieres eliminación física:
+            // $proyecto->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Proyecto eliminado exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar el proyecto: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 }

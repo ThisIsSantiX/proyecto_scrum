@@ -72,9 +72,6 @@ class UserController extends Controller
         }
     }
 
-
-
-
     /**
      * Mostrar un usuario específico
      */

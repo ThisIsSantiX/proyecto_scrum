@@ -80,6 +80,34 @@
                 background: rgba(0, 0, 0, 0.9);
             }
 
+          /* Modal siempre se adapta al tema activo */
+           /* Modo claro (por defecto Bootstrap) → sin cambios */
+
+            /* Modo oscuro */
+            body.dark .modal-content {
+            background-color: #1e1e2d !important; /* fondo oscuro */
+            color: #f8f9fa !important;
+            }
+
+            body.dark .modal-header,
+            body.dark .modal-footer {
+            background-color: #1e1e2d !important;
+            color: #f8f9fa !important;
+            border-color: #2c2c40 !important;
+            }
+
+            body.dark .modal-body {
+            background-color: #1e1e2d !important;
+            color: #f8f9fa !important;
+            }
+
+            body.dark .modal-body .form-control,
+            body.dark .modal-body .form-select {
+            background-color: #2a2a3d !important;
+            color: #f8f9fa !important;
+            border: 1px solid #44475a !important;
+            }
+
 
         </style>
         
