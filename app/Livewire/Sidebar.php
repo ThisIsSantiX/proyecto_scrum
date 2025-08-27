@@ -8,6 +8,7 @@ class Sidebar extends Component
 {
     public function render()
     {
-        return view('layouts.layout.components.sidebar');
+        $recentProjects = session()->get('recent_projects', []);
+        return view('layouts.layout.components.sidebar', compact('recentProjects'));
     }
 }

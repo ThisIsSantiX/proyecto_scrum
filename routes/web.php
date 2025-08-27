@@ -36,18 +36,14 @@ Route::put('/usuarios/update/{uid}', [UserController::class, 'update'])->name('u
 Route::delete('/usuarios/eliminar/{uid}', [UserController::class, 'destroy'])->name('deleteUsuario');
 Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
 
-// proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
+//  Rutas para la gestion de proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
-Route::get('/proyectos/create', [ProyectoController::class, 'create'])->name('proyectos.create');
-Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
-Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.detalle');
-Route::get('/proyectos/{id}',[ProyectoController::class, 'show'])->name('proyectos.show');
-Route::get('/proyectos/{id}/edit', [ProyectoController::class, 'edit'])->name('proyectos.edit');
-Route::put('/proyectos/{id}', [ProyectoController::class, 'update'])->name('proyectos.update');
-Route::delete('/proyectos/{id}', [ProyectoController::class, 'destroy'])->name('proyectos.destroy');
-Route::get('/proyectos/{id}/delete', [ProyectoController::class, 'destroy'])->name('proyectos.delete');
-Route::get('/usuarios/list', [ProyectoController::class, 'showUsuarios'])->name('showUsuario');
-
+Route::get('/showProyectos',[ProyectoController::class, 'show'])->name('showProyectos');
+Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('storeProyecto');
+Route::get('/proyecto/{uid}', [ProyectoController::class, 'detailsProyecto'])->name('detailsProyecto');
+Route::get('/proyectos/edit/{uid}', [ProyectoController::class, 'edit'])->name('editProyecto');
+Route::put('/proyectos/update', [ProyectoController::class, 'update'])->name('updateProyecto');
+Route::delete('/proyectos/delete/{uid}', [ProyectoController::class, 'destroy'])->name('deleteProyecto');
 
 //sprints---------------------------------------------------------------------------------------------------------------------------------------------------
 
