@@ -540,7 +540,7 @@
                         <div class="project-header">
                             <div class="d-flex justify-content-between align-items-start">
                                 <!-- Título -->
-                                <h5 class="project-title mb-2 project-link" data-id="${project.id}">
+                                <h5 class="project-title mb-2 project-link" data-id="${project.uid}">
                                     ${highlightedTitle}
                                 </h5>
 
@@ -979,6 +979,14 @@
         const date = new Date(dateString);
         return date.toLocaleDateString('es-ES') + ' ' + date.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
     }
+
+    $(document).on("click", ".project-link", function () {
+        const uid = $(this).data("id");
+        if (uid) {
+            window.location.href = `/proyectos/backlog/${uid}`;
+        }
+    });
+
     
 </script>
 @endsection

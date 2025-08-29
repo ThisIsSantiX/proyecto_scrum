@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_backlogs', function (Blueprint $table) {
+        Schema::create('product_backlog', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_proyecto');
             $table->foreign('id_proyecto')->references('id')->on('proyectos');
@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('titulo', 50);
             $table->string('descripcion', 255);
             $table->string('prioridad', 10);
+            $table->integer('valor_historia');
             $table->string('progreso', 20);
             $table->integer('estado')->default(1);
             $table->text('uid');
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_backlogs');
+        Schema::dropIfExists('product_backlog');
     }
 };

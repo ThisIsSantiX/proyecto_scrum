@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sprint_backlogs', function (Blueprint $table) {
+        Schema::create('sprint_backlog', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_sprint');
             $table->foreign('id_sprint')->references('id')->on('sprints');
             $table->unsignedBigInteger('id_item_backlog');
-            $table->foreign('id_item_backlog')->references('id')->on('product_backlogs');
+            $table->foreign('id_item_backlog')->references('id')->on('product_backlog');
             $table->unsignedBigInteger('asignado_a');
             $table->foreign('asignado_a')->references('id')->on('users');
             $table->string('titulo', 50);
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sprint_backlogs');
+        Schema::dropIfExists('sprint_backlog');
     }
 };

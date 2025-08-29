@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('historias_usuarios', function (Blueprint $table) {
+        Schema::create('criterios_aceptacion', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_responsable')->nullable();
-            $table->string('titulo');
+            $table->unsignedBigInteger('id_item_backlog');
             $table->text('descripcion');
-            $table->string('prioridad', 50)->nullable(); 
-            $table->integer('valor_historia')->nullable();
-            $table->integer('estado');
+            $table->text('progreso'); // Cumplido - No cumplido
+            $table->integer('estado'); 
             $table->text('uid');
+            $table->foreign('id_item_backlog')->references('id')->on('product_backlog');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('historia_usuarios');
+        Schema::dropIfExists('criterios_aceptacion');
     }
 };

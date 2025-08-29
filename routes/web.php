@@ -2,10 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\SprintController
+
+use App\Http\Controllers\CriteriosAceptacionController;
+use App\Http\Controllers\ProductBacklogController;
+use App\Http\Controllers\SprintController;
 use App\Http\Controllers\ProyectoController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\RolesController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
 
 
 /*
@@ -47,6 +52,17 @@ Route::get('/proyectos/edit/{uid}', [ProyectoController::class, 'edit'])->name('
 Route::put('/proyectos/update', [ProyectoController::class, 'update'])->name('updateProyecto');
 Route::delete('/proyectos/delete/{uid}', [ProyectoController::class, 'destroy'])->name('deleteProyecto');
 
+// Rutas para la gestion del backlog
+
+Route::get('/proyectos/backlog/{uid}', [ProductBacklogController::class, 'index'])->name('showProyectoBacklog');
+Route::get('proyectos/backlog/{uid}/show', [ProductBacklogController::class, 'show'])->name('showProductBacklog');
+Route::post('/proyectos/backlog/{uid}/store', [ProductBacklogController::class, 'store'])->name('storeProductBacklog');
+Route::put('/proyectos/backlog/{uid}/update/{historiaUid}', [ProductBacklogController::class, 'update'])->name('updateProductBacklog');
+Route::delete('/proyectos/backlog/{uid}/delete', [ProductBacklogController::class, 'destroy'])->name('deleteProductBacklog');
+
+// Rutas para la gestion de los criterios de aceptacion
+Route::post('/criterios/{historiaUid}/store', [CriteriosAceptacionController::class, 'store'])->name('storeCriterios');
+
 //sprints---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -66,14 +82,20 @@ Route::get('/kanban', function () {return view('pages.kanban.index');})->name('k
 Route::get('/dashboard', function () {return view('pages.dashboard.index');})->name('dashboard'); 
 
 // Authentication Routes
+Auth::routes(['reset' => true]);
+
 Route::get('/auth/login', [AuthController::class, 'index'])->name('login');
 Route::redirect('/', '/auth/login');
 Route::get('/auth/register', [AuthController::class, 'register'])->name('register');
 Route::post('/auth/register', [AuthController::class, 'authRegister'])->name('register');
 Route::post('/auth/login', [AuthController::class, 'authLogin'])->name('authLogin');
 Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
-Route::get('/auth/confirm-mail', [AuthController::class, 'confirmMail'])->name('confirmMail');
+Route::middleware(['web'])->group(function () {
+    Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
+    Route::post('/auth/recovery', [AuthController::class, 'sendRecoveryEmail'])->name('recoverypw.send');
+    Route::get('/auth/mail-sent', [AuthController::class, 'showMailSent'])->name('mail.sent');
+});
+
 
 // Sprint Routes
 Route::get('/sprints', [SprintController::class, 'index'])->name('sprints.index');
