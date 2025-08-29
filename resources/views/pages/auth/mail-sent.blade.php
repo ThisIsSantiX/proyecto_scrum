@@ -42,7 +42,11 @@
                     </a>
                     <img src="../../assets/images/auth/mail.png" class="img-fluid" width="80" alt="">
                     <h2 class="mt-3 mb-0">Enviado!</h2>
-                    <p class="cnf-mail mb-1">Se ha enviado un correo electrónico a youremail@domain.com. Por favor, revisa tu bandeja de entrada y haz clic en el enlace incluido para restablecer tu contraseña.</p>
+                    <p>
+                        Se ha enviado un correo electrónico a {{ $email ?? 'desconocido' }}. 
+                        Por favor, revisa tu bandeja de entrada y haz clic en el enlace incluido para restablecer tu contraseña.
+                    </p>
+
                     <div class="d-inline-block w-100">
                         <a href="{{ route('login') }}" class="btn btn-primary mt-3">Volver al login</a>
                     </div>

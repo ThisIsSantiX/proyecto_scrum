@@ -23,13 +23,16 @@ class ProyectoController extends Controller
    // Función show (ya actualizada)
     public function show(Request $request)
     {
+        $userId = auth()->id(); 
+
         $query = Proyecto::select(
                 'proyectos.*',
                 'users.nombre as usuario_nombre',
                 'users.email as usuario_email'
             )
             ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
-            ->where('proyectos.estado', 1);
+            ->where('proyectos.estado', 1)
+            ->where('proyectos.id_owner', $userId); 
 
         if ($request->has('search') && !empty($request->search)) {
             $query->where(function($q) use ($request) {
@@ -45,6 +48,7 @@ class ProyectoController extends Controller
             'data' => $proyectos
         ]);
     }
+
 
     // Función store
     public function store(Request $request)

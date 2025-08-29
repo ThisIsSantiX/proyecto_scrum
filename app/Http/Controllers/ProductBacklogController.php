@@ -2,14 +2,42 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\product_backlog;
 use Illuminate\Http\Request;
+use App\Models\Proyecto;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use App\Models\User;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
+
+
 
 class ProductBacklogController extends Controller
 {
-    // Método para mostrar una lista de recursos
-    public function index()
+    /**
+     * Mostrar el backlog del proyecto
+     */
+    public function index($uid)
     {
-        // lógica para mostrar todos los elementos
+        $proyecto = Proyecto::where('uid', $uid)->firstOrFail();
+
+        $historias = DB::table('product_backlog')
+            ->join('criterios_aceptacion', 'product_backlog.id', '=', 'criterios_aceptacion.id_item_backlog')
+            ->where('product_backlog.id_proyecto', $proyecto->id)
+            ->select(
+                'product_backlog.id as historia_id',
+                'product_backlog.titulo as historia_titulo',
+                'product_backlog.descripcion as historia_descripcion',
+                'product_backlog.prioridad',
+                'criterios_aceptacion.id as criterio_id',
+                'criterios_aceptacion.descripcion as criterio_descripcion',
+                'criterios_aceptacion.estado as criterio_estado'
+            )
+            ->get();
+
+        return view('pages.proyectos.backlog.index', compact('proyecto', 'historias'));
     }
 
     // Método para mostrar el formulario de creación
@@ -18,17 +46,172 @@ class ProductBacklogController extends Controller
         // lógica para mostrar el formulario
     }
 
-    // Método para guardar un nuevo recurso
-    public function store(Request $request)
+    public function store(Request $request, $uid)
     {
-        // lógica para guardar el recurso
+        try {
+            // Buscar el proyecto por UID
+            $proyecto = Proyecto::where('uid', $uid)->first();
+
+            if (!$proyecto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Proyecto no encontrado.'
+                ], 404);
+            }
+
+            // Validar los datos de entrada (sin id_proyecto porque ya lo tenemos)
+            $validatedData = $request->validate([
+                'titulo' => 'required|string|max:50',
+                'descripcion' => 'required|string|max:255',
+                'prioridad' => 'required|in:Alta,Media,Baja',
+                'valor_historia' => 'required|integer|min:1|max:100',
+                'progreso' => 'required|in:Por hacer,En progreso,Completado'
+            ], [
+                'titulo.required' => 'El título es requerido.',
+                'titulo.max' => 'El título no puede exceder los 50 caracteres.',
+                'descripcion.required' => 'La descripción es requerida.',
+                'descripcion.max' => 'La descripción no puede exceder los 255 caracteres.',
+                'prioridad.required' => 'La prioridad es requerida.',
+                'prioridad.in' => 'La prioridad debe ser Alta, Media o Baja.',
+                'valor_historia.required' => 'El valor de la historia es requerido.',
+                'valor_historia.integer' => 'El valor de la historia debe ser un número entero.',
+                'valor_historia.min' => 'El valor de la historia debe ser al menos 1.',
+                'valor_historia.max' => 'El valor de la historia no puede ser mayor a 100.',
+                'progreso.required' => 'El estado de progreso es requerido.',
+                'progreso.in' => 'El estado debe ser: Por hacer, En progreso o Completado.'
+            ]);
+
+            // Crear la historia de usuario en el backlog
+            $historia = product_backlog::create([
+                'id_proyecto' => $proyecto->id,
+                'creado_por' => Auth::id(),
+                'titulo' => $validatedData['titulo'],
+                'descripcion' => $validatedData['descripcion'],
+                'prioridad' => $validatedData['prioridad'],
+                'valor_historia' => $validatedData['valor_historia'],
+                'progreso' => $validatedData['progreso'],
+                'estado' => 1,
+                'uid' => Str::uuid()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Historia de usuario creada exitosamente.',
+                'historia' => [
+                    'id' => $historia->id,
+                    'titulo' => $historia->titulo,
+                    'descripcion' => $historia->descripcion,
+                    'prioridad' => $historia->prioridad,
+                    'valor_historia' => $historia->valor_historia,
+                    'progreso' => $historia->progreso,
+                    'uid' => $historia->uid
+                ]
+            ], 201);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos de validación incorrectos.',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor. Por favor, inténtalo de nuevo.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    // Método para mostrar un recurso específico
-    public function show($id)
+
+    public function show($uid)
     {
-        // lógica para mostrar un solo elemento
+        try {
+            // Buscar el proyecto por UID
+            $proyecto = Proyecto::where('uid', $uid)->first();
+            
+            if (!$proyecto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Proyecto no encontrado.'
+                ], 404);
+            }
+
+            // Obtener las historias con sus criterios de aceptación
+            $historiasRaw = DB::table('product_backlog')
+                ->leftJoin('criterios_aceptacion', 'product_backlog.id', '=', 'criterios_aceptacion.id_item_backlog')
+                ->leftJoin('users', 'product_backlog.creado_por', '=', 'users.id')
+                ->where('product_backlog.id_proyecto', $proyecto->id)
+                ->where('product_backlog.estado', 1) // Solo activas
+                ->select(
+                    'product_backlog.id as historia_id',
+                    'product_backlog.titulo as historia_titulo',
+                    'product_backlog.descripcion as historia_descripcion',
+                    'product_backlog.prioridad',
+                    'product_backlog.valor_historia',
+                    'product_backlog.progreso',
+                    'product_backlog.uid as historia_uid',
+                    'product_backlog.created_at',
+                    'users.nombre as creador_nombre',
+                    'criterios_aceptacion.id as criterio_id',
+                    'criterios_aceptacion.descripcion as criterio_descripcion',
+                    'criterios_aceptacion.estado as criterio_estado'
+                )
+                ->orderBy('product_backlog.valor_historia', 'desc')
+                ->get();
+
+            // Agrupar historias con sus criterios
+            $historiasAgrupadas = collect();
+            $historiasProcesadas = [];
+
+            foreach ($historiasRaw as $row) {
+                $historiaId = $row->historia_id;
+
+                if (!isset($historiasProcesadas[$historiaId])) {
+                    $historiasProcesadas[$historiaId] = [
+                        'id' => $row->historia_id,
+                        'titulo' => $row->historia_titulo,
+                        'descripcion' => $row->historia_descripcion,
+                        'prioridad' => $row->prioridad,
+                        'valor_historia' => $row->valor_historia,
+                        'progreso' => $row->progreso,
+                        'uid' => $row->historia_uid,
+                        'creador_nombre' => $row->creador_nombre,
+                        'fecha_creacion' => $row->created_at,
+                        'criterios' => []
+                    ];
+                }
+
+                // Agregar criterio si existe
+                if ($row->criterio_id) {
+                    $historiasProcesadas[$historiaId]['criterios'][] = [
+                        'id' => $row->criterio_id,
+                        'descripcion' => $row->criterio_descripcion,
+                        'estado' => (bool) $row->criterio_estado
+                    ];
+                }
+            }
+
+            // Convertir a array indexado
+            $historias = array_values($historiasProcesadas);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Historias obtenidas correctamente.',
+                'historias' => $historias,
+                'total' => count($historias)
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener las historias del backlog.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
 
     // Método para mostrar el formulario de edición
     public function edit($id)
@@ -37,14 +220,88 @@ class ProductBacklogController extends Controller
     }
 
     // Método para actualizar un recurso existente
-    public function update(Request $request, $id)
+    public function update(Request $request, $uid, $historiaUid)
     {
-        // lógica para actualizar el recurso
+        try {
+            // Buscar el proyecto
+            $proyecto = Proyecto::where('uid', $uid)->first();
+            if (!$proyecto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Proyecto no encontrado.'
+                ], 404);
+            }
+
+            // Buscar la historia
+            $historia = product_backlog::where('uid', $historiaUid)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+
+            if (!$historia) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Historia no encontrada.'
+                ], 404);
+            }
+
+            // Validación
+            $validatedData = $request->validate([
+                'titulo' => 'required|string|max:50',
+                'descripcion' => 'required|string|max:255',
+                'prioridad' => 'required|in:Alta,Media,Baja',
+                'valor_historia' => 'required|integer|min:1|max:100',
+                'progreso' => 'required|in:Por hacer,En progreso,Completado'
+            ]);
+
+            // Actualizar
+            $historia->update($validatedData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Historia actualizada exitosamente.',
+                'historia' => $historia
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la historia.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // Método para eliminar un recurso
-    public function destroy($id)
+    public function destroy($uid)
     {
-        // lógica para eliminar el recurso
+        try {
+            // Buscar la historia por UID
+            $historia = DB::table('product_backlog')->where('uid', $uid)->first();
+
+            if (!$historia) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Historia no encontrada.'
+                ], 404);
+            }
+
+            // Marcar como eliminada (si usas borrado lógico con campo estado)
+            DB::table('product_backlog')
+                ->where('uid', $uid)
+                ->update(['estado' => 0, 'updated_at' => now()]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Historia eliminada correctamente.'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar la historia.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
 }

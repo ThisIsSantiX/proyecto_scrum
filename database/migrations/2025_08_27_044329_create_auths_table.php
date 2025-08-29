@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('criterios_aceptacions', function (Blueprint $table) {
+        Schema::create('auths', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_historia');
-            $table->text('descripcion');
-            $table->integer('estado'); 
-            $table->text('uid');
-            $table->foreign('id_historia')->references('id')->on('historias_usuarios');
             $table->timestamps();
         });
     }
@@ -27,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('criterios_aceptacions');
+        Schema::dropIfExists('auths');
     }
 };

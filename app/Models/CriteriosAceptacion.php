@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CriteriosAceptacion extends Model
 {   
+    protected $table = 'criterios_aceptacion';
     protected $fillable = [
         'id_historia',
         'descripcion',
