@@ -98,11 +98,9 @@ Route::middleware(['web'])->group(function () {
 
 
 // Sprint Routes
-Route::get('/sprints', [SprintController::class, 'index'])->name('sprints.index');
-Route::get('/sprints/create', [SprintController::class, 'create'])->name('sprints.create');
-Route::post('/sprints', [SprintController::class, 'store'])->name('sprints.store');
-Route::get('/sprints/{id}', [SprintController::class, 'show'])->name('sprints.detalle');
-Route::get('/sprints/{id}', [SprintController::class, 'show'])->name('sprints.show');
-Route::get('/sprints/{id}/edit', [SprintController::class, 'edit'])->name('sprints.edit');
-Route::put('/sprints/{id}', [SprintController::class, 'update'])->name('sprints.update');
-Route::delete('/sprints/{id}', [SprintController::class, 'destroy'])->name('sprints.destroy');
+Route::get('/proyectos/backlog/{uid}/sprints/show', [SprintController::class, 'show'])->name('showSprint');
+Route::post('/proyectos/backlog/{uid}/sprints/store', [SprintController::class, 'store'])->name('storeSprint');
+Route::post('/proyectos/backlog/{uid}/sprints/update', [SprintController::class, 'update'])->name('updateSprint');
+Route::post('/proyectos/backlog/{uid}/sprints/destroy', [SprintController::class, 'destroy'])->name('destroySprint');
+
+
