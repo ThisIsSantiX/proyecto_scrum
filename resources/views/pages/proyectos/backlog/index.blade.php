@@ -52,25 +52,35 @@
             </div>
 
             <!-- Sección derecha - Sprints -->
-            <div class="col-md-6">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center py-2">
-                        <h6 class="mb-0 fw-semibold fs-6">
-                            <i class="bi bi-flag text-success me-1"></i>
-                            Sprints
-                        </h6>
-                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalSprint">
-                            <i class="bi bi-plus-circle me-1"></i> Nuevo
-                        </button>
-                    </div>
-                    <div class="card-body py-3 px-3">
-                        <!-- Estado vacío -->
-                        <div class="empty-state text-center text-muted py-4">
-                            <i class="bi bi-flag-fill fs-3 d-block mb-2"></i>
-                            <p class="small mb-2">No hay sprints creados</p>
-                            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalSprint">
-                                +   Crear primer sprint
-                            </button>
+                    <div class="col-md-6"> 
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                                <h6 class="mb-0 fw-semibold fs-6">
+                                    <i class="bi bi-flag text-success me-1"></i>
+                                    Sprints
+                                </h6>
+                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalSprint">
+                                    <i class="bi bi-plus-circle me-1"></i> Nuevo
+                                </button>
+                            </div>
+                            <div class="card-body py-3 px-3">
+                                <!-- Contenedor de sprints -->
+                                <div id="sprintsContainer">
+                                    <!-- Estado vacío inicial -->
+                                    <div id="emptyState" class="empty-state text-center text-muted py-4">
+                                        <i class="bi bi-flag-fill fs-3 d-block mb-2"></i>
+                                        <p class="small mb-2">No hay sprints creados</p>
+                                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalSprint">
+                                            + Crear primer sprint
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Lista de sprints (se llenará dinámicamente) -->
+                                    <div id="sprintsList" class="d-none">
+                                        <!-- Los sprints se cargarán aquí -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -165,7 +175,6 @@
                 <div class="modal-body">
                     <form id="formHistoriaEdit">
                         <input type="hidden" id="edit_proyecto_uid" value="{{ $proyecto->uid }}">
-                        <input type="hidden" id="edit_historia_uid">
 
                         <div class="mb-3">
                             <label for="edit_titulo" class="form-label">Título</label>
@@ -245,7 +254,7 @@
 
 
 
-    <!-- Modal para Nuevo Sprint (Solo visual) -->
+    <!-- Modal para crear sprint -->
     <div class="modal fade" id="modalSprint" tabindex="-1" aria-labelledby="modalSprintLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -260,43 +269,45 @@
                     <form id="formSprint">
                         <div class="mb-3">
                             <label class="form-label">Nombre del Sprint</label>
-                            <input type="text" class="form-control" placeholder="Sprint 1" disabled>
+                            <input type="text" id="nombreSprint" name="nombre" class="form-control" placeholder="Sprint 1" required>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Fecha Inicio</label>
-                                    <input type="date" class="form-control" disabled>
+                                    <input type="date" id="fechaInicio" name="fecha_inicio" class="form-control" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Fecha Fin</label>
-                                    <input type="date" class="form-control" disabled>
+                                    <input type="date" id="fechaFin" name="fecha_fin" class="form-control" required>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Objetivo del Sprint</label>
-                            <textarea class="form-control" rows="3" placeholder="Descripción del objetivo..." disabled></textarea>
+                            <textarea id="objetivoSprint" name="objetivo" class="form-control" rows="3" placeholder="Descripción del objetivo..." required></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Duración</label>
-                            <select class="form-select" disabled>
-                                <option>1 semana</option>
-                                <option>2 semanas</option>
-                                <option>3 semanas</option>
-                                <option>4 semanas</option>
+                            <select id="duracionSprint" name="duracion" class="form-select" required>
+                                <option value="">Seleccionar duración</option>
+                                <option value="1">1 semana</option>
+                                <option value="2">2 semanas</option>
+                                <option value="3">3 semanas</option>
+                                <option value="4">4 semanas</option>
                             </select>
                         </div>
+                            <input type="hidden" id="uid_proyecto" value="{{ $proyecto->uid }}">
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" disabled>
+                    <button type="button" id="btnCrearSprint" class="btn btn-primary">
                         <i class="fas fa-plus me-2"></i>
                         Crear Sprint
                     </button>
@@ -304,6 +315,60 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal para editar sprint -->
+    <div class="modal fade" id="modalEditarSprint" tabindex="-1" aria-labelledby="modalEditarSprintLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditarSprintLabel">
+                        <i class="fas fa-edit me-2"></i>
+                        Editar Sprint
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEditarSprint">
+                        <input type="hidden" id="editarSprintUid" name="uid">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nombre del Sprint</label>
+                            <input type="text" id="editarNombreSprint" name="nombre" class="form-control" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Fecha Inicio</label>
+                                    <input type="date" id="editarFechaInicio" name="fecha_inicio" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Fecha Fin</label>
+                                    <input type="date" id="editarFechaFin" name="fecha_fin" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Objetivo del Sprint</label>
+                            <textarea id="editarObjetivoSprint" name="objetivo" class="form-control" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btnActualizarSprint" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Actualizar Sprint
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -333,6 +398,97 @@
             font-size: 4rem;
             margin-bottom: 1rem;
             color: #d1d5db;
+        }
+
+        .sprint-item {
+            margin-bottom: 20px;
+        }
+        
+        .sprint-item .card {
+            transition: all 0.3s ease;
+        }
+        
+        .sprint-item:hover .card {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .sprint-item.ui-sortable-helper .card {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            transform: rotate(2deg);
+        }
+        
+        .sprint-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+        
+        .sprint-progress {
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .sprint-meta {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .drag-handle {
+            color: #6c757d;
+            cursor: grab;
+        }
+        
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        
+        .empty-state {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 40px 20px;
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+        }
+        
+        /* Estilos para el área de product backlog */
+        .sprint-backlog-area {
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .sprint-backlog-area:hover {
+            background: #e9ecef;
+            border-color: #007bff !important;
+        }
+        
+        .sprint-backlog-area.drag-over {
+            background: #e3f2fd;
+            border-color: #2196f3 !important;
+            box-shadow: inset 0 2px 8px rgba(33, 150, 243, 0.2);
+        }
+        
+        .backlog-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: move;
+            transition: all 0.2s ease;
+        }
+        
+        .backlog-item:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        
+        .backlog-item.ui-sortable-helper {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transform: rotate(1deg);
         }
         
     </style>
@@ -865,5 +1021,504 @@
                 cargarHistorias();
             });
         });
+
+        // Sprints
+        const notyf = new Notyf({
+            duration: 3000,
+            position: {
+                x: 'right',
+                y: 'top',
+            }
+        });
+
+        // Variable global para almacenar sprints
+        function getStatusBadge(estado) {
+            const estados = {
+                1: { text: 'Por hacer', class: 'bg-secondary' },
+                2: { text: 'En progreso', class: 'bg-warning' },
+                3: { text: 'Completado', class: 'bg-success' }
+            };
+            const status = estados[estado] || { text: 'Desconocido', class: 'bg-dark' };
+            return `<span class="badge ${status.class} status-badge">${status.text}</span>`;
+        }
+
+        // Función para renderizar un sprint con su área de product backlog
+        function renderSprint(sprint) {
+            const fechaInicio = new Date(sprint.fecha_inicio).toLocaleDateString();
+            const fechaFin = new Date(sprint.fecha_fin).toLocaleDateString();
+            
+            return `
+                <div class="sprint-item mb-4" data-sprint-id="${sprint.id}">
+                    <div class="card shadow-sm border rounded-3">
+                        <div class="card-header">
+                            <div class="sprint-header">
+                                <div class="d-flex align-items-center flex-grow-1">
+                                    <i class="fas fa-grip-vertical drag-handle me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">${sprint.nombre}</h6>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="sprint-meta">${fechaInicio} - ${fechaFin}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-secondary" 
+                                            type="button" 
+                                            data-bs-toggle="dropdown" 
+                                            aria-expanded="false" 
+                                            data-bs-display="static">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                        <li>
+                                            <a class="dropdown-item editar-sprint" href="#" data-sprint-uid="${sprint.uid}">
+                                                <i class="bi bi-pencil-square me-1"></i> Editar
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item eliminar-sprint text-danger" href="#" data-sprint-uid="${sprint.uid}">
+                                                <i class="bi bi-trash me-1"></i> Eliminar
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <p class="small text-muted mb-1 mt-2">${sprint.objetivo}</p>
+                        </div>
+                        
+                        <!-- Área de Product Backlog para el Sprint -->
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 text-muted">
+                                    <i class="fas fa-tasks me-2"></i>
+                                    Sprint Backlog
+                                </h6>
+                                <span class="badge bg-secondary">0 elementos</span>
+                            </div>
+                            
+                            <!-- Zona de drop para product backlog -->
+                            <div class="sprint-backlog-area border border-dashed rounded p-3 min-height-100 bg-light" 
+                                data-sprint-id="${sprint.id}"
+                                style="min-height: 100px; border-color: #dee2e6;">
+                                <div class="text-center text-body py-3">
+                                    <i class="fas fa-arrow-down fs-4 mb-2 d-block"></i>
+                                    <p class="small mb-0">Arrastra elementos del Product Backlog aquí</p>
+                                    <small class="text-body">Los elementos aparecerán en esta área</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Función para cargar sprints
+        function cargarSprints() {
+            const proyectoUID = $('#uid_proyecto').val();
+            
+            axios.get(`/proyectos/backlog/${proyectoUID}/sprints/show`)
+                .then(response => {
+                    sprints = response.data;
+                    mostrarSprints();
+                })
+                .catch(error => {
+                    console.error('Error al cargar sprints:', error);
+                    if (error.response && error.response.status === 404) {
+                        notyf.error('Proyecto no encontrado');
+                    } else {
+                        notyf.error('Error al cargar los sprints');
+                    }
+                });
+        }
+
+        // Función para mostrar sprints
+        function mostrarSprints() {
+            const container = $('#sprintsContainer');
+            const emptyState = $('#emptyState');
+            const sprintsList = $('#sprintsList');
+
+            if (sprints.length === 0) {
+                emptyState.removeClass('d-none');
+                sprintsList.addClass('d-none');
+            } else {
+                emptyState.addClass('d-none');
+                sprintsList.removeClass('d-none');
+                
+                let html = '';
+                sprints.forEach(sprint => {
+                    html += renderSprint(sprint);
+                });
+                
+                sprintsList.html(html);
+                
+                // Alternativa sin jQuery UI - usar HTML5 drag and drop
+                if (typeof $.fn.sortable === 'undefined') {
+                    habilitarDragDropHTML5();
+                } else {
+                    // Verificar que jQuery UI esté cargado antes de habilitar sortable
+                    // Habilitar drag & drop para sprints
+                    sprintsList.sortable({
+                        handle: '.drag-handle',
+                        placeholder: 'sprint-placeholder',
+                        update: function(event, ui) {
+                            actualizarOrdenSprints();
+                        }
+                    });
+                    
+                    // Habilitar drag & drop para las áreas de product backlog
+                    $('.sprint-backlog-area').sortable({
+                        connectWith: '.sprint-backlog-area',
+                        placeholder: 'backlog-placeholder',
+                        tolerance: 'pointer',
+                        over: function(event, ui) {
+                            $(this).addClass('drag-over');
+                        },
+                        out: function(event, ui) {
+                            $(this).removeClass('drag-over');
+                        },
+                        drop: function(event, ui) {
+                            $(this).removeClass('drag-over');
+                            notyf.success('Elemento movido al sprint (visual)');
+                        }
+                    });
+                }
+                
+                // Agregar algunos elementos de prueba para mostrar el drag & drop
+            }
+        }
+
+        // Función alternativa usando HTML5 drag and drop
+        function habilitarDragDropHTML5() {
+            // Hacer los elementos de backlog arrastrables
+            $(document).on('mouseenter', '.backlog-item', function() {
+                $(this).attr('draggable', 'true');
+            });
+            
+            // Eventos de drag para elementos de backlog
+            $(document).on('dragstart', '.backlog-item', function(e) {
+                e.originalEvent.dataTransfer.setData('text/plain', $(this).data('backlog-id'));
+                $(this).addClass('dragging');
+            });
+            
+            $(document).on('dragend', '.backlog-item', function(e) {
+                $(this).removeClass('dragging');
+            });
+            
+            // Eventos de drop para áreas de sprint
+            $(document).on('dragover', '.sprint-backlog-area', function(e) {
+                e.preventDefault();
+                $(this).addClass('drag-over');
+            });
+            
+            $(document).on('dragleave', '.sprint-backlog-area', function(e) {
+                $(this).removeClass('drag-over');
+            });
+            
+            $(document).on('drop', '.sprint-backlog-area', function(e) {
+                e.preventDefault();
+                $(this).removeClass('drag-over');
+                
+                const backlogId = e.originalEvent.dataTransfer.getData('text/plain');
+                const $draggedElement = $(`.backlog-item[data-backlog-id="${backlogId}"]`);
+                
+                // Mover el elemento visualmente
+                $(this).append($draggedElement);
+                
+                // Limpiar mensaje vacío si existe
+                $(this).find('.text-center').remove();
+                
+                notyf.success('Elemento movido al sprint (visual)');
+            });
+        }
+
+        // Función para actualizar orden de sprints (solo visual)
+        function actualizarOrdenSprints() {
+            const orden = [];
+            $('#sprintsList .sprint-item').each(function(index) {
+                orden.push({
+                    id: $(this).data('sprint-id'),
+                    orden: index + 1
+                });
+            });
+
+            // Solo mostramos feedback visual, no hacemos petición real
+            notyf.success('Orden de sprints actualizado (visual)');
+        }
+
+        // Función para crear sprint
+        function crearSprint() {
+            const proyectoUID = $('#uid_proyecto').val();
+            
+            // Obtener datos del formulario
+            const formData = {
+                nombre: $('#nombreSprint').val(),
+                objetivo: $('#objetivoSprint').val(),
+                fecha_inicio: $('#fechaInicio').val(),
+                fecha_fin: $('#fechaFin').val(),
+                _token: $('meta[name="csrf-token"]').attr('content')
+            };
+            
+            // Validar fechas
+            const fechaInicio = new Date(formData.fecha_inicio);
+            const fechaFin = new Date(formData.fecha_fin);
+            
+            if (fechaFin <= fechaInicio) {
+                notyf.error('La fecha de fin debe ser posterior a la fecha de inicio');
+                return;
+            }
+
+            axios.post(`/proyectos/backlog/${proyectoUID}/sprints/store`, formData, {
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    notyf.success(response.data.message || 'Sprint creado correctamente');
+                    $('#modalSprint').modal('hide');
+                    $('#formSprint')[0].reset();
+                    cargarSprints(); // Recargar la lista
+                })
+                .catch(error => {
+                    console.error('Error al crear sprint:', error);
+                    if (error.response) {
+                        if (error.response.status === 422) {
+                            // Errores de validación de Laravel
+                            const errors = error.response.data.errors;
+                            let errorMessage = 'Errores de validación:\n';
+                            Object.keys(errors).forEach(key => {
+                                errorMessage += `- ${errors[key][0]}\n`;
+                            });
+                            notyf.error(errorMessage);
+                        } else if (error.response.data && error.response.data.error) {
+                            notyf.error(error.response.data.error);
+                        } else {
+                            notyf.error('Error al crear el sprint');
+                        }
+                    } else {
+                        notyf.error('Error de conexión');
+                    }
+                });
+        }
+
+        // Event Listeners
+        $(document).ready(function() {
+            // Verificar librerías
+            
+            // Cargar sprints al iniciar
+            cargarSprints();
+
+            // Crear sprint
+            $('#btnCrearSprint').click(function() {
+                if ($('#formSprint')[0].checkValidity()) {
+                    crearSprint();
+                } else {
+                    notyf.error('Por favor completa todos los campos requeridos');
+                    $('#formSprint')[0].reportValidity();
+                }
+            });
+
+            // Limpiar formulario al cerrar modal
+            $('#modalSprint').on('hidden.bs.modal', function() {
+                $('#formSprint')[0].reset();
+            });
+
+            // Establecer fecha mínima como hoy
+            const hoy = new Date().toISOString().split('T')[0];
+            $('#fechaInicio').attr('min', hoy);
+            
+            // Actualizar fecha mínima de fin cuando cambie la de inicio
+            $('#fechaInicio').change(function() {
+                const fechaInicio = $(this).val();
+                if (fechaInicio) {
+                    $('#fechaFin').attr('min', fechaInicio);
+                }
+            });
+        });
+
+          // Función para editar sprint
+        function editarSprint(sprintUid) {
+            // Buscar sprint en el array
+            const sprint = sprints.find(s => s.uid === sprintUid);
+
+            if (!sprint) {
+                notyf.error('Sprint no encontrado');
+                return;
+            }
+
+            // Llenar el formulario
+            $('#editarSprintUid').val(sprint.uid);  // <-- nuevo
+            $('#editarSprintId').val(sprint.id);   // puedes mantenerlo si backend aún lo necesita
+            $('#editarNombreSprint').val(sprint.nombre);
+            $('#editarObjetivoSprint').val(sprint.objetivo);
+            $('#editarFechaInicio').val(sprint.fecha_inicio);
+            $('#editarFechaFin').val(sprint.fecha_fin);
+
+            // Mostrar modal
+            $('#modalEditarSprint').modal('show');
+        }
+
+
+
+        // Función para actualizar sprint
+        function actualizarSprint() {
+            const proyectoUID = $('#uid_proyecto').val();
+            
+            // Obtener datos del formulario
+            const formData = {
+                uid: $('#editarSprintUid').val(),   // <-- aquí cambias
+                nombre: $('#editarNombreSprint').val(),
+                objetivo: $('#editarObjetivoSprint').val(),
+                fecha_inicio: $('#editarFechaInicio').val(),
+                fecha_fin: $('#editarFechaFin').val(),
+                _token: $('meta[name="csrf-token"]').attr('content')
+            };
+            
+            // Validar fechas
+            const fechaInicio = new Date(formData.fecha_inicio);
+            const fechaFin = new Date(formData.fecha_fin);
+            
+            if (fechaFin <= fechaInicio) {
+                notyf.error('La fecha de fin debe ser posterior a la fecha de inicio');
+                return;
+            }
+
+            axios.post(`/proyectos/backlog/${proyectoUID}/sprints/update`, formData, {
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                notyf.success(response.data.message || 'Sprint actualizado correctamente');
+                $('#modalEditarSprint').modal('hide');
+                $('#formEditarSprint')[0].reset();
+                cargarSprints(); // Recargar la lista
+            })
+            .catch(error => {
+                console.error('Error al actualizar sprint:', error);
+                if (error.response) {
+                    if (error.response.status === 422) {
+                        // Errores de validación de Laravel
+                        const errors = error.response.data.errors;
+                        let errorMessage = 'Errores de validación:\n';
+                        Object.keys(errors).forEach(key => {
+                            errorMessage += `- ${errors[key][0]}\n`;
+                        });
+                        notyf.error(errorMessage);
+                    } else if (error.response.data && error.response.data.error) {
+                        notyf.error(error.response.data.error);
+                    } else {
+                        notyf.error('Error al actualizar el sprint');
+                    }
+                } else {
+                    notyf.error('Error de conexión');
+                }
+            });
+        }
+
+
+        // Función para eliminar sprint con SweetAlert
+        function eliminarSprint(sprintUid) {
+            // Buscar el sprint en el array para mostrar su nombre
+            const sprint = sprints.find(s => s.uid === sprintUid);
+            const nombreSprint = sprint ? sprint.nombre : 'este sprint';
+
+            const isDark = $("body").hasClass("dark");
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: `¿Deseas eliminar ${nombreSprint}? Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: isDark ? '#444' : '#aaa',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                background: isDark ? '#1e1e2d' : '#fff',
+                color: isDark ? '#f1f1f1' : '#000'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ejecutarEliminacionSprint(sprintUid);
+                }
+            });
+        }
+
+        // Función para ejecutar la eliminación del sprint
+        function ejecutarEliminacionSprint(sprintUid) {
+            const proyectoUID = $('#uid_proyecto').val();
+            const isDark = $("body").hasClass("dark");
+
+            const formData = {
+                uid: sprintUid, 
+                _token: $('meta[name="csrf-token"]').attr('content')
+            };
+
+            axios.post(`/proyectos/backlog/${proyectoUID}/sprints/destroy`, formData, {
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                Swal.fire({
+                    title: '¡Eliminado!',
+                    text: response.data.message || 'Sprint eliminado correctamente',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    background: isDark ? '#1e1e2d' : '#fff',
+                    color: isDark ? '#f1f1f1' : '#000'
+                });
+                cargarSprints(); // Recargar la lista
+            })
+            .catch(error => {
+                console.error('Error al eliminar sprint:', error);
+                let errorMessage = 'Error al eliminar el sprint';
+                
+                if (error.response && error.response.data && error.response.data.error) {
+                    errorMessage = error.response.data.error;
+                }
+                
+                Swal.fire({
+                    title: 'Error',
+                    text: errorMessage,
+                    icon: 'error',
+                    background: isDark ? '#1e1e2d' : '#fff',
+                    color: isDark ? '#f1f1f1' : '#000'
+                });
+            });
+        }
+
+
+
+        // Editar sprint (abrir modal)
+        $(document).on('click', '.editar-sprint', function (e) {
+            e.preventDefault();
+            const sprintUid = $(this).data('sprint-uid');
+            editarSprint(sprintUid); // tu función ya lo maneja
+        });
+
+        // Eliminar sprint (abrir SweetAlert)
+        $(document).on('click', '.eliminar-sprint', function (e) {
+            e.preventDefault();
+            const sprintUid = $(this).data('sprint-uid');
+            eliminarSprint(sprintUid); // tu función ya lo maneja
+        });
+
+        // Guardar cambios desde el modal
+        $('#formEditarSprint').on('submit', function (e) {
+            e.preventDefault();
+            actualizarSprint();
+        });
+
+        // Cuando el DOM está listo
+        $(document).on('click', '#btnActualizarSprint', function (e) {
+            e.preventDefault();
+            actualizarSprint();
+        });
+
+
     </script>
 @endsection
