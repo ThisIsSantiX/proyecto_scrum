@@ -303,4 +303,41 @@ class SprintController extends Controller
             return 'En progreso';
         }
     }
+
+    public function showItems($id)
+    {
+        // Items del product backlog activos
+        $backlog = DB::table('product_backlog')
+            ->where('id_proyecto', $id)
+            ->where('estado', 1)
+            ->get();
+
+        $equipo = DB::table('miembros_equipos as me')
+            ->join('users as u', 'u.id', '=', 'me.id_usuario')
+            ->select(
+                'me.id',
+                'me.id_proyecto',
+                'me.id_usuario',
+                'me.id_rol',
+                'me.estado',
+                DB::raw("CONCAT(u.nombre, ' ', u.apellido) as nombre_completo")
+            )
+            ->where('me.id_proyecto', $id)
+            ->where('me.estado', 1)
+            ->get();
+
+        $sprints = DB::table('sprints')
+            ->where('id_proyecto', $id)
+            ->where('estado', 1)
+            ->get();
+
+
+
+        return response()->json([
+            'backlog' => $backlog,
+            'equipo' => $equipo,
+            'sprints' => $sprints
+        ]);
+    }
+
 }
