@@ -102,5 +102,5 @@ Route::post('/proyectos/backlog/{uid}/sprints/destroy', [SprintController::class
 Route::get('/proyectos/backlog/{uid}/sprints/items', [SprintController::class, 'showItems'])->name('showItems');
 
 // Sprint Backlog Routes
-Route::get('/proyectos/backlog/{uid}/sprbacklog/show', [SprintBacklogController::class, 'show'])->name('showSprintBacklog ');
+Route::get('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/show', [SprintBacklogController::class, 'show'])->name('showSprintBacklog ');
 Route::post('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/store',[SprintBacklogController::class, 'store'])->name('storeSprintBacklog');
