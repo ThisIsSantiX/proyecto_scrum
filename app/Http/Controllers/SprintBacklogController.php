@@ -83,20 +83,30 @@ class SprintBacklogController extends Controller
 
 
     // Mostrar todos los items de un proyecto
-    public function show($uid)
+    public function show($uid, $sprintId)
     {
         try {
+            // Obtener items del sprint backlog con información del product backlog
             $items = DB::table('sprint_backlog as sb')
-                ->select('sb.*')
-                ->where('sb.id_proyecto', $uid)
+                ->join('product_backlog as pb', 'sb.id_item_backlog', '=', 'pb.id')
+                ->select(
+                    'sb.*',
+                    'pb.titulo',
+                    'pb.descripcion', 
+                    'pb.prioridad',
+                    'pb.valor_historia',
+                    'pb.progreso'
+                )
+                ->where('sb.id_sprint', $sprintId)
                 ->get();
 
-            // Decodificar asignado_a y traer nombres
+            // Obtener usuarios asignados desde sprint_backlog_miembros
             $items->transform(function ($item) {
-                $ids = json_decode($item->asignado_a, true) ?? [];
-                $usuarios = DB::table('users')
-                    ->whereIn('id', $ids)
-                    ->select(DB::raw("CONCAT(name,' ',apellido) as nombre_completo"))
+                $usuarios = DB::table('sprint_backlog_miembros as sbm')
+                    ->join('miembros_equipos as me', 'sbm.id_miembro_equipo', '=', 'me.id')
+                    ->join('users as u', 'me.id_usuario', '=', 'u.id')
+                    ->where('sbm.id_sprint_backlog', $item->id)
+                    ->select(DB::raw("CONCAT(u.nombre,' ',u.apellido) as nombre_completo"))
                     ->pluck('nombre_completo')
                     ->toArray();
                 
@@ -104,10 +114,14 @@ class SprintBacklogController extends Controller
                 return $item;
             });
 
-            return response()->json($items);
+            return response()->json([
+                'success' => true,
+                'items' => $items
+            ]);
 
         } catch (\Exception $e) {
             return response()->json([
+                'success' => false,
                 'error' => 'Error al obtener los items del Sprint Backlog',
                 'details' => $e->getMessage()
             ], 500);

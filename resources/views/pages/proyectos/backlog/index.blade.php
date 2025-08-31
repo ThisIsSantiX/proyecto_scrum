@@ -1233,6 +1233,7 @@
             const fechaInicio = new Date(sprint.fecha_inicio).toLocaleDateString();
             const fechaFin = new Date(sprint.fecha_fin).toLocaleDateString();
             
+            
             return `
                 <div class="sprint-item mb-4" data-sprint-id="${sprint.id}">
                     <div class="card shadow-sm border rounded-3">
@@ -1292,30 +1293,34 @@
 
                             </div>
                             
-                            <!-- Zona de drop para product backlog -->
-                            <div class="sprint-backlog-area rounded p-3 min-height-100" 
-                                data-sprint-id="${sprint.id}"
-                                style="min-height: 100px; border-color: #dee2e6;">
-                                <div class="text-center text-body py-3">
-                                    <i class="fas fa-arrow-down fs-4 mb-2 d-block"></i>
-                                    <p class="small mb-0">
-                                        <a 
-                                            href="#" 
-                                            class="text-primary fw-bold" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#modalRegSprBacklog" 
-                                            data-sprint-id="${sprint.id}"
-                                        >
-                                            Agregue un elemento
-                                        </a> 
-                                        o simplemente arrastre y suelte Product Backlog.
-                                    </p>
+                            <!-- Contenedor Sprint Backlog -->
+                            <div class="sprint-backlog-wrapper" data-sprint-id="${sprint.id}">
+                                <!-- Sprint backlog area (cuando hay SBs) -->
+                                <div class="sprint-backlog-area rounded p-3 min-height-100" 
+                                    style="min-height: 100px; border-color: #dee2e6;">
+                                    <div class="text-center text-body py-3">
+                                        <i class="fas fa-arrow-down fs-4 mb-2 d-block"></i>
+                                        <p class="small mb-0">
+                                            <a 
+                                                href="#" 
+                                                class="text-primary fw-bold" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalRegSprBacklog" 
+                                                data-sprint-id="${sprint.id}"
+                                            >
+                                                Agregue un elemento
+                                            </a> 
+                                            o simplemente arrastre y suelte Product Backlog.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
+
+            
         }
 
         // Función para cargar sprints
@@ -1326,6 +1331,7 @@
                 .then(response => {
                     sprints = response.data;
                     mostrarSprints();
+                    window.refreshAllSprintBacklogs();
                 })
                 .catch(error => {
                     console.error('Error al cargar sprints:', error);
@@ -1697,8 +1703,6 @@
             });
         }
 
-
-
         // Editar sprint (abrir modal)
         $(document).on('click', '.editar-sprint', function (e) {
             e.preventDefault();
@@ -1897,6 +1901,236 @@
             });
 
 
+        });
+
+        $(document).ready(function () {
+    
+            // Función para cargar Sprint Backlog
+            function loadSprintBacklog(sprintId) {
+                const uid = $("#id_proyecto").val();
+                
+                if (!uid || !sprintId) {
+                    console.error('ID de proyecto o sprint no definido');
+                    return;
+                }
+
+                // Mostrar loading en el área del sprint
+                const sprintWrapper = $(`.sprint-backlog-wrapper[data-sprint-id="${sprintId}"]`);
+                const sprintArea = sprintWrapper.find('.sprint-backlog-area');
+                
+                // Mostrar indicador de carga
+                sprintArea.html(`
+                    <div class="text-center text-body py-3">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <span>Cargando elementos del sprint...</span>
+                    </div>
+                `);
+
+                // Llamada axios para obtener los items del sprint
+                axios.get(`/proyectos/backlog/${uid}/sprints/${sprintId}/sprbacklog/show`)
+                    .then(function (response) {
+                        if (response.data.success) {
+                            const items = response.data.items;
+                            
+                            if (items.length === 0) {
+                                // No hay items - mostrar mensaje para agregar
+                                sprintWrapper.html(`
+                                    <div class="text-center text-body py-3">
+                                        <i class="fas fa-arrow-down fs-4 mb-2 d-block"></i>
+                                        <p class="small mb-0">
+                                            <a 
+                                                href="#" 
+                                                class="text-primary fw-bold" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalRegSprBacklog" 
+                                                data-sprint-id="${sprintId}"
+                                            >
+                                                Agregue un elemento
+                                            </a> 
+                                            o simplemente arrastre y suelte Product Backlog.
+                                        </p>
+                                    </div>
+                                `);
+                            } else {
+                                // Hay items - mostrar lista
+                                let itemsHtml = '<div class="sprint-items">';
+                                
+                                items.forEach(function(item) {
+                                    // Determinar color de prioridad
+                                    let priorityColor = 'secondary';
+                                    if (item.prioridad === 'Alta') priorityColor = 'danger';
+                                    else if (item.prioridad === 'Media') priorityColor = 'warning';
+                                    else if (item.prioridad === 'Baja') priorityColor = 'success';
+                                    
+                                    // Determinar color de estado
+                                    let statusColor = 'secondary';
+                                    if (item.estado === 'Completado') statusColor = 'success';
+                                    else if (item.estado === 'En progreso') statusColor = 'primary';
+                                    else if (item.estado === 'Por hacer') statusColor = 'info';
+                                    
+                                    itemsHtml += `
+                                        <div class="card mb-2 sprint-item" data-item-id="${item.id}">
+                                            <div class="card-body border rounded-3 p-3">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="card-title mb-1">${item.titulo || 'Sin título'}</h6>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                            <i class="fas fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end">
+                                                            <li><a class="dropdown-item edit-item" href="#" data-item-id="${item.id}"><i class="fas fa-edit me-2"></i>Editar</a></li>
+                                                            <li><a class="dropdown-item delete-item" href="#" data-item-id="${item.id}"><i class="fas fa-trash me-2"></i>Eliminar</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                
+                                                ${item.descripcion ? `<p class="card-text small text-muted mb-2">${item.descripcion}</p>` : ''}
+                                                
+                                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                                    <span class="badge bg-${priorityColor} small">${item.prioridad || 'Sin prioridad'}</span>
+                                                    <span class="badge bg-${statusColor} small">${item.estado || 'Sin estado'}</span>
+                                                    ${item.tipo_articulo ? `<span class="badge bg-info small">${item.tipo_articulo}</span>` : ''}
+                                                </div>
+                                                
+                                                ${item.responsables ? `
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-user me-2 text-muted small"></i>
+                                                        <span class="small text-muted">${item.responsables}</span>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                                
+                                itemsHtml += `
+                                    <div class="text-center mt-3">
+                                        <a 
+                                            href="#" 
+                                            class="text-primary fw-bold" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalRegSprBacklog" 
+                                            data-sprint-id="${sprintId}"
+                                        >
+                                            <i class="fas fa-plus me-1"></i>
+                                            Agregar otro elemento
+                                        </a>
+                                    </div>
+                                </div>`;
+                                
+                                sprintWrapper.html(itemsHtml);
+                            }
+                            
+                            // notyf.success("Sprint Backlog cargado correctamente");
+                        } else {
+                            throw new Error(response.data.error || 'Error desconocido');
+                        }
+                    })
+                    .catch(function (error) {
+                        console.error('Error al cargar Sprint Backlog:', error);
+                        
+                        sprintWrapper.html(`
+                            <div class="text-center text-danger py-3">
+                                <i class="fas fa-exclamation-triangle fs-4 mb-2 d-block"></i>
+                                <p class="small mb-2">Error al cargar los elementos del sprint</p>
+                                <button class="btn btn-sm btn-outline-primary retry-load" data-sprint-id="${sprintId}">
+                                    <i class="fas fa-redo me-1"></i>
+                                    Intentar de nuevo
+                                </button>
+                            </div>
+                        `);
+                        
+                        notyf.error("Error al cargar el Sprint Backlog");
+                    });
+            }
+
+            // Cargar Sprint Backlog automáticamente cuando se cargue la página
+            $('.sprint-backlog-wrapper').each(function() {
+                const sprintId = $(this).data('sprint-id');
+                if (sprintId) {
+                    loadSprintBacklog(sprintId);
+                }
+            });
+
+            // Manejo del botón "Intentar de nuevo"
+            $(document).on('click', '.retry-load', function(e) {
+                e.preventDefault();
+                const sprintId = $(this).data('sprint-id');
+                loadSprintBacklog(sprintId);
+            });
+
+            // Recargar cuando se guarde un nuevo item en el modal
+            $('#modalRegSprBacklog').on('hidden.bs.modal', function () {
+                // Obtener el sprint ID del modal
+                const sprintId = $(this).data('sprint-id');
+                if (sprintId) {
+                    // Recargar el sprint backlog después de cerrar el modal
+                    setTimeout(() => {
+                        loadSprintBacklog(sprintId);
+                    }, 500);
+                }
+            });
+
+            // Capturar el sprint ID cuando se abre el modal
+            $(document).on('click', '[data-bs-target="#modalRegSprBacklog"]', function() {
+                const sprintId = $(this).data('sprint-id');
+                $('#modalRegSprBacklog').data('sprint-id', sprintId);
+            });
+
+            // Manejo de acciones de los items (editar/eliminar)
+            $(document).on('click', '.edit-item', function(e) {
+                e.preventDefault();
+                const itemId = $(this).data('item-id');
+                // Aquí puedes abrir un modal de edición o redirigir
+                console.log('Editar item:', itemId);
+                // Ejemplo: $('#modalEditSprBacklog').modal('show').data('item-id', itemId);
+            });
+
+            $(document).on('click', '.delete-item', function(e) {
+                e.preventDefault();
+                const itemId = $(this).data('item-id');
+                
+                if (confirm('¿Está seguro de que desea eliminar este elemento?')) {
+                    const uid = $("#id_proyecto").val();
+                    
+                    axios.delete(`/proyectos/backlog/${uid}/sprints/items/${itemId}`)
+                        .then(function(response) {
+                            if (response.data.success) {
+                                notyf.success("Elemento eliminado correctamente");
+                                // Recargar el sprint backlog
+                                const sprintId = $(`.sprint-item[data-item-id="${itemId}"]`)
+                                    .closest('.sprint-backlog-wrapper')
+                                    .data('sprint-id');
+                                if (sprintId) {
+                                    loadSprintBacklog(sprintId);
+                                }
+                            } else {
+                                notyf.error("Error al eliminar el elemento");
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('Error al eliminar:', error);
+                            notyf.error("Error al eliminar el elemento");
+                        });
+                }
+            });
+
+            // Función para refrescar todos los sprint backlogs
+            window.refreshAllSprintBacklogs = function() {
+                $('.sprint-backlog-wrapper').each(function() {
+                    const sprintId = $(this).data('sprint-id');
+                    if (sprintId) {
+                        loadSprintBacklog(sprintId);
+                    }
+                });
+            };
+
+            // Exponer la función globalmente para poder llamarla desde otros lugares
+            window.loadSprintBacklog = loadSprintBacklog;
+
+            
         });
 
     </script>
