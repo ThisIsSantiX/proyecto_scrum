@@ -369,6 +369,99 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modalRegSprBacklog" tabindex="-1" aria-labelledby="modalRegSprBacklogLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            
+            <!-- Encabezado -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalRegSprBacklogLabel">
+                    <i class="fas fa-tasks me-2"></i>
+                    Agregar al Sprint Backlog
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Cuerpo -->
+            <div class="modal-body">
+                <form id="formSprintBacklog">
+                    @csrf
+                    <input type="hidden" id="uid_proyecto" value="{{ $proyecto->uid }}">
+                    
+                    <!-- Seleccionar item del Product Backlog -->
+                    <div class="mb-3">
+                        <label class="form-label">Elemento del Product Backlog</label>
+                        <select name="id_item_backlog" class="form-select" id="id_item_backlog" required>
+                            <option value="">Seleccionar elemento</option>
+                        </select>
+                    </div>
+
+                    <!-- Título y Estado -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Título</label>
+                                <input type="text" id="tituloSpr" name="titulo" class="form-control" placeholder="Ej. Implementar login" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Estado</label>
+                                <select id="progresoSpr" name="progreso" class="form-select" required>
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="en_progreso">En progreso</option>
+                                    <option value="completado">Completado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Sprint</label>
+                        <select id="id_sprint" name="id_sprint" class="form-select" required>
+                            <option value="">Seleccionar Sprint</option>
+                        </select>
+                        <input type="hidden" id="current_sprint_id" value="">
+
+                    </div>
+
+
+                    <!-- Asignación -->
+                    <div class="mb-3">
+                        <label class="form-label">Asignar usuarios</label>
+                        <div class="custom-dropdown border rounded-2">
+                            <div class="workspace-header">
+                                <i class="fas fa-users me-2"></i>
+                                Participantes del proyecto
+                            </div>
+                            <div class="dropdown-content modal-body">
+                                <input type="text" class="search-box form-control" placeholder="Escriba el nombre de usuario" id="searchBox">
+                                <div id="usersList">
+                                    <!-- Los usuarios se cargarán aquí -->
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Los campos hidden se crean dinámicamente para cada usuario seleccionado -->
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnGuardarSprintBacklog" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>
+                    Guardar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
 @endsection
 
 @section('css')
@@ -443,12 +536,6 @@
             cursor: grabbing;
         }
         
-        .empty-state {
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            padding: 40px 20px;
-        }
-        
         .status-badge {
             font-size: 0.75rem;
             padding: 4px 8px;
@@ -457,16 +544,15 @@
         /* Estilos para el área de product backlog */
         .sprint-backlog-area {
             transition: all 0.3s ease;
-            background: #f8f9fa;
+            border: 2px white dashed;
         }
         
         .sprint-backlog-area:hover {
-            background: #e9ecef;
-            border-color: #007bff !important;
+            border-color: #868686 !important;
         }
         
         .sprint-backlog-area.drag-over {
-            background: #e3f2fd;
+            background: #10223e;
             border-color: #2196f3 !important;
             box-shadow: inset 0 2px 8px rgba(33, 150, 243, 0.2);
         }
@@ -489,6 +575,106 @@
         .backlog-item.ui-sortable-helper {
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             transform: rotate(1deg);
+        }
+
+        .custom-select2-container .select2-container {
+            border: 2px solid #2023c9;
+            border-radius: 8px;
+        }
+        
+        .custom-select2-container .select2-selection--multiple {
+            border: none !important;
+            background: transparent !important;
+            min-height: 150px;
+            padding: 10px;
+        }
+        
+        .custom-select2-container .select2-search--inline {
+            margin-bottom: 10px;
+        }
+        
+        .custom-select2-container .select2-search__field {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            width: 100% !important;
+            font-size: 14px;
+        }
+        
+        .workspace-header {
+            padding: 5px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .user-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+        
+        .user-option:hover {
+            margin: 0 -10px;
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+        
+        .user-option input[type="checkbox"] {
+            margin-right: 10px;
+            accent-color: #2026c9;
+        }
+        
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #20c997, #17a2b8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #2028c9;
+            border-color: #2320c9;
+            border-radius: 20px;
+            padding: 2px 8px;
+        }
+        
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            margin-right: 5px;
+        }
+        
+        .custom-dropdown {
+            border-radius: 8px;
+            min-height: 200px;
+            padding: 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dropdown-content {
+            padding: 15px;
+        }
+        
+        .search-box {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            width: 100%;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #352f89;
+            box-shadow: 0 0 0 0.2rem rgba(32, 54, 201, 0.25);
         }
         
     </style>
@@ -1094,16 +1280,36 @@
                                     Sprint Backlog
                                 </h6>
                                 <span class="badge bg-secondary">0 elementos</span>
+                                <button
+                                    type="button"
+                                    class="btn btn-primary btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalRegSprBacklog"
+                                    data-sprint-id="${sprint.id}"
+                                >
+                                    Agregar
+                                </button>
+
                             </div>
                             
                             <!-- Zona de drop para product backlog -->
-                            <div class="sprint-backlog-area border border-dashed rounded p-3 min-height-100 bg-light" 
+                            <div class="sprint-backlog-area rounded p-3 min-height-100" 
                                 data-sprint-id="${sprint.id}"
                                 style="min-height: 100px; border-color: #dee2e6;">
                                 <div class="text-center text-body py-3">
                                     <i class="fas fa-arrow-down fs-4 mb-2 d-block"></i>
-                                    <p class="small mb-0">Arrastra elementos del Product Backlog aquí</p>
-                                    <small class="text-body">Los elementos aparecerán en esta área</small>
+                                    <p class="small mb-0">
+                                        <a 
+                                            href="#" 
+                                            class="text-primary fw-bold" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalRegSprBacklog" 
+                                            data-sprint-id="${sprint.id}"
+                                        >
+                                            Agregue un elemento
+                                        </a> 
+                                        o simplemente arrastre y suelte Product Backlog.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -1519,6 +1725,179 @@
             actualizarSprint();
         });
 
+
+        $(document).ready(function () {
+            const uid = $("#id_proyecto").val();
+            let selectedUsers = [];
+            let allUsers = [];
+
+            // Función para renderizar la lista de usuarios
+            function renderUsersList(users) {
+                const usersList = $("#usersList");
+                usersList.empty();
+
+                users.forEach(function (usuario) {
+                    const isSelected = selectedUsers.includes(usuario.id);
+                    const initials = getInitials(usuario.nombre_completo);
+                    
+                    const userOption = $(`
+                        <div class="user-option" data-user-id="${usuario.id}">
+                            <input type="checkbox" ${isSelected ? 'checked' : ''}>
+                            <div class="user-avatar">${initials}</div>
+                            <span>${usuario.nombre_completo}</span>
+                        </div>
+                    `);
+                    
+                    usersList.append(userOption);
+                });
+            }
+
+            // Función para obtener iniciales
+            function getInitials(name) {
+                return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            }
+
+            // Función para filtrar usuarios
+            function filterUsers(searchTerm) {
+                const filtered = allUsers.filter(user => 
+                    user.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                renderUsersList(filtered);
+            }
+
+            // Manejo del campo de búsqueda
+            $("#searchBox").on("input", function () {
+                const searchTerm = $(this).val();
+                filterUsers(searchTerm);
+            });
+
+            // Manejo de selección de usuarios
+            $(document).on("click", ".user-option", function (e) {
+                if (e.target.type !== 'checkbox') {
+                    const checkbox = $(this).find('input[type="checkbox"]');
+                    checkbox.prop('checked', !checkbox.prop('checked'));
+                }
+                
+                const userId = parseInt($(this).data('user-id'));
+                const checkbox = $(this).find('input[type="checkbox"]');
+                
+                if (checkbox.prop('checked')) {
+                    if (!selectedUsers.includes(userId)) {
+                        selectedUsers.push(userId);
+                    }
+                } else {
+                    selectedUsers = selectedUsers.filter(id => id !== userId);
+                }
+                
+                updateHiddenField();
+            });
+
+            // Actualizar campo oculto con formato de array para el backend
+            function updateHiddenField() {
+                // Crear inputs hidden separados para cada usuario seleccionado
+                $('input[name="asignado_a[]"]').remove();
+                
+                selectedUsers.forEach(function(userId) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'asignado_a[]',
+                        value: userId
+                    }).appendTo('form');
+                });
+            }
+
+            // Función para cargar usuarios del proyecto
+            function loadUserData(sprintId = null) {
+                axios.get(`/proyectos/backlog/${uid}/sprints/items`)
+                    .then(function (response) {
+                        const data = response.data;
+
+                        // Limpiar backlog
+                        $("#id_item_backlog").empty().append('<option value="">Seleccionar elemento</option>');
+                        data.backlog.forEach(function (item) {
+                            $("#id_item_backlog").append(
+                                `<option value="${item.id}">${item.titulo}</option>`
+                            );
+                        });
+
+                        // Limpiar y cargar sprints
+                        $("#id_sprint").empty().append('<option value="">Seleccionar Sprint</option>');
+                        data.sprints.forEach(sprint => {
+                            $("#id_sprint").append(
+                                `<option value="${sprint.id}">${sprint.nombre}</option>`
+                            );
+                        });
+
+                        if (sprintId) {
+                            $("#id_sprint").val(sprintId);
+                        }
+
+                        // Cargar usuarios
+                        allUsers = data.equipo;
+                        selectedUsers = [];
+                        renderUsersList(allUsers);
+                        $("#searchBox").val('');
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                        notyf.error("Error al cargar los datos");
+                    });
+            }
+
+            // Cargar datos al abrir modal
+            $(document).on("show.bs.modal", "#modalRegSprBacklog", function (event) {
+                const button = $(event.relatedTarget);
+                const sprintId = button.data("sprint-id");
+                $("#current_sprint_id").val(sprintId);
+                loadUserData(sprintId);
+            });
+
+
+            // Reset del formulario cuando se cierra el modal
+            $("#modalRegSprBacklog").on("hidden.bs.modal", function () {
+                selectedUsers = [];
+                allUsers = [];
+                $("#usersList").empty();
+                $("#searchBox").val('');
+                $('input[name="asignado_a[]"]').remove();
+            });
+
+            $("#btnGuardarSprintBacklog").on("click", function () {
+                const uid = $("#uid_proyecto").val();
+                const sprintId = $("#current_sprint_id").val(); // viene del botón
+                console.log(sprintId)
+                const formData = {
+                    id_sprint: sprintId,   
+                    id_item_backlog: $("#id_item_backlog").val(),
+                    titulo: $("#tituloSpr").val(),
+                    progreso: $("#progresoSpr").val(),
+                    asignado_a: selectedUsers
+                };
+
+                axios.post(`/proyectos/backlog/${uid}/sprints/${sprintId}/sprbacklog/store`, formData)
+                    .then(function (response) {
+                        notyf.success(response.data.message);
+                        $("#modalRegSprBacklog").modal("hide");
+
+                        $("#tituloSpr").val('');
+                        $("#progresoSpr").val('');
+                        $("#id_item_backlog").val('');
+                        selectedUsers = [];
+                        allUsers = [];
+                        $("#usersList").empty();
+                        $("#searchBox").val('');
+                        $('input[name="asignado_a[]"]').remove();
+                        
+                        // loadSprintBacklog(uid);
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                        notyf.error(error.response?.data?.error || "Error al guardar en Sprint Backlog");
+                    });
+            });
+
+
+        });
 
     </script>
 @endsection

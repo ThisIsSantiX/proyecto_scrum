@@ -9,6 +9,7 @@ use App\Http\Controllers\SprintController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\SprintBacklogController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 
@@ -53,7 +54,6 @@ Route::put('/proyectos/update', [ProyectoController::class, 'update'])->name('up
 Route::delete('/proyectos/delete/{uid}', [ProyectoController::class, 'destroy'])->name('deleteProyecto');
 
 // Rutas para la gestion del backlog
-
 Route::get('/proyectos/backlog/{uid}', [ProductBacklogController::class, 'index'])->name('showProyectoBacklog');
 Route::get('proyectos/backlog/{uid}/show', [ProductBacklogController::class, 'show'])->name('showProductBacklog');
 Route::post('/proyectos/backlog/{uid}/store', [ProductBacklogController::class, 'store'])->name('storeProductBacklog');
@@ -62,9 +62,6 @@ Route::delete('/proyectos/backlog/{uid}/delete', [ProductBacklogController::clas
 
 // Rutas para la gestion de los criterios de aceptacion
 Route::post('/criterios/{historiaUid}/store', [CriteriosAceptacionController::class, 'store'])->name('storeCriterios');
-
-//sprints---------------------------------------------------------------------------------------------------------------------------------------------------
-
 
 //Roles---------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -102,5 +99,8 @@ Route::get('/proyectos/backlog/{uid}/sprints/show', [SprintController::class, 's
 Route::post('/proyectos/backlog/{uid}/sprints/store', [SprintController::class, 'store'])->name('storeSprint');
 Route::post('/proyectos/backlog/{uid}/sprints/update', [SprintController::class, 'update'])->name('updateSprint');
 Route::post('/proyectos/backlog/{uid}/sprints/destroy', [SprintController::class, 'destroy'])->name('destroySprint');
+Route::get('/proyectos/backlog/{uid}/sprints/items', [SprintController::class, 'showItems'])->name('showItems');
 
-
+// Sprint Backlog Routes
+Route::get('/proyectos/backlog/{uid}/sprbacklog/show', [SprintBacklogController::class, 'show'])->name('showSprintBacklog ');
+Route::post('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/store',[SprintBacklogController::class, 'store'])->name('storeSprintBacklog');

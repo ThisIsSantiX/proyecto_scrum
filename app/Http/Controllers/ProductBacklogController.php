@@ -37,8 +37,13 @@ class ProductBacklogController extends Controller
             )
             ->get();
 
-        return view('pages.proyectos.backlog.index', compact('proyecto', 'historias'));
+            $sprints = DB::table('sprints')
+                ->where('id_proyecto', $proyecto->id)
+                ->get();
+
+        return view('pages.proyectos.backlog.index', compact('proyecto', 'historias', 'sprints'));
     }
+
 
     // Método para mostrar el formulario de creación
     public function create()
