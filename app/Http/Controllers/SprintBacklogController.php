@@ -53,6 +53,13 @@ class SprintBacklogController extends Controller
                 'updated_at'      => now(),
             ]);
 
+            DB::table('product_backlog')
+            ->where('id', $request->id_item_backlog)
+            ->update([
+                'estado' => 0,
+                'updated_at' => now()
+            ]);
+
             // Relacionar los usuarios (miembros del equipo)
             foreach ($request->asignado_a as $miembroId) {
                 DB::table('sprint_backlog_miembros')->insert([
@@ -106,7 +113,10 @@ class SprintBacklogController extends Controller
                     ->join('miembros_equipos as me', 'sbm.id_miembro_equipo', '=', 'me.id')
                     ->join('users as u', 'me.id_usuario', '=', 'u.id')
                     ->where('sbm.id_sprint_backlog', $item->id)
-                    ->select(DB::raw("CONCAT(u.nombre,' ',u.apellido) as nombre_completo"))
+                    ->select(
+                        'u.foto_url as foto_url',
+                        DB::raw("CONCAT(u.nombre,' ',u.apellido) as nombre_completo")
+                        )
                     ->pluck('nombre_completo')
                     ->toArray();
                 

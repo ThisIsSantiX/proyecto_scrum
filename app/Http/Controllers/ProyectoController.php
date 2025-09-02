@@ -245,5 +245,9 @@ class ProyectoController extends Controller
         }
     }
 
+    public function board()
+    {
+        return view('pages.proyectos.backlog.board.index');
+    }
 
 }
