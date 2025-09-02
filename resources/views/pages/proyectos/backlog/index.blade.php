@@ -5,18 +5,31 @@
 @section('content')
     <div class="container-fluid content-inner mt-5 pt-4 py-0">
         <div class="row">
-            <!-- Título principal -->
-            <div class="col-12 mb-2">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body d-flex align-items-center py-2">
-                        <h5 class="mb-0 fw-semibold">
-                            Backlog del Proyecto: 
-                            <span class="text-muted fw-normal">{{ $proyecto->nombre }}</span>
-                        </h5>
-                    </div>
-                </div>
+    <!-- Título principal -->
+    <div class="col-12 mb-2">
+        <div class="card shadow-sm border-0">
+            <div class="card-body py-2">
+                <h5 class="mb-4 mt-2 fw-semibold">
+                    <span class="text-muted fw-normal">{{ $proyecto->nombre }}</span>
+                </h5>
+
+                <!-- Navbar debajo del título -->
+                <ul class="nav nav-tabs mt-2">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="javascript:void(0);">Trabajo pendiente</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);">Tablero</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);">Reuniones</a>
+                    </li>
+                </ul>
             </div>
         </div>
+    </div>
+</div>
+
 
         <div class="row g-3">
             <!-- Sección izquierda - Historias de Usuario -->
@@ -807,7 +820,7 @@
 
                         historiasHtml += `
                             <div class="col-12 mb-2" data-historia-id="${historia.id}">
-                                <div class="card shadow-sm border rounded-3 historia-item ${prioridadClass}" 
+                                <div class="card shadow-sm border rounded-2 historia-item ${prioridadClass}" 
                                     style="font-size: 0.85rem;"
                                     data-uid="${historia.uid}"
                                     data-titulo="${historia.titulo}"
@@ -818,17 +831,17 @@
                                     data-creador="${historia.creador_nombre || 'Desconocido'}">
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-start mb-1">
-                                            <h6 class="card-title mb-0 fw-semibold text-truncate" style="max-width: 70%;">
+                                            <p class="card-title mb-0 fw-semibold text-truncate" style="max-width: 70%;">
                                                 ${historia.titulo}
-                                            </h6>
+                                            </p>
                                             <span class="badge ${badgeClass}">${historia.prioridad}</span>
                                         </div>
                                         
                                         <p class="card-text text-muted small mb-2">${historia.descripcion}</p>
                                         
                                         <div class="d-flex justify-content-between align-items-center small text-muted">
-                                            <span><i class="bi bi-star me-1"></i>Valor: ${historia.valor_historia}</span>
-                                            <span><i class="bi bi-list-task me-1"></i>${historia.progreso}</span>
+                                            <span> Estado: ${historia.progreso}</span>
+                                            <span> Valor: ${historia.valor_historia}</span>
                                         </div>
                                         
                                         <!-- Creado por + opciones -->
@@ -838,12 +851,12 @@
                                             </span>
                                             <div class="d-flex align-items-center">
                                                 <!-- Botón para agregar criterios -->
-                                                <button class="btn btn-sm btn-primary me-1 agregar-criterio" title="Agregar criterio" data-historia-id="${historia.uid}">
+                                                <button class="btn btn-sm btn-primary me-1 p-0 px-1 agregar-criterio" title="Agregar criterio" data-historia-id="${historia.uid}">
                                                     <i class="bi bi-check2-square"></i>
                                                 </button>
                                                 <!-- Menú de opciones (Editar / Eliminar) -->
                                                 <div class="dropup">
-                                                    <button class="btn btn-sm btn-secondary" 
+                                                    <button class="btn btn-sm btn-secondary p-0 px-1" 
                                                             type="button" 
                                                             data-bs-toggle="dropdown" 
                                                             aria-expanded="false" 
@@ -1959,47 +1972,65 @@
                                 
                                 items.forEach(function(item) {
                                     // Determinar color de prioridad
-                                    let priorityColor = 'secondary';
-                                    if (item.prioridad === 'Alta') priorityColor = 'danger';
-                                    else if (item.prioridad === 'Media') priorityColor = 'warning';
-                                    else if (item.prioridad === 'Baja') priorityColor = 'success';
-                                    
-                                    // Determinar color de estado
-                                    let statusColor = 'secondary';
-                                    if (item.estado === 'Completado') statusColor = 'success';
-                                    else if (item.estado === 'En progreso') statusColor = 'primary';
-                                    else if (item.estado === 'Por hacer') statusColor = 'info';
-                                    
+                                        const prioridadClass = item.prioridad?.toLowerCase() === 'alta' ? 'prioridad-alta' : 
+                                        item.prioridad?.toLowerCase() === 'media' ? 'prioridad-media' : 'prioridad-baja';
+
+                                        const badgeClass = item.prioridad === 'Alta' ? 'bg-danger' : 
+                                                        item.prioridad === 'Media' ? 'bg-warning' : 'bg-success';
+
                                     itemsHtml += `
-                                        <div class="card mb-2 sprint-item" data-item-id="${item.id}">
-                                            <div class="card-body border rounded-3 p-3">
-                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <h6 class="card-title mb-1">${item.titulo || 'Sin título'}</h6>
-                                                    <div class="dropdown">
-                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                                            <i class="fas fa-ellipsis-v"></i>
-                                                        </button>
-                                                        <ul class="dropdown-menu dropdown-menu-end">
-                                                            <li><a class="dropdown-item edit-item" href="#" data-item-id="${item.id}"><i class="fas fa-edit me-2"></i>Editar</a></li>
-                                                            <li><a class="dropdown-item delete-item" href="#" data-item-id="${item.id}"><i class="fas fa-trash me-2"></i>Eliminar</a></li>
-                                                        </ul>
+                                        <div class="col-12 mb-2" data-item-id="${item.id}">
+                                            <div class="card shadow-sm border rounded-2 sprint-item ${prioridadClass}" style="font-size: 0.85rem;">
+                                                <div class="card-body p-3">
+                                                    
+                                                    <!-- Título + Prioridad -->
+                                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                                        <p class="card-title mb-0 fw-semibold text-truncate" style="max-width: 70%;">
+                                                            ${item.titulo || 'Sin título'}
+                                                        </p>
+                                                        <span class="badge ${badgeClass}">${item.prioridad || 'Sin prioridad'}</span>
                                                     </div>
-                                                </div>
-                                                
-                                                ${item.descripcion ? `<p class="card-text small text-muted mb-2">${item.descripcion}</p>` : ''}
-                                                
-                                                <div class="d-flex flex-wrap gap-2 mb-2">
-                                                    <span class="badge bg-${priorityColor} small">${item.prioridad || 'Sin prioridad'}</span>
-                                                    <span class="badge bg-${statusColor} small">${item.estado || 'Sin estado'}</span>
-                                                    ${item.tipo_articulo ? `<span class="badge bg-info small">${item.tipo_articulo}</span>` : ''}
-                                                </div>
-                                                
-                                                ${item.responsables ? `
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="fas fa-user me-2 text-muted small"></i>
-                                                        <span class="small text-muted">${item.responsables}</span>
+                                                    
+                                                    <!-- Descripción -->
+                                                    ${item.descripcion ? `<p class="card-text text-muted small mb-2">${item.descripcion}</p>` : ''}
+
+                                                    <!-- Estado + Tipo -->
+                                                    <div class="d-flex justify-content-between align-items-center small text-muted">
+                                                        <span> Estado: ${item.estado || 'Sin estado'}</span>
+                                                        <span> Valor: ${item.valor_historia}</span>
                                                     </div>
-                                                ` : ''}
+
+                                                    <!-- Responsable -->
+                                                    ${item.responsables ? `
+                                                        <div class="d-flex justify-content-between align-items-center mt-1 small text-muted">
+                                                            <span>
+                                                                <i class="bi bi-person-circle me-1"></i> ${item.responsables}
+                                                            </span>
+
+                                                            <div class="dropup">
+                                                                <button class="btn btn-sm btn-secondary p-0 px-1" 
+                                                                        type="button" 
+                                                                        data-bs-toggle="dropdown" 
+                                                                        aria-expanded="false" 
+                                                                        data-bs-display="static">
+                                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                                    <li>
+                                                                        <a class="dropdown-item editar-item" href="#" data-item-id="${item.uid}">
+                                                                            <i class="bi bi-pencil-square me-1"></i> Editar
+                                                                        </a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a class="dropdown-item eliminar-item text-danger" href="#" data-item-id="${item.uid}">
+                                                                            <i class="bi bi-trash me-1"></i> Eliminar
+                                                                        </a>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
                                             </div>
                                         </div>
                                     `;
