@@ -340,4 +340,63 @@ class SprintController extends Controller
         ]);
     }
 
+    public function startSprint(Request $request, $uid, $sprintUid)
+    {
+        $request->validate([
+            'fecha_inicio' => ['required','date'],
+            'fecha_fin'    => ['required','date','after_or_equal:fecha_inicio'],
+        ]);
+
+        try {
+            // Proyecto
+            $proyecto = DB::table('proyectos')->where('uid', $uid)->first();
+            if (!$proyecto) {
+                return response()->json(['success'=>false,'message'=>'Proyecto no encontrado.'], 404);
+            }
+
+            // Sprint dentro del proyecto (ajusta columna id_proyecto/proyecto_id según tu esquema)
+            $sprint = DB::table('sprints')
+                ->where('uid', $sprintUid)
+                ->where(function($q) use ($proyecto) {
+                    $q->where('id_proyecto', $proyecto->id);
+                })
+                ->first();
+
+            if (!$sprint) {
+                return response()->json(['success'=>false,'message'=>'Sprint no encontrado.'], 404);
+            }
+
+            // Validar que tenga Sprint Backlog
+            $itemsCount = DB::table('sprint_backlog')->where('id_sprint', $sprint->id)->count();
+            if ($itemsCount === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No puedes iniciar un sprint sin Sprint Backlog asignado.'
+                ], 422);
+            }
+
+            // Iniciar sprint (ajusta campos: estado/status, fecha_inicio/fin)
+            DB::table('sprints')->where('id', $sprint->id)->update([
+                'estado'       => 0,
+                'progreso'     => 'iniciado',
+                'fecha_inicio' => $request->fecha_inicio,
+                'fecha_fin'    => $request->fecha_fin,
+                'updated_at'   => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sprint iniciado correctamente.'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al iniciar el sprint.',
+                'error'   => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+
+
 }

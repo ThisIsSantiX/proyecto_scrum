@@ -7,7 +7,7 @@
 @endsection
 
 @section('content')
-<div class="conatiner-fluid content-inner mt-5 py-0">
+<div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
     <div class="row">
         <div class="col-md-12">
             <div class="card">
