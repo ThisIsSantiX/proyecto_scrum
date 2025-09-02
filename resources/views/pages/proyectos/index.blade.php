@@ -433,25 +433,6 @@
     .status-pausado { background-color: #6c757d; color: white; }
     .status-cancelado { background-color: #495057; color: white; }
 
-    /* SweetAlert2 Dark Mode Compatibility */
-    .swal2-popup.swal2-toast {
-        background: var(--bs-body-bg) !important;
-        color: var(--bs-body-color) !important;
-    }
-    
-    .swal2-popup {
-        background: var(--bs-body-bg) !important;
-        color: var(--bs-body-color) !important;
-        border: 1px solid var(--bs-border-color) !important;
-    }
-    
-    .swal2-title {
-        color: var(--bs-body-color) !important;
-    }
-    
-    .swal2-content {
-        color: var(--bs-body-color) !important;
-    }
 </style>
 @endsection
 
