@@ -12,6 +12,7 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SprintBacklogController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
+use App\Http\Controllers\DashboardController;
 
 
 /*
@@ -73,7 +74,10 @@ Route::get('/roles/{id}/edit', [RolesController::class, 'edit'])->name('roles.ed
 Route::put('/roles/{id}', [RolesController::class, 'update'])->name('roles.update');
 Route::delete('/roles/{id}', [RolesController::class, 'destroy'])->name('roles.destroy');
 Route::get('/roles/{id}/delete', [RolesController::class, 'destroy'])->name('roles.delete');
-Route::get('/dashboard', function () {return view('pages.dashboard.index');})->name('dashboard'); 
+
+// Dashboard Routes
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard/proyectos', [DashboardController::class, 'getProyectos'])->name('getProyectos');
 
 // Authentication Routes
 Auth::routes(['reset' => true]);

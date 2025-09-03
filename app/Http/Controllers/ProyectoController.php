@@ -31,8 +31,12 @@ class ProyectoController extends Controller
                 'users.email as usuario_email'
             )
             ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
+            ->leftJoin('miembros_equipos', 'proyectos.id', '=', 'miembros_equipos.id_proyecto')
             ->where('proyectos.estado', 1)
-            ->where('proyectos.id_owner', $userId); 
+            ->where(function($q) use ($userId) {
+                $q->where('proyectos.id_owner', $userId)
+                ->orWhere('miembros_equipos.id_usuario', $userId);
+            });
 
         if ($request->has('search') && !empty($request->search)) {
             $query->where(function($q) use ($request) {
@@ -41,7 +45,7 @@ class ProyectoController extends Controller
             });
         }
 
-        $proyectos = $query->get();
+        $proyectos = $query->distinct()->get();
         
         return response()->json([
             'success' => true,
@@ -99,13 +103,40 @@ class ProyectoController extends Controller
     public function detailsProyecto($uid)
     {
         try {
-            $proyecto = Proyecto::select(
+            $proyecto = DB::table('proyectos')
+                ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
+                ->leftJoin('product_backlog', function($join) {
+                    $join->on('proyectos.id', '=', 'product_backlog.id_proyecto')
+                        ->where('product_backlog.estado', '=', 1);
+                })
+                ->leftJoin('sprints', function($join) {
+                    $join->on('proyectos.id', '=', 'sprints.id_proyecto')
+                        ->where('sprints.estado', '=', 1);
+                })
+                ->select(
                     'proyectos.*',
                     'users.nombre as usuario_nombre',
-                    'users.email as usuario_email'
+                    'users.email as usuario_email',
+                    DB::raw('COUNT(DISTINCT product_backlog.id) as total_elementos'),
+                    DB::raw('COUNT(DISTINCT sprints.id) as total_sprints')
                 )
-                ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
                 ->where('proyectos.uid', $uid)
+                ->groupBy(
+                    'proyectos.id',
+                    'proyectos.uid',
+                    'proyectos.nombre',
+                    'proyectos.descripcion',
+                    'proyectos.id_owner',
+                    'proyectos.estado',
+                    'proyectos.visibilidad',
+                    'proyectos.progreso',
+                    'proyectos.fecha_inicio',
+                    'proyectos.fecha_fin',
+                    'proyectos.created_at',
+                    'proyectos.updated_at',
+                    'users.nombre',
+                    'users.email'
+                )
                 ->first();
 
             if (!$proyecto) {
@@ -127,6 +158,7 @@ class ProyectoController extends Controller
             ], 500);
         }
     }
+
 
     // Función edit
     public function edit($uid)
