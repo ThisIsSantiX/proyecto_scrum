@@ -341,12 +341,10 @@
             <!-- Body -->
             <div class="modal-body">
                 <form id="formAddUser">
-                    <!-- este hidden se llena con el id del proyecto al abrir la modal -->
-                    <input type="hidden" id="projectId" name="projectId">
-
+                    @csrf
                     <div class="mb-3">
                         <label for="userEmail" class="form-label">Correo del Usuario</label>
-                        <input type="email" class="form-control" id="userEmail" name="userEmail" required>
+                        <input type="email" class="form-control" id="email" name="email" required>
                     </div>
                 </form>
             </div>
@@ -354,7 +352,7 @@
             <!-- Footer -->
             <div class="modal-footer border-top">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" form="formAddUser" class="btn btn-primary">Guardar</button>
+                <button type="button" id="btnSaveUser" class="btn btn-primary">Guardar</button>
             </div>
         </div>
     </div>
@@ -1047,13 +1045,54 @@
         }
     });
 
+
     //funciones para agregar una nueva persona al proyecto
+    const notyf = new Notyf({
+        duration: 3000,
+        position: {
+            x: 'right',
+            y: 'top'
+        }
+    });
+    let proyectId = null
     $(document).on("click", "[id^=btnAddUser_]", function() {
-        let proyectId = $(this).data('project-id');
-        console.log('id del proyecto: ', proyectId);
-        $('#modalAddUser #projectId').val(proyectId);
+        proyectId = $(this).data('project-id');
         $('#modalAddUser').modal('show');
     });
+
+    $('#btnSaveUser').on('click', function() {
+        if (!proyectId) {
+            notyf.error('No se encontro el proyecto.');
+            return;
+        }
+
+        let formData = $('#formAddUser').serialize();
+        console.log(formData);
+        $.ajax({
+            url: `/proyectos/${proyectId}/enviar-invitacion`,
+            method: 'POST',
+            data: formData,
+            success: function(response) {
+                $('#modalAddUser').modal('hide');
+                $('#formAddUser')[0].reset();
+                notyf.success(response.message);
+                console.log(response.message);
+            },
+            error: function(xhr) {
+                let errorMsg = "Error al enviar invitación.";
+
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+
+                notyf.error(errorMsg);
+            }
+        });
+    });
+
+
+
+
     //----------------
 </script>
 @endsection

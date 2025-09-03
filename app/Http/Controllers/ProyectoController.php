@@ -316,7 +316,7 @@ class ProyectoController extends Controller
                 ], 400);
             }
 
-            $invitacionPendiente = proyecto_invitaciones::where('id_proyecto', $idProyecto)
+            $invitacionPendiente = proyecto_invitaciones::where('proyecto_id', $idProyecto)
                 ->where('usuario_invitado', $usuarioInvitado->id)
                 ->where('estadoInvitacion', 'pendiente')
                 ->where(function ($q) {
@@ -333,8 +333,8 @@ class ProyectoController extends Controller
 
             $invitacion = proyecto_invitaciones::create([
                 'proyecto_id' => $idProyecto,
-                'invitado_por' => $usuarioActual,
-                'usuario_invitado' => $usuarioInvitado,
+                'invitado_por' => $usuarioActual->id,
+                'usuario_invitado' => $usuarioInvitado->id,
                 'estadoInvitacion' => 'pendiente',
                 'uid' => Str::uuid(),
                 'estado' => 1,
@@ -374,7 +374,7 @@ class ProyectoController extends Controller
             // Agregar información adicional del proyecto
             $invitaciones->each(function ($invitacion) {
                 $invitacion->proyecto->makeHidden(['created_at', 'updated_at']);
-                $invitacion->invitado_por->makeHidden(['email', 'created_at', 'updated_at']);
+                $invitacion->invitadoPor->makeHidden(['created_at', 'updated_at']);
             });
 
             return response()->json([
@@ -418,7 +418,7 @@ class ProyectoController extends Controller
             if ($request->accion === 'aceptar') {
                 $yaEsMiembro = DB::table('miembros_equipos')
                     ->where('id_proyecto', $invitacion->id_proyecto)
-                    ->where('id_user', $user->id)
+                    ->where('id_usuario', $user->id)
                     ->exists();
                 if (!$yaEsMiembro) {
                     //agregamos el usuario al proyecto
@@ -429,10 +429,10 @@ class ProyectoController extends Controller
                         'id_proyecto' => $invitacion->proyecto_id
                     ]);
                 }
-                $invitacion->estado = 'aceptada';
+                $invitacion->estadoInvitacion = 'aceptada';
                 $mensaje = 'Te has unido al proyecto exitosamente';
             } else {
-                $invitacion->estado = 'rechazada';
+                $invitacion->estadoInvitacion = 'rechazada';
                 $mensaje = 'Invitacion rechazada';
             }
 
