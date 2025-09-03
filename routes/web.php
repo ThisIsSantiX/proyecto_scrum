@@ -12,6 +12,7 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SprintBacklogController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
+use App\Http\Controllers\DashboardController;
 
 
 /*
@@ -74,9 +75,9 @@ Route::put('/roles/{id}', [RolesController::class, 'update'])->name('roles.updat
 Route::delete('/roles/{id}', [RolesController::class, 'destroy'])->name('roles.destroy');
 Route::get('/roles/{id}/delete', [RolesController::class, 'destroy'])->name('roles.delete');
 
-
-Route::get('/kanban', function () {return view('pages.kanban.index');})->name('kanban'); 
-Route::get('/dashboard', function () {return view('pages.dashboard.index');})->name('dashboard'); 
+// Dashboard Routes
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard/proyectos', [DashboardController::class, 'getProyectos'])->name('getProyectos');
 
 // Authentication Routes
 Auth::routes(['reset' => true]);
@@ -100,6 +101,9 @@ Route::post('/proyectos/backlog/{uid}/sprints/store', [SprintController::class, 
 Route::post('/proyectos/backlog/{uid}/sprints/update', [SprintController::class, 'update'])->name('updateSprint');
 Route::post('/proyectos/backlog/{uid}/sprints/destroy', [SprintController::class, 'destroy'])->name('destroySprint');
 Route::get('/proyectos/backlog/{uid}/sprints/items', [SprintController::class, 'showItems'])->name('showItems');
+Route::post('/proyectos/backlog/{uid}/sprints/{sprintUid}/items/start', [SprintController::class, 'startSprint'])->name('startSprint');
+Route::get('/proyectos/{uid}/board', [ProyectoController::class, 'board'])->name('board');
+
 
 // Sprint Backlog Routes
 Route::get('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/show', [SprintBacklogController::class, 'show'])->name('showSprintBacklog ');

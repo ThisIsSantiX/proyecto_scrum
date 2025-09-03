@@ -5,30 +5,30 @@
 @section('content')
     <div class="container-fluid content-inner mt-5 pt-4 py-0">
         <div class="row">
-    <!-- Título principal -->
-    <div class="col-12 mb-2">
-        <div class="card shadow-sm border-0">
-            <div class="card-body py-2">
-                <h5 class="mb-4 mt-2 fw-semibold">
-                    <span class="text-muted fw-normal">{{ $proyecto->nombre }}</span>
-                </h5>
+            <!-- Título principal -->
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body py-2">
+                        <h5 class="mb-4 mt-2 fw-semibold">
+                            <span class="text-muted fw-bold">{{ $proyecto->nombre }}</span>
+                        </h5>
 
-                <!-- Navbar debajo del título -->
-                <ul class="nav nav-tabs mt-2">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="javascript:void(0);">Trabajo pendiente</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="javascript:void(0);">Tablero</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="javascript:void(0);">Reuniones</a>
-                    </li>
-                </ul>
+                        <!-- Navbar debajo del título -->
+                        <ul class="nav nav-tabs mt-2">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="javascript:void(0);">Trabajo pendiente</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="javascript:void(0);">Tablero</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="javascript:void(0);">Reuniones</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
 
         <div class="row g-3">
@@ -474,6 +474,46 @@
     </div>
 </div>
 
+<!-- Modal Iniciar Sprint -->
+    <div class="modal fade" id="modalIniciarSprint" tabindex="-1" aria-labelledby="modalIniciarSprintLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+        <div class="modal-header">
+            <h5 class="modal-title fw-bold" id="modalIniciarSprintLabel">
+            <i class="bi bi-play-circle-fill text-success me-2"></i> Inicie el Sprint
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+            <p class="mb-3">¿Desea modificar la duración antes de comenzar el sprint?</p>
+            
+            <form id="formIniciarSprint">
+            @csrf
+            <div class="mb-3">
+                <label class="form-label">Fecha de inicio</label>
+                <input type="date" class="form-control" name="fecha_inicio" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Fecha final</label>
+                <input type="date" class="form-control" name="fecha_fin" required>
+            </div>
+            </form>
+
+            <div class="alert alert-light border mt-3 small mb-0">
+            <strong>Nota:</strong> Será redirigido a su panel de Scrum después de pulsar en Iniciar.
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" form="formIniciarSprint" class="btn btn-success">
+            <i class="bi bi-play-fill"></i> Iniciar
+            </button>
+        </div>
+        </div>
+    </div>
+    </div>
+
+
 
 @endsection
 
@@ -783,6 +823,9 @@
                     });
             }
 
+            window.cargarHistorias = cargarHistorias;
+
+
             // Función para mostrar las historias en el DOM
             function mostrarHistorias(historias) {
                 if (historias && historias.length > 0) {
@@ -846,9 +889,13 @@
                                         
                                         <!-- Creado por + opciones -->
                                         <div class="d-flex justify-content-between align-items-center mt-1 small text-muted">
-                                            <span>
-                                                <i class="bi bi-person-circle me-1"></i> ${historia.creador_nombre || 'Desconocido'}
+                                            <span class="position-relative d-inline-block" data-bs-toggle="tooltip" title="${historia.creador_nombre || 'Desconocido'}">
+                                                <img src="${historia.foto_url}" 
+                                                    alt="${historia.creador_nombre || 'Usuario'}"
+                                                    class="rounded-circle"
+                                                    style="width: 24px; height: 24px; object-fit: cover;">
                                             </span>
+
                                             <div class="d-flex align-items-center">
                                                 <!-- Botón para agregar criterios -->
                                                 <button class="btn btn-sm btn-primary me-1 p-0 px-1 agregar-criterio" title="Agregar criterio" data-historia-id="${historia.uid}">
@@ -1262,7 +1309,7 @@
                                     </div>
                                 </div>
                                 <div class="dropdown">
-                                    <button class="btn btn-sm btn-secondary" 
+                                    <button class="btn btn-sm btn-secondary p-0 px-1" 
                                             type="button" 
                                             data-bs-toggle="dropdown" 
                                             aria-expanded="false" 
@@ -1282,6 +1329,14 @@
                                         </li>
                                     </ul>
                                 </div>
+                                <button class="btn btn-outline-success btn-sm ms-2"
+                                        data-bs-toggle="modal"
+                                        data-sprint-uid="${sprint.uid}"
+                                        data-fecha-inicio="${sprint.fecha_inicio || ''}"
+                                        data-fecha-fin="${sprint.fecha_fin || ''}"
+                                        data-bs-target="#modalIniciarSprint">
+                                <i class="bi bi-play-fill"></i> Iniciar
+                                </button>
                             </div>
                             <p class="small text-muted mb-1 mt-2">${sprint.objetivo}</p>
                         </div>
@@ -1716,6 +1771,46 @@
             });
         }
 
+        $('#modalIniciarSprint').on('show.bs.modal', function (event) {
+            const button = $(event.relatedTarget); // botón que abrió el modal
+            const sprintUid = button.data('sprint-uid');
+            const fechaInicio = button.data('fecha-inicio');
+            const fechaFin = button.data('fecha-fin');
+
+            // Guardar UID en el modal (para el submit después)
+            $('#formIniciarSprint').data('sprint-uid', sprintUid);
+
+            // Rellenar inputs
+            $('#formIniciarSprint input[name="fecha_inicio"]').val(fechaInicio);
+            $('#formIniciarSprint input[name="fecha_fin"]').val(fechaFin);
+        });
+
+
+
+        $('#formIniciarSprint').on('submit', function (e) {
+            e.preventDefault();
+
+            const proyectoUID = $('#uid_proyecto').val();
+            const sprintUID   = $(this).data('sprint-uid');
+            const fechaInicio = $(this).find('input[name="fecha_inicio"]').val();
+            const fechaFin    = $(this).find('input[name="fecha_fin"]').val();
+
+            axios.post(`/proyectos/backlog/${proyectoUID}/sprints/${sprintUID}/items/start`, {
+                fecha_inicio: fechaInicio,
+                fecha_fin: fechaFin
+            })
+            .then(response => {
+                $('#modalIniciarSprint').modal('hide');
+                notyf.success('Sprint iniciado correctamente');
+                window.location.href = `/proyectos/${proyectoUID}/board`;
+                cargarSprints();
+            })
+            .catch(error => {
+                console.error(error);
+                notyf.error('Error al iniciar sprint');
+            });
+        });
+
         // Editar sprint (abrir modal)
         $(document).on('click', '.editar-sprint', function (e) {
             e.preventDefault();
@@ -1906,6 +2001,7 @@
                         $('input[name="asignado_a[]"]').remove();
                         
                         // loadSprintBacklog(uid);
+                        window.cargarHistorias();
                     })
                     .catch(function (error) {
                         console.error(error);
@@ -1950,20 +2046,23 @@
                             if (items.length === 0) {
                                 // No hay items - mostrar mensaje para agregar
                                 sprintWrapper.html(`
-                                    <div class="text-center text-body py-3">
-                                        <i class="fas fa-arrow-down fs-4 mb-2 d-block"></i>
-                                        <p class="small mb-0">
-                                            <a 
-                                                href="#" 
-                                                class="text-primary fw-bold" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#modalRegSprBacklog" 
-                                                data-sprint-id="${sprintId}"
-                                            >
-                                                Agregue un elemento
-                                            </a> 
-                                            o simplemente arrastre y suelte Product Backlog.
-                                        </p>
+                                    <div class="sprint-backlog-area rounded p-3 min-height-100" 
+                                        style="min-height: 100px; border-color: #dee2e6;">
+                                        <div class="text-center text-body py-3">
+                                            <i class="fas fa-arrow-down fs-4 mb-2 d-block"></i>
+                                            <p class="small mb-0">
+                                                <a 
+                                                    href="#" 
+                                                    class="text-primary fw-bold" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#modalRegSprBacklog" 
+                                                    data-sprint-id="${sprintId}"
+                                                >
+                                                    Agregue un elemento
+                                                </a> 
+                                                o simplemente arrastre y suelte Product Backlog.
+                                            </p>
+                                        </div>
                                     </div>
                                 `);
                             } else {
@@ -2023,7 +2122,7 @@
                                                                     </li>
                                                                     <li>
                                                                         <a class="dropdown-item eliminar-item text-danger" href="#" data-item-id="${item.uid}">
-                                                                            <i class="bi bi-trash me-1"></i> Eliminar
+                                                                            <i class="bi bi-trash me-1"></i> 
                                                                         </a>
                                                                     </li>
                                                                 </ul>
@@ -2037,10 +2136,10 @@
                                 });
                                 
                                 itemsHtml += `
-                                    <div class="text-center mt-3">
+                                    <div class="text-center  mt-3">
                                         <a 
                                             href="#" 
-                                            class="text-primary fw-bold" 
+                                            class="text-primary fw-semibold small" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#modalRegSprBacklog" 
                                             data-sprint-id="${sprintId}"
@@ -2163,6 +2262,15 @@
 
             
         });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+
+
 
     </script>
 @endsection

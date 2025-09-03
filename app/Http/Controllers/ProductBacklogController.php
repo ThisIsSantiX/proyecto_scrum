@@ -41,7 +41,10 @@ class ProductBacklogController extends Controller
                 ->where('id_proyecto', $proyecto->id)
                 ->get();
 
-        return view('pages.proyectos.backlog.index', compact('proyecto', 'historias', 'sprints'));
+            $sprintBacklog = DB::table('sprint_backlog')
+                ->get();
+
+        return view('pages.proyectos.backlog.index', compact('proyecto', 'historias', 'sprints', 'sprintBacklog'));
     }
 
 
@@ -159,6 +162,7 @@ class ProductBacklogController extends Controller
                     'product_backlog.uid as historia_uid',
                     'product_backlog.created_at',
                     'users.nombre as creador_nombre',
+                    'users.foto_url as foto_url',
                     'criterios_aceptacion.id as criterio_id',
                     'criterios_aceptacion.descripcion as criterio_descripcion',
                     'criterios_aceptacion.estado as criterio_estado'
@@ -180,6 +184,7 @@ class ProductBacklogController extends Controller
                         'descripcion' => $row->historia_descripcion,
                         'prioridad' => $row->prioridad,
                         'valor_historia' => $row->valor_historia,
+                        'foto_url' => $row->foto_url,
                         'progreso' => $row->progreso,
                         'uid' => $row->historia_uid,
                         'creador_nombre' => $row->creador_nombre,

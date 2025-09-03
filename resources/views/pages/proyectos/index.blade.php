@@ -991,6 +991,10 @@
                     $("#detalleCreado").text(formatDateTime(p.created_at) || "N/A");
                     $("#detalleActualizado").text(formatDateTime(p.updated_at) || "N/A");
 
+                    $("#sprintsValue").text(p.total_sprints || 0);
+                    $("#elementsValue").text(p.total_elementos || 0);
+
+
                     $("#deleteProjectBtn").data('uid', uid);
                     $("#updateProjectBtn").data('uid', uid);
 
