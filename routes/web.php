@@ -108,3 +108,10 @@ Route::get('/proyectos/{uid}/board', [ProyectoController::class, 'board'])->name
 // Sprint Backlog Routes
 Route::get('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/show', [SprintBacklogController::class, 'show'])->name('showSprintBacklog ');
 Route::post('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/store',[SprintBacklogController::class, 'store'])->name('storeSprintBacklog');
+
+
+//ruta para las invitaciones a proyectos
+Route::post('/proyectos/{proyecto}/enviar-invitacion',[ProyectoController::class,'enviarInvitacion'])->name('proyectos.enviarInvitacion');
+Route::get('/mis-invitaciones',[ProyectoController::class,'misInvitaciones'])->name('proyectos.misInvitaciones');
+Route::post('/invitaciones/{uid}/responder',[ProyectoController::class,'responderInvitacion'])->name('proyectos.responderInvitacion');
+//------

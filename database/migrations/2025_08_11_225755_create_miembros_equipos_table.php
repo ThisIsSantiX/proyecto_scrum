@@ -17,8 +17,8 @@ return new class extends Migration
             $table->foreign('id_proyecto')->references('id')->on('proyectos');
             $table->unsignedBigInteger('id_usuario');
             $table->foreign('id_usuario')->references('id')->on('users');
-            $table->unsignedBigInteger('id_rol');
-            $table->foreign('id_rol')->references('id')->on('roles');
+            // $table->unsignedBigInteger('id_rol');
+            // $table->foreign('id_rol')->references('id')->on('roles');
             $table->integer('estado')->default(1);
             $table->text('uid');
             $table->timestamps();

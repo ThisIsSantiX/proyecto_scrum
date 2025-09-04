@@ -2,64 +2,64 @@
 
 @section('content')
 
-    <div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <div class="header-title">
-                            <h4 class="card-title">Todos los proyectos</h4>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <div class="position-relative">
-                                <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Buscar proyectos..." style="width: 250px;">
-                                <i class="fas fa-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted"></i>
-                            </div>
-                            <a href="javascript:void(0);" 
-                                class="btn btn-sm btn-primary" 
-                                data-bs-toggle="modal" 
-                                data-bs-target="#modalCrearProyecto">
-                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-1">
-                                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                                    </svg>
-                                    Crear Proyecto
-                            </a>
-
-                        </div>
+<div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="header-title">
+                        <h4 class="card-title">Todos los proyectos</h4>
                     </div>
-                    
-                    <div class="card-body">
-                        <!-- Loading Spinner -->
-                        <div id="loadingSpinner" class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Cargando...</span>
-                            </div>
-                            <p class="mt-2 text-muted">Cargando proyectos...</p>
+                    <div class="d-flex gap-2">
+                        <div class="position-relative">
+                            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Buscar proyectos..." style="width: 250px;">
+                            <i class="fas fa-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted"></i>
                         </div>
-
-                        <!-- Empty State -->
-                        <div id="emptyState" class="text-center py-5" style="display: none;">
-                            <svg width="64" height="64" fill="currentColor" viewBox="0 0 16 16" class="text-muted mb-3">
-                                <path d="m9.828 3 3 3v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.828ZM9 3H4a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6L9 3ZM3 7.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5Zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5Z"/>
+                        <a href="javascript:void(0);"
+                            class="btn btn-sm btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalCrearProyecto">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-1">
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
                             </svg>
-                            <h5 class="text-muted">No se encontraron proyectos</h5>
-                            <p class="text-muted">No hay proyectos que coincidan con tu búsqueda.</p>
-                        </div>
+                            Crear Proyecto
+                        </a>
 
-                        <!-- Projects Cards Container -->
-                        <div id="projectsContainer" class="row g-4" style="display: none;">
-                            <!-- Las cartas se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Loading Spinner -->
+                    <div id="loadingSpinner" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
                         </div>
+                        <p class="mt-2 text-muted">Cargando proyectos...</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyState" class="text-center py-5" style="display: none;">
+                        <svg width="64" height="64" fill="currentColor" viewBox="0 0 16 16" class="text-muted mb-3">
+                            <path d="m9.828 3 3 3v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.828ZM9 3H4a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6L9 3ZM3 7.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5Zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5Z" />
+                        </svg>
+                        <h5 class="text-muted">No se encontraron proyectos</h5>
+                        <p class="text-muted">No hay proyectos que coincidan con tu búsqueda.</p>
+                    </div>
+
+                    <!-- Projects Cards Container -->
+                    <div id="projectsContainer" class="row g-4" style="display: none;">
+                        <!-- Las cartas se cargarán aquí dinámicamente -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal Crear Proyecto -->
-    <div class="modal fade" id="modalCrearProyecto" tabindex="-1" aria-labelledby="modalCrearProyectoLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
+<!-- Modal Crear Proyecto -->
+<div class="modal fade" id="modalCrearProyecto" tabindex="-1" aria-labelledby="modalCrearProyectoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
 
             <!-- Header -->
             <div class="modal-header border-bottom">
@@ -70,47 +70,47 @@
             <!-- Body -->
             <div class="modal-body">
                 <form id="formCrearProyecto">
-                <div class="mb-3">
-                    <label for="nombre" class="form-label">Nombre</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" required maxlength="50">
-                </div>
-
-                <div class="mb-3">
-                    <label for="descripcion" class="form-label">Descripción</label>
-                    <textarea class="form-control" id="descripcion" name="descripcion" maxlength="255"></textarea>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                    <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
-                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required maxlength="50">
                     </div>
-                    <div class="col-md-6 mb-3">
-                    <label for="fecha_fin" class="form-label">Fecha Fin</label>
-                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin">
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" maxlength="255"></textarea>
                     </div>
-                </div>
 
-                <div class="mb-3">
-                    <label for="visibilidad" class="form-label">Visibilidad</label>
-                    <select class="form-select" id="visibilidad" name="visibilidad" required>
-                    <option value="1">Público</option>
-                    <option value="0">Privado</option>
-                    </select>
-                </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+                            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin">
+                        </div>
+                    </div>
 
-                <div class="mb-3">
-                    <label for="progreso" class="form-label">Progreso</label>
-                    <select class="form-select" id="progreso" name="progreso" required>
-                    <option value="planificacion">Planificación</option>
-                    <option value="desarrollo">Desarrollo</option>
-                    <option value="testing">Testing</option>
-                    <option value="revision">Revisión</option>
-                    <option value="completado">Completado</option>
-                    <option value="pausado">Pausado</option>
-                    <option value="cancelado">Cancelado</option>
-                    </select>
-                </div>
+                    <div class="mb-3">
+                        <label for="visibilidad" class="form-label">Visibilidad</label>
+                        <select class="form-select" id="visibilidad" name="visibilidad" required>
+                            <option value="1">Público</option>
+                            <option value="0">Privado</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="progreso" class="form-label">Progreso</label>
+                        <select class="form-select" id="progreso" name="progreso" required>
+                            <option value="planificacion">Planificación</option>
+                            <option value="desarrollo">Desarrollo</option>
+                            <option value="testing">Testing</option>
+                            <option value="revision">Revisión</option>
+                            <option value="completado">Completado</option>
+                            <option value="pausado">Pausado</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
                 </form>
             </div>
 
@@ -119,15 +119,15 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="submit" form="formCrearProyecto" class="btn btn-primary">Guardar</button>
             </div>
-            </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal Detalles del Proyecto -->
+<!-- Modal Detalles del Proyecto -->
 <div class="modal fade" id="modalDetallesProyecto" tabindex="-1" aria-labelledby="modalDetallesProyectoLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            
+
             <!-- Bootstrap modal header with blue background -->
             <div class="modal-header bg-body text-white">
                 <h5 class="modal-title" id="modalDetallesProyectoLabel">Detalles del Proyecto</h5>
@@ -302,12 +302,12 @@
                                 <div class="mt-3">
                                     <button type="button" class="btn btn-outline-danger btn-sm" id="deleteProjectBtn">
                                         <svg class="me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor">
-                                            <path d="M19.3248 9.46826C19.3248 9.46826 18.7818 16.2033 18.4668 19.0403C18.3168 20.3953 17.4798 21.1893 16.1088 21.2143C13.4998 21.2613 10.8878 21.2643 8.27979 21.2093C6.96079 21.1823 6.13779 20.3783 5.99079 19.0473C5.67379 16.1853 5.13379 9.46826 5.13379 9.46826" 
-                                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M20.708 6.23975H3.75" 
-                                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M17.4406 6.23973C16.6556 6.23973 15.9796 5.68473 15.8256 4.91573L15.5826 3.69973C15.4326 3.13873 14.9246 2.75073 14.3456 2.75073H10.1126C9.53358 2.75073 9.02558 3.13873 8.87558 3.69973L8.63258 4.91573C8.47858 5.68473 7.80258 6.23973 7.01758 6.23973" 
-                                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M19.3248 9.46826C19.3248 9.46826 18.7818 16.2033 18.4668 19.0403C18.3168 20.3953 17.4798 21.1893 16.1088 21.2143C13.4998 21.2613 10.8878 21.2643 8.27979 21.2093C6.96079 21.1823 6.13779 20.3783 5.99079 19.0473C5.67379 16.1853 5.13379 9.46826 5.13379 9.46826"
+                                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M20.708 6.23975H3.75"
+                                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M17.4406 6.23973C16.6556 6.23973 15.9796 5.68473 15.8256 4.91573L15.5826 3.69973C15.4326 3.13873 14.9246 2.75073 14.3456 2.75073H10.1126C9.53358 2.75073 9.02558 3.13873 8.87558 3.69973L8.63258 4.91573C8.47858 5.68473 7.80258 6.23973 7.01758 6.23973"
+                                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                                         </svg>
                                         Eliminar Proyecto
                                     </button>
@@ -327,23 +327,54 @@
     </div>
 </div>
 
+<!-- Modal Añadir Usuario a Proyecto -->
+<div class="modal fade" id="modalAddUser" tabindex="-1" aria-labelledby="modalAddUserLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+
+            <!-- Header -->
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title" id="modalAddUserLabel">Añadir Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <form id="formAddUser">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="userEmail" class="form-label">Correo del Usuario</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnSaveUser" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('css')
 <style>
     .project-card {
         transition: all 0.3s ease;
-        border: 1px solid rgba(0,0,0,0.1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
         border-radius: 12px;
         height: 100%;
     }
-    
+
     .project-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         border-color: var(--bs-primary);
     }
-    
+
     .project-header {
         background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-info) 100%);
         color: white;
@@ -352,7 +383,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .project-header::before {
         content: '';
         position: absolute;
@@ -360,11 +391,11 @@
         left: -2px;
         right: -2px;
         bottom: -2px;
-        background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
+        background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
         border-radius: 12px 12px 0 0;
         pointer-events: none;
     }
-    
+
     .project-title {
         font-weight: 600;
         margin-bottom: 0.5rem;
@@ -374,25 +405,25 @@
         text-decoration: none;
         color: inherit;
     }
-    
+
     .project-title:hover {
         text-decoration: underline;
         opacity: 0.8;
     }
-    
+
     .project-description {
         opacity: 0.9;
         font-size: 0.9rem;
         line-height: 1.4;
     }
-    
+
     .owner-info {
         background: rgba(var(--bs-primary-rgb), 0.1);
         border-radius: 8px;
         padding: 0.75rem;
         margin-bottom: 1rem;
     }
-    
+
     .owner-avatar {
         width: 35px;
         height: 35px;
@@ -405,19 +436,19 @@
         font-weight: 600;
         font-size: 0.9rem;
     }
-    
+
     .project-meta {
         font-size: 0.85rem;
         color: var(--bs-secondary);
     }
-    
+
     .badge-status {
         font-size: 0.75rem;
         padding: 0.4rem 0.8rem;
         border-radius: 20px;
         font-weight: 500;
     }
-    
+
     .search-highlight {
         background-color: rgba(var(--bs-warning-rgb), 0.3);
         padding: 0.1rem 0.2rem;
@@ -425,14 +456,40 @@
     }
 
     /* Status badges colors */
-    .status-planificacion { background-color: #6f42c1; color: white; }
-    .status-desarrollo { background-color: #0d6efd; color: white; }
-    .status-testing { background-color: #fd7e14; color: white; }
-    .status-revision { background-color: #dc3545; color: white; }
-    .status-completado { background-color: #198754; color: white; }
-    .status-pausado { background-color: #6c757d; color: white; }
-    .status-cancelado { background-color: #495057; color: white; }
+    .status-planificacion {
+        background-color: #6f42c1;
+        color: white;
+    }
 
+    .status-desarrollo {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .status-testing {
+        background-color: #fd7e14;
+        color: white;
+    }
+
+    .status-revision {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .status-completado {
+        background-color: #198754;
+        color: white;
+    }
+
+    .status-pausado {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .status-cancelado {
+        background-color: #495057;
+        color: white;
+    }
 </style>
 @endsection
 
@@ -449,7 +506,7 @@
         $('#searchInput').on('input', function() {
             clearTimeout(searchTimeout);
             const searchTerm = $(this).val().trim();
-            
+
             searchTimeout = setTimeout(function() {
                 if (searchTerm.length >= 2 || searchTerm.length === 0) {
                     loadProjects(searchTerm);
@@ -459,10 +516,14 @@
 
         function loadProjects(search = '') {
             showLoading();
-            
-            const params = search ? { search: search } : {};
-            
-            axios.get('{{ route("showProyectos") }}', { params: params })
+
+            const params = search ? {
+                search: search
+            } : {};
+
+            axios.get('{{ route("showProyectos") }}', {
+                    params: params
+                })
                 .then(function(response) {
                     if (response.data.success) {
                         allProjects = response.data.data;
@@ -481,7 +542,7 @@
 
         function renderProjects(projects, searchTerm = '') {
             hideLoading();
-            
+
             if (projects.length === 0) {
                 showEmptyState();
                 return;
@@ -498,18 +559,20 @@
 
             // Animar las cartas
             $('.project-card').each(function(index) {
-                $(this).css('opacity', 0).delay(index * 100).animate({ opacity: 1 }, 300);
+                $(this).css('opacity', 0).delay(index * 100).animate({
+                    opacity: 1
+                }, 300);
             });
         }
 
         function createProjectCard(project, searchTerm = '') {
             // Generar iniciales para el avatar
             const initials = getInitials(project.usuario_nombre || 'Usuario');
-            
+
             // Destacar términos de búsqueda
             const highlightedTitle = highlightSearchTerm(project.nombre || 'Sin título', searchTerm);
             const highlightedOwner = highlightSearchTerm(project.usuario_nombre || 'Usuario desconocido', searchTerm);
-            
+
             // Determinar el progreso/estado
             const progress = project.progreso;
             const progressText = progress;
@@ -567,6 +630,7 @@
                                 <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary bg-white text-primary"
                                     style="width: 40px; height: 40px; cursor: pointer; z-index: 2;"
                                     id="btnAddUser_${project.id}"
+                                    data-project-id="${project.id}"
                                     data-bs-toggle="tooltip" data-bs-placement="bottom"
                                     title="Añadir usuarios">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
@@ -581,21 +645,24 @@
             `;
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
                 new bootstrap.Tooltip(tooltipTriggerEl)
             })
         });
 
         // Funcion para crear un proyecto
-        $(document).ready(function () {
+        $(document).ready(function() {
             const notyf = new Notyf({
                 duration: 3000,
-                position: { x: 'right', y: 'top' }
+                position: {
+                    x: 'right',
+                    y: 'top'
+                }
             });
 
-            $("#formCrearProyecto").on("submit", function (e) {
+            $("#formCrearProyecto").on("submit", function(e) {
                 e.preventDefault();
 
                 // Botón en estado "Guardando..."
@@ -605,7 +672,7 @@
                 let formData = new FormData(this);
 
                 axios.post("{{ route('storeProyecto') }}", formData)
-                    .then(function (response) {
+                    .then(function(response) {
                         if (response.data.success) {
                             notyf.success(response.data.message);
 
@@ -619,17 +686,17 @@
                             notyf.error("No se pudo guardar el proyecto");
                         }
                     })
-                    .catch(function (error) {
+                    .catch(function(error) {
                         if (error.response && error.response.status === 422) {
                             let errors = error.response.data.errors;
-                            $.each(errors, function (key, value) {
+                            $.each(errors, function(key, value) {
                                 notyf.error(value[0]);
                             });
                         } else {
                             notyf.error("Ocurrió un error inesperado");
                         }
                     })
-                    .finally(function () {
+                    .finally(function() {
                         // Restaurar botón
                         btn.prop("disabled", false).text("Guardar");
                     });
@@ -676,7 +743,7 @@
 
         function highlightSearchTerm(text, searchTerm) {
             if (!searchTerm || searchTerm.trim() === '') return text;
-            
+
             const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
             return text.replace(regex, '<span class="search-highlight">$1</span>');
         }
@@ -687,16 +754,16 @@
 
         function formatDate(dateString) {
             if (!dateString) return 'Fecha no disponible';
-            
+
             const date = new Date(dateString);
-            const options = { 
-                year: 'numeric', 
-                month: 'short', 
+            const options = {
+                year: 'numeric',
+                month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
             };
-            
+
             return date.toLocaleDateString('es-ES', options);
         }
 
@@ -752,7 +819,7 @@
             });
         }
 
-        $(document).on("click", "#deleteProjectBtn", function () {
+        $(document).on("click", "#deleteProjectBtn", function() {
             const uid = $(this).data('uid'); // Obtenemos el UID que asignamos antes
             const isDark = document.body.classList.contains('dark'); // Etiqueta de modo oscuro
 
@@ -780,73 +847,76 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     axios.delete(`/proyectos/delete/${uid}`, {
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        }
-                    })
-                    .then(response => {
-                        if (response.data.success) {
-                            // Cerrar modal de detalles del proyecto si está abierto
-                            const modalDetalles = bootstrap.Modal.getInstance(document.getElementById('modalDetallesProyecto'));
-                            if (modalDetalles) modalDetalles.hide();
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        })
+                        .then(response => {
+                            if (response.data.success) {
+                                // Cerrar modal de detalles del proyecto si está abierto
+                                const modalDetalles = bootstrap.Modal.getInstance(document.getElementById('modalDetallesProyecto'));
+                                if (modalDetalles) modalDetalles.hide();
 
+                                Swal.fire({
+                                    title: 'Eliminado!',
+                                    text: 'El proyecto fue eliminado correctamente.',
+                                    icon: 'success',
+                                    confirmButtonColor: '#198754',
+                                    background: isDark ? '#1e1e2d' : '#fff',
+                                    color: isDark ? '#fff' : '#000'
+                                }).then(() => {
+                                    loadProjects(); // Recarga la lista de proyectos
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: response.data.message || 'No se pudo eliminar el proyecto.',
+                                    icon: 'error',
+                                    background: isDark ? '#1e1e2d' : '#fff',
+                                    color: isDark ? '#fff' : '#000'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error(error);
                             Swal.fire({
-                                title: 'Eliminado!',
-                                text: 'El proyecto fue eliminado correctamente.',
-                                icon: 'success',
-                                confirmButtonColor: '#198754',
-                                background: isDark ? '#1e1e2d' : '#fff',
-                                color: isDark ? '#fff' : '#000'
-                            }).then(() => {
-                                loadProjects(); // Recarga la lista de proyectos
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Error',
-                                text: response.data.message || 'No se pudo eliminar el proyecto.',
+                                title: 'Error del servidor',
+                                text: 'Ocurrió un problema al intentar eliminar el proyecto.',
                                 icon: 'error',
                                 background: isDark ? '#1e1e2d' : '#fff',
                                 color: isDark ? '#fff' : '#000'
                             });
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        Swal.fire({
-                            title: 'Error del servidor',
-                            text: 'Ocurrió un problema al intentar eliminar el proyecto.',
-                            icon: 'error',
-                            background: isDark ? '#1e1e2d' : '#fff',
-                            color: isDark ? '#fff' : '#000'
                         });
-                    });
                 }
             });
         });
 
-            const notyf = new Notyf({
-                duration: 3000,
-                position: { x: 'right', y: 'top' },
-                dismissible: true
-            });
+        const notyf = new Notyf({
+            duration: 3000,
+            position: {
+                x: 'right',
+                y: 'top'
+            },
+            dismissible: true
+        });
 
-            $(document).on("click", "#updateProjectBtn", function () {
-                const uid = $("#updateProjectBtn").data("uid") || $("#deleteProjectBtn").data("uid"); // UID del proyecto
+        $(document).on("click", "#updateProjectBtn", function() {
+            const uid = $("#updateProjectBtn").data("uid") || $("#deleteProjectBtn").data("uid"); // UID del proyecto
 
-                if (!uid) {
-                    notyf.error('No se encontró el proyecto.');
-                    return;
-                }
+            if (!uid) {
+                notyf.error('No se encontró el proyecto.');
+                return;
+            }
 
-                // Valores del modal
-                const nombre = $("#detalleNombre").val();
-                const progreso = $("#detalleProgreso").val();
-                const visibilidad = $("#detalleVisibilidad").val();
-                const fecha_inicio = $("#detalleFechaInicio").val();
-                const fecha_fin = $("#detalleFechaFin").val();
-                const descripcion = $("#detalleDescripcionInput").val();
+            // Valores del modal
+            const nombre = $("#detalleNombre").val();
+            const progreso = $("#detalleProgreso").val();
+            const visibilidad = $("#detalleVisibilidad").val();
+            const fecha_inicio = $("#detalleFechaInicio").val();
+            const fecha_fin = $("#detalleFechaFin").val();
+            const descripcion = $("#detalleDescripcionInput").val();
 
-                axios.put("{{ route('updateProyecto') }}", {
+            axios.put("{{ route('updateProyecto') }}", {
                     uid,
                     nombre,
                     progreso,
@@ -885,14 +955,14 @@
                         notyf.error('Ocurrió un problema al actualizar el proyecto.');
                     }
                 });
-            });
+        });
     });
 
-    $(document).on("click", ".btn-view", function () {
+    $(document).on("click", ".btn-view", function() {
         let uid = $(this).data("id");
 
         axios.get(`/proyecto/${uid}`)
-            .then(function (response) {
+            .then(function(response) {
                 if (response.data.success) {
                     let p = response.data.data;
 
@@ -930,7 +1000,7 @@
                     new bootstrap.Modal(document.getElementById('modalDetallesProyecto')).show();
                 }
             })
-            .catch(function (error) {
+            .catch(function(error) {
                 console.error(error);
                 alert("Error al cargar detalles del proyecto");
             });
@@ -943,7 +1013,7 @@
     function getProgressText(progreso) {
         const progressMap = {
             'planificacion': 'Planificación',
-            'desarrollo': 'Desarrollo', 
+            'desarrollo': 'Desarrollo',
             'testing': 'Testing',
             'revision': 'Revisión',
             'completado': 'Completado',
@@ -962,16 +1032,67 @@
     function formatDateTime(dateString) {
         if (!dateString) return null;
         const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES') + ' ' + date.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
+        return date.toLocaleDateString('es-ES') + ' ' + date.toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     }
 
-    $(document).on("click", ".project-link", function () {
+    $(document).on("click", ".project-link", function() {
         const uid = $(this).data("id");
         if (uid) {
             window.location.href = `/proyectos/backlog/${uid}`;
         }
     });
 
-    
+
+    //funciones para agregar una nueva persona al proyecto
+    const notyf = new Notyf({
+        duration: 3000,
+        position: {
+            x: 'right',
+            y: 'top'
+        }
+    });
+    let proyectId = null
+    $(document).on("click", "[id^=btnAddUser_]", function() {
+        proyectId = $(this).data('project-id');
+        $('#modalAddUser').modal('show');
+    });
+
+    $('#btnSaveUser').on('click', function() {
+        if (!proyectId) {
+            notyf.error('No se encontro el proyecto.');
+            return;
+        }
+
+        let formData = $('#formAddUser').serialize();
+        console.log(formData);
+        $.ajax({
+            url: `/proyectos/${proyectId}/enviar-invitacion`,
+            method: 'POST',
+            data: formData,
+            success: function(response) {
+                $('#modalAddUser').modal('hide');
+                $('#formAddUser')[0].reset();
+                notyf.success(response.message);
+                console.log(response.message);
+            },
+            error: function(xhr) {
+                let errorMsg = "Error al enviar invitación.";
+
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+
+                notyf.error(errorMsg);
+            }
+        });
+    });
+
+
+
+
+    //----------------
 </script>
 @endsection
