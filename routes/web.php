@@ -3,8 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SprintController
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\RolesController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -75,3 +77,12 @@ Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
 Route::get('/auth/confirm-mail', [AuthController::class, 'confirmMail'])->name('confirmMail');
 
+// Sprint Routes
+Route::get('/sprints', [SprintController::class, 'index'])->name('sprints.index');
+Route::get('/sprints/create', [SprintController::class, 'create'])->name('sprints.create');
+Route::post('/sprints', [SprintController::class, 'store'])->name('sprints.store');
+Route::get('/sprints/{id}', [SprintController::class, 'show'])->name('sprints.detalle');
+Route::get('/sprints/{id}', [SprintController::class, 'show'])->name('sprints.show');
+Route::get('/sprints/{id}/edit', [SprintController::class, 'edit'])->name('sprints.edit');
+Route::put('/sprints/{id}', [SprintController::class, 'update'])->name('sprints.update');
+Route::delete('/sprints/{id}', [SprintController::class, 'destroy'])->name('sprints.destroy');
