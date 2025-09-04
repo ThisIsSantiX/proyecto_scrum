@@ -48,9 +48,13 @@ class UserController extends Controller
             DB::transaction(function () use ($request) {
                 // Subir foto si existe
                 if ($request->hasFile('foto_url')) {
-                    $fotoPath = $request->file('foto_url')->store('usuarios', 'public');
+                    $file = $request->file('foto_url');
+                    $filename = time().'_'.$file->getClientOriginalName();
+                    $file->storeAs('usuarios', $filename, 'public');
+
+                    $fotoPath = $filename;
                 } else {
-                    $fotoPath = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
+                    $fotoPath = 'https://ui-avatars.com/api/?name=' . urlencode("{$request->nombre} {$request->apellido}") . '&background=random&color=fff';
                 }
 
                 User::create([
@@ -131,11 +135,14 @@ class UserController extends Controller
         }
 
         // Procesar foto
-        if ($request->hasFile('foto_url')) {
-            $data['foto_url'] = $request->file('foto_url')->store('usuarios', 'public');
-        } elseif (!$user->foto_url) {
-            $data['foto_url'] = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
+      if ($request->hasFile('foto_url')) {
+            $file = $request->file('foto_url');
+            $filename = time().'_'.$file->getClientOriginalName();
+            $file->storeAs('usuarios', $filename, 'public');
+
+            $user->foto_url = $filename;
         }
+
 
         $user->update($data);
 

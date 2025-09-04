@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-
 use App\Http\Controllers\CriteriosAceptacionController;
 use App\Http\Controllers\ProductBacklogController;
 use App\Http\Controllers\SprintController;
