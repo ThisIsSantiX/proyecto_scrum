@@ -12,7 +12,7 @@ class RolesController extends Controller
     // Método para mostrar una lista de recursos
     public function index()
     {
-         $roles = Roles::all();
+        $roles = Roles::all();
         return view('pages.roles.index', compact('roles'));
 
     }
