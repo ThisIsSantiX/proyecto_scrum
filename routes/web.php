@@ -13,7 +13,7 @@ use App\Http\Controllers\SprintBacklogController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use App\Http\Controllers\DashboardController;
-
+use App\Http\Controllers\MiembrosEquipoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -115,3 +115,7 @@ Route::post('/proyectos/{proyecto}/enviar-invitacion',[ProyectoController::class
 Route::get('/mis-invitaciones',[ProyectoController::class,'misInvitaciones'])->name('proyectos.misInvitaciones');
 Route::post('/invitaciones/{uid}/responder',[ProyectoController::class,'responderInvitacion'])->name('proyectos.responderInvitacion');
 //------
+
+//RUTAS PARA MOSTRAR LOS MIEMBROS DE UN EQUIPO
+Route::get('/miembros-equipo/{uidProyecto}',[MiembrosEquipoController::class,'show'])->name('miembros');
+//-----------------------

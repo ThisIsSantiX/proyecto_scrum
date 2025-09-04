@@ -10,7 +10,6 @@
     }
 
     .notification-item:hover {
-        background-color: #f8f9fa;
         transform: translateX(5px);
     }
 
@@ -153,7 +152,7 @@
                             </div>
                         </div>
                         <div class="tab-pane fade" id="mentions">No hay menciones nuevas.</div>
-                        <div class="tab-pane fade" id="projects">
+                        <div class="tab-pane fade" id="projects" class="tab-pane fade show active">
                             <div id="invitacionesProyectos">
                                 <!-- Las invitaciones se cargarán aquí -->
                             </div>
@@ -303,21 +302,21 @@
                 <div class="notification-item alert alert-light d-flex align-items-start border rounded-3 mb-2" 
                     onclick="abrirDetalleInvitacion('${invitacion.uid}')">
                 <div class="me-2">
-                    <i class="bi bi-folder text-primary fs-5"></i>
+                    <i class="bi bi-folder fs-5"></i>
                 </div>
                 <div class="flex-grow-1">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <strong class="text-primary">${invitacion.proyecto.nombre}</strong>
+                            <strong>${invitacion.proyecto.nombre}</strong>
                             <br>
-                            <small class="text-muted">
+                            <small>
                                 Invitado por ${invitacion.invitado_por.nombre} • ${fechaInvitacion}
                             </small>
                         </div>
                         <div class="text-end">
                             <span class="badge bg-warning text-dark">Pendiente</span>
                             <br>
-                            <small class="text-muted">${diasRestantes}</small>
+                            <small>${diasRestantes}</small>
                         </div>
                     </div>
                 </div>
