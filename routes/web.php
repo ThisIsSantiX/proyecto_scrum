@@ -71,12 +71,18 @@ Route::get('/roles/create', [RolesController::class, 'create'])->name('roles.cre
 Route::post('/roles/store', [RolesController::class, 'store'])->name('roles.store');
 Route::get('/roles/{id}',[RolesController::class, 'show'])->name('roles.show');
 Route::put('/roles/{id}', [RolesController::class, 'update'])->name('roles.update');
+
+Route::delete('/roles/{uid}', [RolesController::class, 'destroy'])->name('deleteRoles');
+Route::get('roles/show', [RolesController::class, 'showRoles'])->name('showRoles');
+
+
 Route::delete('/roles/{id}', [RolesController::class, 'destroy'])->name('roles.destroy');
 Route::get('/roles/{id}/delete', [RolesController::class, 'destroy'])->name('roles.delete');
 
 // Dashboard Routes
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/dashboard/proyectos', [DashboardController::class, 'getProyectos'])->name('getProyectos');
+
 
 // Authentication Routes
 Auth::routes(['reset' => true]);
