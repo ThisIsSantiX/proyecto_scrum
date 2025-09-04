@@ -12,7 +12,7 @@ class miembros_equipo extends Model
     protected $fillable = [
         'id_equipo',
         'id_usuario',
-        'id_rol',
+        // 'id_rol',
         'estado',
         'uid',
     ];

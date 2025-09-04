@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class product_backlog extends Model
 {
     use HasFactory;
+    
+    protected $table = 'product_backlog';
 
     protected $fillable = [
         'id_proyecto',
@@ -15,6 +17,7 @@ class product_backlog extends Model
         'titulo',
         'descripcion',
         'prioridad',
+        'valor_historia',
         'progreso',
         'estado',
         'uid',

@@ -19,6 +19,8 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 
         @yield('css')
     </head>
@@ -46,7 +48,10 @@
 
         
         <style>
-            
+            body {
+                font-family: 'Nunito', sans-serif;
+            }
+                                    
             .icon-21 {
                 height: 2rem;
                 width: 1.9rem;
@@ -80,6 +85,33 @@
                 background: rgba(0, 0, 0, 0.9);
             }
 
+          /* Modal siempre se adapta al tema activo */
+           /* Modo claro (por defecto Bootstrap) → sin cambios */
+
+            /* Modo oscuro */
+            body.dark .modal-content {
+            background-color: #1e1e2d !important; /* fondo oscuro */
+            color: #f8f9fa !important;
+            }
+
+            body.dark .modal-header,
+            body.dark .modal-footer {
+            background-color: #1e1e2d !important;
+            color: #f8f9fa !important;
+            border-color: #2c2c40 !important;
+            }
+
+            body.dark .modal-body {
+            background-color: #1e1e2d !important;
+            color: #f8f9fa !important;
+            }
+
+            body.dark .modal-body .form-control,
+            body.dark .modal-body .form-select {
+            background-color: #2a2a3d !important;
+            color: #f8f9fa !important;
+            border: 1px solid #44475a !important;
+            }
 
         </style>
         

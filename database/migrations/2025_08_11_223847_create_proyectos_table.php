@@ -21,8 +21,8 @@ return new class extends Migration
             $table->text('uid');
             $table->integer('visibilidad')->default(1); // 1 = privado, 2 = publico
             $table->string('progreso',20);
-            $table->date('fecha_inicio');
-            $table->date('fecha_fin');
+            $table->date('fecha_inicio')->nullable();
+            $table->date('fecha_fin')->nullable();
             $table->timestamps();
         });
     }
