@@ -70,7 +70,6 @@ Route::get('/roles', [RolesController::class, 'index'])->name('roles.index');
 Route::get('/roles/create', [RolesController::class, 'create'])->name('roles.create');
 Route::post('/roles/store', [RolesController::class, 'store'])->name('roles.store');
 Route::get('/roles/{id}',[RolesController::class, 'show'])->name('roles.show');
-Route::get('/roles/{id}/edit', [RolesController::class, 'edit'])->name('roles.edit');
 Route::put('/roles/{id}', [RolesController::class, 'update'])->name('roles.update');
 Route::delete('/roles/{id}', [RolesController::class, 'destroy'])->name('roles.destroy');
 Route::get('/roles/{id}/delete', [RolesController::class, 'destroy'])->name('roles.delete');
