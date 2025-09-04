@@ -2,20 +2,6 @@
 
 @section('content')
 <div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
-
-    {{-- Mensaje de éxito --}}
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-        </div>
-    @endif
-    {{-- Mensaje de eliminación temporal --}}
-    <div id="delete-alert" class="alert alert-warning alert-dismissible fade show d-none" role="alert">
-        Usuario Eliminado
-        <button type="button" class="btn-close" onclick="hideAlert()"></button>
-    </div>
-
     <div class="row">
         <div class="col-sm-12">
             <div class="card">

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\HistoriaUsuario;
+use App\Models\proyecto_invitaciones;
 use Illuminate\Http\Request;
 
-class HistoriaUsuarioController extends Controller
+class ProyectoInvitacionesController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class HistoriaUsuarioController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(HistoriaUsuario $historiaUsuario)
+    public function show(proyecto_invitaciones $proyecto_invitaciones)
     {
         //
     }
@@ -42,7 +42,7 @@ class HistoriaUsuarioController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(HistoriaUsuario $historiaUsuario)
+    public function edit(proyecto_invitaciones $proyecto_invitaciones)
     {
         //
     }
@@ -50,7 +50,7 @@ class HistoriaUsuarioController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, HistoriaUsuario $historiaUsuario)
+    public function update(Request $request, proyecto_invitaciones $proyecto_invitaciones)
     {
         //
     }
@@ -58,7 +58,7 @@ class HistoriaUsuarioController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(HistoriaUsuario $historiaUsuario)
+    public function destroy(proyecto_invitaciones $proyecto_invitaciones)
     {
         //
     }

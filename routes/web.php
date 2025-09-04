@@ -2,10 +2,17 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\SprintController; 
+
+use App\Http\Controllers\CriteriosAceptacionController;
+use App\Http\Controllers\ProductBacklogController;
+use App\Http\Controllers\SprintController;
 use App\Http\Controllers\ProyectoController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\SprintBacklogController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
+use App\Http\Controllers\DashboardController;
 
 
 /*
@@ -38,21 +45,24 @@ Route::put('/usuarios/update/{uid}', [UserController::class, 'update'])->name('u
 Route::delete('/usuarios/eliminar/{uid}', [UserController::class, 'destroy'])->name('deleteUsuario');
 Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
 
-// proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
+//  Rutas para la gestion de proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
-Route::get('/proyectos/create', [ProyectoController::class, 'create'])->name('proyectos.create');
-Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
-Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.detalle');
-Route::get('/proyectos/{id}',[ProyectoController::class, 'show'])->name('proyectos.show');
-Route::get('/proyectos/{id}/edit', [ProyectoController::class, 'edit'])->name('proyectos.edit');
-Route::put('/proyectos/{id}', [ProyectoController::class, 'update'])->name('proyectos.update');
-Route::delete('/proyectos/{id}', [ProyectoController::class, 'destroy'])->name('proyectos.destroy');
-Route::get('/proyectos/{id}/delete', [ProyectoController::class, 'destroy'])->name('proyectos.delete');
-Route::get('/usuarios/list', [ProyectoController::class, 'showUsuarios'])->name('showUsuario');
+Route::get('/showProyectos',[ProyectoController::class, 'show'])->name('showProyectos');
+Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('storeProyecto');
+Route::get('/proyecto/{uid}', [ProyectoController::class, 'detailsProyecto'])->name('detailsProyecto');
+Route::get('/proyectos/edit/{uid}', [ProyectoController::class, 'edit'])->name('editProyecto');
+Route::put('/proyectos/update', [ProyectoController::class, 'update'])->name('updateProyecto');
+Route::delete('/proyectos/delete/{uid}', [ProyectoController::class, 'destroy'])->name('deleteProyecto');
 
+// Rutas para la gestion del backlog
+Route::get('/proyectos/backlog/{uid}', [ProductBacklogController::class, 'index'])->name('showProyectoBacklog');
+Route::get('proyectos/backlog/{uid}/show', [ProductBacklogController::class, 'show'])->name('showProductBacklog');
+Route::post('/proyectos/backlog/{uid}/store', [ProductBacklogController::class, 'store'])->name('storeProductBacklog');
+Route::put('/proyectos/backlog/{uid}/update/{historiaUid}', [ProductBacklogController::class, 'update'])->name('updateProductBacklog');
+Route::delete('/proyectos/backlog/{uid}/delete', [ProductBacklogController::class, 'destroy'])->name('deleteProductBacklog');
 
-//sprints---------------------------------------------------------------------------------------------------------------------------------------------------
-
+// Rutas para la gestion de los criterios de aceptacion
+Route::post('/criterios/{historiaUid}/store', [CriteriosAceptacionController::class, 'store'])->name('storeCriterios');
 
 //Roles---------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -61,28 +71,46 @@ Route::get('/roles/create', [RolesController::class, 'create'])->name('roles.cre
 Route::post('/roles/store', [RolesController::class, 'store'])->name('roles.store');
 Route::get('/roles/{id}',[RolesController::class, 'show'])->name('roles.show');
 Route::put('/roles/{id}', [RolesController::class, 'update'])->name('roles.update');
-Route::delete('/roles/{uid}', [RolesController::class, 'destroy'])->name('deleteRoles');
-Route::get('roles/show', [RolesController::class, 'showRoles'])->name('showRoles');
+Route::delete('/roles/{id}', [RolesController::class, 'destroy'])->name('roles.destroy');
+Route::get('/roles/{id}/delete', [RolesController::class, 'destroy'])->name('roles.delete');
 
-Route::get('/kanban', function () {return view('pages.kanban.index');})->name('kanban'); 
-Route::get('/dashboard', function () {return view('pages.dashboard.index');})->name('dashboard'); 
+// Dashboard Routes
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard/proyectos', [DashboardController::class, 'getProyectos'])->name('getProyectos');
 
 // Authentication Routes
+Auth::routes(['reset' => true]);
+
 Route::get('/auth/login', [AuthController::class, 'index'])->name('login');
 Route::redirect('/', '/auth/login');
 Route::get('/auth/register', [AuthController::class, 'register'])->name('register');
 Route::post('/auth/register', [AuthController::class, 'authRegister'])->name('register');
 Route::post('/auth/login', [AuthController::class, 'authLogin'])->name('authLogin');
 Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
-Route::get('/auth/confirm-mail', [AuthController::class, 'confirmMail'])->name('confirmMail');
+Route::middleware(['web'])->group(function () {
+    Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
+    Route::post('/auth/recovery', [AuthController::class, 'sendRecoveryEmail'])->name('recoverypw.send');
+    Route::get('/auth/mail-sent', [AuthController::class, 'showMailSent'])->name('mail.sent');
+});
+
 
 // Sprint Routes
-Route::get('/sprints', [SprintController::class, 'index'])->name('sprints.index');
-Route::get('/sprints/create', [SprintController::class, 'create'])->name('sprints.create');
-Route::post('/sprints', [SprintController::class, 'store'])->name('sprints.store');
-Route::get('/sprints/{id}', [SprintController::class, 'show'])->name('sprints.detalle');
-Route::get('/sprints/{id}', [SprintController::class, 'show'])->name('sprints.show');
-Route::get('/sprints/{id}/edit', [SprintController::class, 'edit'])->name('sprints.edit');
-Route::put('/sprints/{id}', [SprintController::class, 'update'])->name('sprints.update');
-Route::delete('/sprints/{id}', [SprintController::class, 'destroy'])->name('sprints.destroy');
+Route::get('/proyectos/backlog/{uid}/sprints/show', [SprintController::class, 'show'])->name('showSprint');
+Route::post('/proyectos/backlog/{uid}/sprints/store', [SprintController::class, 'store'])->name('storeSprint');
+Route::post('/proyectos/backlog/{uid}/sprints/update', [SprintController::class, 'update'])->name('updateSprint');
+Route::post('/proyectos/backlog/{uid}/sprints/destroy', [SprintController::class, 'destroy'])->name('destroySprint');
+Route::get('/proyectos/backlog/{uid}/sprints/items', [SprintController::class, 'showItems'])->name('showItems');
+Route::post('/proyectos/backlog/{uid}/sprints/{sprintUid}/items/start', [SprintController::class, 'startSprint'])->name('startSprint');
+Route::get('/proyectos/{uid}/board', [ProyectoController::class, 'board'])->name('board');
+
+
+// Sprint Backlog Routes
+Route::get('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/show', [SprintBacklogController::class, 'show'])->name('showSprintBacklog ');
+Route::post('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/store',[SprintBacklogController::class, 'store'])->name('storeSprintBacklog');
+
+
+//ruta para las invitaciones a proyectos
+Route::post('/proyectos/{proyecto}/enviar-invitacion',[ProyectoController::class,'enviarInvitacion'])->name('proyectos.enviarInvitacion');
+Route::get('/mis-invitaciones',[ProyectoController::class,'misInvitaciones'])->name('proyectos.misInvitaciones');
+Route::post('/invitaciones/{uid}/responder',[ProyectoController::class,'responderInvitacion'])->name('proyectos.responderInvitacion');
+//------

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
@@ -32,10 +34,13 @@ class AuthController extends Controller
     }
 
     // Esta función muestra la vista de confirmación de correo electrónico
-    public function confirmMail()
+    public function showMailSent()
     {
-        return view('pages.auth.confirm-mail');
+        $email = session('email'); // obtiene el email que pusimos en with()
+        return view('pages.auth.mail-sent', ['email' => $email]);
     }
+
+
 
     // Funcion de inicio de sesión
     public function authLogin(Request $request)
@@ -116,6 +121,18 @@ class AuthController extends Controller
         }
     }
 
+    public function sendRecoveryEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink($request->only('email'));
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return redirect()->route('mail.sent')->with('email', $request->email);
+        } else {
+            return back()->withErrors(['email' => __($status)]);
+        }
+    }
 
     // Funcion de cierre de sesión
     public function logout(Request $request)
