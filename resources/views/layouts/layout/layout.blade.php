@@ -19,6 +19,8 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 
         @yield('css')
     </head>
@@ -46,7 +48,10 @@
 
         
         <style>
-            
+            body {
+                font-family: 'Nunito', sans-serif;
+            }
+                                    
             .icon-21 {
                 height: 2rem;
                 width: 1.9rem;
@@ -107,7 +112,6 @@
             color: #f8f9fa !important;
             border: 1px solid #44475a !important;
             }
-
 
         </style>
         

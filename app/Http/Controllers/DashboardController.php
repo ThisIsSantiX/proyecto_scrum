@@ -17,7 +17,7 @@ class DashboardController extends Controller
     {
         $now = Carbon::now('America/Bogota');
 
-        $fecha = $now->locale('es')->isoFormat('dddd D [de] MMMM');
+        $fecha = $now->locale('es')->isoFormat('dddd, D [de] MMMM');
         $fecha = mb_convert_case($fecha, MB_CASE_TITLE, "UTF-8");
 
         $hora = $now->hour;
