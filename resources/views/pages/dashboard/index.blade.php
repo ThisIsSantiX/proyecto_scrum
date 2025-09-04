@@ -81,7 +81,9 @@
                 <div class="card-body">
                     <h6 class="fw-semibold mb-3"><i class="bi bi-check-circle me-2"></i> Tareas</h6>
                     <div class="text-center p-4">
-                        <img src="https://via.placeholder.com/150" alt="No tareas" class="mb-3">
+                        <img src="https://img.icons8.com/ios/150/000000/todo-list--v1.png" 
+                            alt="Sin tareas" 
+                            class="mb-3 opacity-50" width="75">
                         <p class="text-muted mb-1">No hay tareas asignadas a usted</p>
                         <small class="text-muted">También puedes fijar tareas para verlas aquí</small>
                     </div>
@@ -137,7 +139,6 @@
                         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#all">Todo</button></li>
                         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#mentions">Menciones</button></li>
                         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#projects">Proyectos</button></li>
-                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#notes">Notas</button></li>
                     </ul>
 
                     <div class="tab-content flex-grow-1">
@@ -145,7 +146,7 @@
                             <div class="alert alert-light d-flex align-items-start border rounded-3">
                                 <span class="badge bg-danger me-2">2</span>
                                 <div>
-                                    <strong>Hola Santiago, ¡Bienvenido a Scrum!</strong><br>
+                                    <strong>Hola  {{ Auth::user()->nombre }}, ¡Bienvenido a Scrum!</strong><br>
                                     Estamos encantados de tenerte a bordo. Disfruta.
                                     <div class="mt-1"><small class="text-muted">21 de agosto</small></div>
                                 </div>
@@ -161,7 +162,6 @@
                                 <p class="text-muted mb-0">No hay invitaciones pendientes</p>
                             </div>
                         </div>
-                        <div class="tab-pane fade" id="notes">No hay notas nuevas.</div>
                     </div>
                 </div>
             </div>
@@ -301,7 +301,7 @@
 
                 return `
                 <div class="notification-item alert alert-light d-flex align-items-start border rounded-3 mb-2" 
-                 onclick="abrirDetalleInvitacion('${invitacion.uid}')">
+                    onclick="abrirDetalleInvitacion('${invitacion.uid}')">
                 <div class="me-2">
                     <i class="bi bi-folder text-primary fs-5"></i>
                 </div>
@@ -447,6 +447,7 @@
                             }).then(() => {
                                 // Recargar las invitaciones
                                 cargarInvitacionesNotificaciones();
+                                cargarProyectos();
                             });
                         })
                         .catch(error => {
@@ -487,8 +488,7 @@
             });
 
         });
-    </script>
-    <script>
+
         function cargarProyectos() {
             axios.get("{{ route('getProyectos') }}")
                 .then(function(response) {

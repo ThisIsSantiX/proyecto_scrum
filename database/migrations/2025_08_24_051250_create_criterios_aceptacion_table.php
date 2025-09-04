@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_item_backlog');
             $table->text('descripcion');
-            $table->text('progreso'); // Cumplido - No cumplido
             $table->integer('estado'); 
             $table->text('uid');
             $table->foreign('id_item_backlog')->references('id')->on('product_backlog');
