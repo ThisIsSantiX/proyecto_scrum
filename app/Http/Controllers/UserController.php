@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\roles;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -55,7 +54,6 @@ class UserController extends Controller
                     $fotoPath = $filename;
                     $fotoPath = $request->file('foto_url')->store('usuarios', 'public');
                 } else {
-                    $fotoPath = 'https://ui-avatars.com/api/?name=' . urlencode("{$request->nombre} {$request->apellido}") . '&background=random&color=fff';
                    $fotoPath = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
                 }
 
