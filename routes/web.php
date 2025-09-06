@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-
 use App\Http\Controllers\CriteriosAceptacionController;
 use App\Http\Controllers\ProductBacklogController;
 use App\Http\Controllers\SprintController;
@@ -44,6 +43,7 @@ Route::get('/usuarios/edit/{uid}', [UserController::class, 'edit'])->name('editU
 Route::put('/usuarios/update/{uid}', [UserController::class, 'update'])->name('updateUsuario');
 Route::delete('/usuarios/eliminar/{uid}', [UserController::class, 'destroy'])->name('deleteUsuario');
 Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
+Route::delete('/usuarios/{id}/delete-foto', [UserController::class, 'deleteFoto'])->name('usuarios.deleteFoto');
 
 //  Rutas para la gestion de proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
@@ -76,7 +76,10 @@ Route::delete('/roles/{id}', [RolesController::class, 'destroy'])->name('roles.d
 Route::get('/roles/{id}/delete', [RolesController::class, 'destroy'])->name('roles.delete');
 
 // Dashboard Routes
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('dashboard');
+
 Route::get('/dashboard/proyectos', [DashboardController::class, 'getProyectos'])->name('getProyectos');
 
 
@@ -86,13 +89,13 @@ Auth::routes(['reset' => true]);
 Route::get('/auth/login', [AuthController::class, 'index'])->name('login');
 Route::redirect('/', '/auth/login');
 Route::get('/auth/register', [AuthController::class, 'register'])->name('register');
-Route::post('/auth/register', [AuthController::class, 'authRegister'])->name('register');
+Route::post('/auth/register', [AuthController::class, 'authRegister'])->name('auth.register');
 Route::post('/auth/login', [AuthController::class, 'authLogin'])->name('authLogin');
 Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['web'])->group(function () {
-    Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
-    Route::post('/auth/recovery', [AuthController::class, 'sendRecoveryEmail'])->name('recoverypw.send');
-    Route::get('/auth/mail-sent', [AuthController::class, 'showMailSent'])->name('mail.sent');
+Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
+Route::post('/auth/recovery', [AuthController::class, 'sendRecoveryEmail'])->name('recoverypw.send');
+Route::get('/auth/mail-sent', [AuthController::class, 'showMailSent'])->name('mail.sent');
 });
 
 
@@ -115,8 +118,10 @@ Route::post('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/store',[Spri
 Route::post('/proyectos/{proyecto}/enviar-invitacion',[ProyectoController::class,'enviarInvitacion'])->name('proyectos.enviarInvitacion');
 Route::get('/mis-invitaciones',[ProyectoController::class,'misInvitaciones'])->name('proyectos.misInvitaciones');
 Route::post('/invitaciones/{uid}/responder',[ProyectoController::class,'responderInvitacion'])->name('proyectos.responderInvitacion');
+
 //------
 
 //RUTAS PARA MOSTRAR LOS MIEMBROS DE UN EQUIPO
 Route::get('/miembros-equipo/{uidProyecto}',[MiembrosEquipoController::class,'show'])->name('miembros');
 //-----------------------
+
