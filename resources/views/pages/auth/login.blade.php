@@ -73,6 +73,14 @@
                             <div class="d-flex justify-content-center">
                                 <button type="submit" class="btn btn-primary">Iniciar sesion</button>
                             </div>
+                            <div class="d-flex flex-column align-items-center mt-3 mb-3">
+                                <p>O continúa con</p>
+                                
+                                <a href="{{ url('/auth/google') }}" class="mt-2">
+                                    <img width="50px" src="https://templates.iqonic.design/hope-ui/laravel/public/images/brands/gm.svg" alt="Google">
+                                </a>
+                            </div>
+
                             <p class="mt-3 text-center">
                                 No tienes una cuenta? <a href="{{ route('register') }}" class="text-underline">Haz click aquí para crear una.</a>
                             </p>

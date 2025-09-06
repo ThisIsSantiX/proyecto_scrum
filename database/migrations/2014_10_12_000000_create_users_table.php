@@ -25,6 +25,8 @@ return new class extends Migration
             $table->integer('estado')->default(1);
             $table->text('foto_url')->nullable();
             $table->text('uid');
+            $table->text('google_id')->nullable();
+            $table->string('avatar')->nullable();
             $table->timestamps();
         });
 
