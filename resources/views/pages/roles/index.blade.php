@@ -128,7 +128,7 @@
 <script>
     
     function showRoles(pgn = null) {
-        const baseUrl = "{{ route('showRoles') }}";
+        const baseUrl = "{{ route('roles.show') }}";
         const url = new URL(pgn ?? baseUrl);
          const termino = $('#buscarRoles').val(); 
             if (termino) {
