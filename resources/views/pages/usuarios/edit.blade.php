@@ -15,9 +15,11 @@
                     {{-- Foto --}}
                     <div class="form-group">
                         <div class="profile-img-edit position-relative">
-                            <img src="{{ $user->foto_url ? asset('storage/' . $user->foto_url) : 'https://ui-avatars.com/api/?name='.urlencode($user->nombre.' '.$user->apellido).'&background=random&color=fff' }}"
+                            <img id="fotoPreview" 
+                                src="{{ $user->foto_url ? asset('storage/' . $user->foto_url) : 'https://ui-avatars.com/api/?name='.urlencode($user->nombre.' '.$user->apellido).'&background=random&color=fff' }}"
                                 alt="profile-pic"
                                 class="theme-color-default-img profile-pic rounded avatar-100">
+
 
                             <div class="upload-icone bg-primary">
                                 <label for="foto_url" class="mb-0 d-flex align-items-center justify-content-center">
@@ -123,6 +125,10 @@
 
             formData.set('estado', $('#estado').val());
             formData.set('id_rol', $('#id_rol').val());
+            formData.set('nombre', $('#nombre').val());
+            formData.set('apellido', $('#apellido').val());
+            formData.set('email', $('#email').val());
+
 
             axios.post("{{ route('updateUsuario', $user->uid) }}", formData, {
                 headers: {
@@ -134,7 +140,7 @@
             .then(response => {
                 notyf.success('Usuario actualizado correctamente!');
                 setTimeout(() => {
-                    window.location.href = "{{ route('usuarios.index') }}";
+                    window.location.href = "{{ route('usuarios.index')}}";
                 }, 1200);
             })
             .catch(error => {
@@ -153,6 +159,7 @@
         });
     });
 
+    
 
     $(document).ready(function () {
         const select = $('#id_rol'); 
@@ -198,6 +205,18 @@
                 notyf.error('No se pudieron cargar los roles.');
             });
     });
+
+        document.getElementById('foto_url').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    document.querySelector('.profile-pic').src = ev.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
 
 
 </script>

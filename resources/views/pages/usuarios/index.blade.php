@@ -1,7 +1,8 @@
 @extends('layouts.layout.layout')
 
 @section('content')
-<div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
+<div class="container-fluid content-inner mt-5 pt-4 py-0">
+
     <div class="row">
         <div class="col-sm-12">
             <div class="card">
@@ -76,15 +77,16 @@
 
                     const tabla = usuarios.map(user => `
                         <tr>
-                            <!-- Foto -->
+                           <!-- Foto -->
                             <td class="text-center">
                                 <img src="${user.foto_url.startsWith('http') 
                                             ? user.foto_url 
                                             : `/storage/${user.foto_url}`}" 
                                     alt="foto" 
-                                    class="bg-soft-primary rounded img-fluid avatar-40">
+                                    class="bg-soft-primary rounded img-fluid avatar-40"
+                                    style="cursor: pointer"
+                                    onclick="verFoto('${user.foto_url.startsWith('http') ? user.foto_url : `/storage/${user.foto_url}`}')">
                             </td>
-
 
 
                             <!-- Nombre -->
@@ -106,8 +108,8 @@
                             <!-- Acciones -->
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    <a class="btn btn-sm btn-icon btn-warning" title="Editar"
-                                    href="/usuarios/edit/${user.uid}">
+                                    <a class="btn btn-sm btn-icon btn-primary" title="Editar"
+                                    href="/usuarios/edit/${user.uid}">  
                                         <span class="btn-inner">
                                             <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" 
                                                 xmlns="http://www.w3.org/2000/svg">
@@ -236,6 +238,22 @@
         $(document).ready(function() {
             showUsuarios();
         });
+
+
+        function verFoto(url) {
+            Swal.fire({
+                imageUrl: url,
+                imageAlt: 'Foto de perfil',
+                showCloseButton: true,
+                showConfirmButton: false,
+                width: '30%',
+                high: '50%',
+                background: '#000000ff'
+            });
+        }
+
+        
+
         
     </script>
 @endsection
