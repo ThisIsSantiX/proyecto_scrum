@@ -12,7 +12,7 @@ use App\Http\Controllers\SprintBacklogController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use App\Http\Controllers\DashboardController;
-
+use App\Http\Controllers\MiembrosEquipoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -93,9 +93,9 @@ Route::post('/auth/register', [AuthController::class, 'authRegister'])->name('au
 Route::post('/auth/login', [AuthController::class, 'authLogin'])->name('authLogin');
 Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['web'])->group(function () {
-    Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
-    Route::post('/auth/recovery', [AuthController::class, 'sendRecoveryEmail'])->name('recoverypw.send');
-    Route::get('/auth/mail-sent', [AuthController::class, 'showMailSent'])->name('mail.sent');
+Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
+Route::post('/auth/recovery', [AuthController::class, 'sendRecoveryEmail'])->name('recoverypw.send');
+Route::get('/auth/mail-sent', [AuthController::class, 'showMailSent'])->name('mail.sent');
 });
 
 
@@ -118,4 +118,10 @@ Route::post('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/store',[Spri
 Route::post('/proyectos/{proyecto}/enviar-invitacion',[ProyectoController::class,'enviarInvitacion'])->name('proyectos.enviarInvitacion');
 Route::get('/mis-invitaciones',[ProyectoController::class,'misInvitaciones'])->name('proyectos.misInvitaciones');
 Route::post('/invitaciones/{uid}/responder',[ProyectoController::class,'responderInvitacion'])->name('proyectos.responderInvitacion');
+
 //------
+
+//RUTAS PARA MOSTRAR LOS MIEMBROS DE UN EQUIPO
+Route::get('/miembros-equipo/{uidProyecto}',[MiembrosEquipoController::class,'show'])->name('miembros');
+//-----------------------
+

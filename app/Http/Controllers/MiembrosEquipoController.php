@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\miembros_equipo;
+use App\Models\proyecto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MiembrosEquipoController extends Controller
 {
@@ -25,9 +28,38 @@ class MiembrosEquipoController extends Controller
     }
 
     // Método para mostrar un recurso específico
-    public function show($id)
+    public function show($proyectoUid)
     {
-        // lógica para mostrar un solo elemento
+        try{
+            $proyecto = proyecto::where('uid',$proyectoUid);
+            if(!$proyecto){
+                return response()->json([
+                    "message"=>"No se encontro el proyecto"
+                ],404);
+            }
+
+            $miembros = DB::table('miembros_equipos')
+                        ->join('users','miembros_equipos.id_usuario','=','users.id')
+                        ->join('proyectos','miembros_equipos.id_proyecto','=','proyectos.id')
+                        ->where('proyectos.uid',$proyectoUid)
+                        ->select(
+                            'users.id',
+                            'users.nombre',
+                            'users.apellido',
+                            'users.email',
+                            'users.foto_url',
+                        )
+                        ->get();
+
+            return response()->json([
+                "miembros"=>$miembros
+            ]);
+
+        }catch(\Exception $e){
+            return response()->json([
+                "message"=>"Error: ".$e->getMessage()
+            ]);
+        }
     }
 
     // Método para mostrar el formulario de edición
