@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 
 class UserController extends Controller
@@ -45,17 +46,19 @@ class UserController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($request) {
-                // Subir foto si existe
-                if ($request->hasFile('foto_url')) {
+             DB::transaction(function () use ($request) {
+                 if ($request->hasFile('foto_url')) {
                     $file = $request->file('foto_url');
                     $filename = time().'_'.$file->getClientOriginalName();
                     $file->storeAs('usuarios', $filename, 'public');
 
                     $fotoPath = $filename;
+                    $fotoPath = $request->file('foto_url')->store('usuarios', 'public');
                 } else {
                     $fotoPath = 'https://ui-avatars.com/api/?name=' . urlencode("{$request->nombre} {$request->apellido}") . '&background=random&color=fff';
+                   $fotoPath = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
                 }
+
 
                 User::create([
                     'nombre'    => $request->nombre,
@@ -135,14 +138,12 @@ class UserController extends Controller
         }
 
         // Procesar foto
-      if ($request->hasFile('foto_url')) {
-            $file = $request->file('foto_url');
-            $filename = time().'_'.$file->getClientOriginalName();
-            $file->storeAs('usuarios', $filename, 'public');
+        if ($request->hasFile('foto_url')) {
 
-            $user->foto_url = $filename;
-        }
-
+            $data['foto_url'] = $request->file('foto_url')->store('usuarios', 'public');
+         } elseif (!$user->foto_url) {
+            $data['foto_url'] = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
+         }
 
         $user->update($data);
 
@@ -175,5 +176,22 @@ class UserController extends Controller
         $roles = roles::where('estado', 1)->get(); 
         return response()->json($roles);
     }
+
+
+    public function deleteFoto($id)
+    {
+        $usuario = User::findOrFail($id);
+
+        if ($usuario->foto_url) {
+            // Eliminar archivo físico
+            Storage::disk('public')->delete('usuarios/'.$usuario->foto_url);
+
+            // Quitar referencia en la BD
+            $usuario->foto_url = null;
+            $usuario->save();
+        }
+
+        return redirect()->back()->with('success', 'La foto de perfil fue eliminada correctamente.'); 
+    }               
 
 }    

@@ -43,11 +43,14 @@
 <div class="container-fluid px-4 py-4">
 
     <!-- Saludo -->
-    <div class="text-center mb-4">
-        <p class="text-muted mb-1">{{ $fecha }}</p>
-        <h2 class="fw-bold">{{ $saludo }}, {{ Auth::user()->nombre }}</h2>
-
-    </div>
+        <h2 class="fw-bold">
+                {{ $saludo }},
+                @if(Auth::check())
+                    {{ Auth::user()->nombre }}
+                @else
+                    Invitado
+                @endif
+    </h2>
 
     <!-- Barra de búsqueda -->
     <div class="row justify-content-center mb-4">

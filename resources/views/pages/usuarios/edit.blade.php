@@ -162,6 +162,7 @@
         axios.get("{{ route('showRoles') }}")
             .then(response => {
                 const roles = response.data; 
+                console.log(roles);
                 select.empty();
                 select.append('<option value="">Seleccione un rol...</option>');
 
