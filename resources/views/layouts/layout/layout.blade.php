@@ -80,15 +80,6 @@
                 justify-content: center;
                 align-items: center;
             }
-
-            body.dark #loading {
-                background: rgba(0, 0, 0, 0.9);
-            }
-
-          /* Modal siempre se adapta al tema activo */
-           /* Modo claro (por defecto Bootstrap) → sin cambios */
-
-            /* Modo oscuro */
             body.dark .modal-content {
             background-color: #1e1e2d !important; /* fondo oscuro */
             color: #f8f9fa !important;

@@ -10,7 +10,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SprintBacklogController;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use App\Models\User;
+use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
 
@@ -25,6 +29,72 @@ use App\Http\Controllers\MiembrosEquipoController;
 |
 */
 
+Route::get('/auth/google', function () {
+    return Socialite::driver('google')->redirect();
+});
+
+Route::get('/auth/google/callback', function () {
+    try {
+        $googleUser = Socialite::driver('google')->user();
+    } catch (\Exception $e) {
+        return redirect('/auth/login')->withErrors(['google_login' => 'Error al iniciar sesión con Google: ' . $e->getMessage()]);
+    }
+
+    $nombre   = explode(' ', $googleUser->getName())[0] ?? '';
+    $apellido = explode(' ', $googleUser->getName())[1] ?? '';
+
+    $user = User::where('email', $googleUser->getEmail())->first();
+    $uid = $user ? $user->uid : (string) Str::uuid();
+
+    $foto = null;
+
+    // 🔹 Intentar descargar la foto de Google con headers
+    if ($googleUser->getAvatar()) {
+        try {
+            $response = Http::withHeaders([
+                'User-Agent' => 'Mozilla/5.0',
+                'Accept'     => 'image/webp,image/apng,image/*,*/*;q=0.8',
+            ])->get($googleUser->getAvatar());
+
+            if ($response->successful()) {
+                $extension = "jpg";
+                $fileName = "usuarios/" . $uid . "." . $extension;
+
+                Storage::disk('public')->put($fileName, $response->body());
+
+                $foto = "storage/" . $fileName;
+            }
+        } catch (\Exception $e) {
+            // Si falla, se deja null y pasa al fallback
+        }
+    }
+
+    // 🔹 Fallback a ui-avatars si no se descargó nada
+    if (!$foto) {
+        $foto = "https://ui-avatars.com/api/?name=" . urlencode("{$nombre} {$apellido}") . "&background=random&color=fff";
+    }
+
+    // 🔹 Guardar usuario
+    $user = User::updateOrCreate(
+        ['email' => $googleUser->getEmail()],
+        [
+            'nombre'   => $nombre,
+            'apellido' => $apellido,
+            'email'    => $googleUser->getEmail(),
+            'google_id'=> $googleUser->getId(),
+            'foto_url' => $foto,
+            'uid'      => $uid,
+            'estado'   => 1,
+            'password' => bcrypt(Str::random(16)),
+        ]
+    );
+
+    Auth::login($user);
+
+    return redirect('/dashboard');
+});
+
+//-----------------------------------------------------------------------
 
 Route::get('/', function () {
     return view('pages.auth.login');
