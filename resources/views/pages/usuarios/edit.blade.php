@@ -89,7 +89,7 @@
                             </div>
                         
                             <div class="mt-4 d-flex justify-content-end">
-                                <button type="submit" class="btn btn-warning">
+                                <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-pencil-square"></i> Actualizar
                                 </button>
                             </div>

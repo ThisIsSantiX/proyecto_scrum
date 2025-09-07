@@ -108,7 +108,7 @@
                             <!-- Acciones -->
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    <a class="btn btn-sm btn-icon btn-primary" title="Editar"
+                                    <a class="btn btn-sm btn-icon btn-warning" title="Editar"
                                     href="/usuarios/edit/${user.uid}">  
                                         <span class="btn-inner">
                                             <svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" 

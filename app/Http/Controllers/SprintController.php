@@ -318,7 +318,6 @@ class SprintController extends Controller
                 'me.id',
                 'me.id_proyecto',
                 'me.id_usuario',
-                'me.id_rol',
                 'me.estado',
                 DB::raw("CONCAT(u.nombre, ' ', u.apellido) as nombre_completo")
             )
