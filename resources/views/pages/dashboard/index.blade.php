@@ -62,10 +62,10 @@
 
     <!-- Chips / Filtros -->
     <div class="d-flex justify-content-center gap-2 mb-5">
-        <span class="badge rounded-pill bg-body-secondary text-dark px-3 py-2">
+        <span class="badge rounded-pill bg-body-secondary text-body px-3 py-2">
             <i class="bi bi-people me-1"></i> Equipo del Proyecto de Santiago
         </span>
-        <span class="badge rounded-pill bg-body-secondary text-dark px-3 py-2">
+        <span class="badge rounded-pill bg-body-secondary text-body px-3 py-2">
             <i class="bi bi-clock-history me-1"></i> Ver todos los recientes
         </span>
     </div>
