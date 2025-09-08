@@ -113,7 +113,7 @@ Route::get('/usuarios/edit/{uid}', [UserController::class, 'edit'])->name('editU
 Route::put('/usuarios/update/{uid}', [UserController::class, 'update'])->name('updateUsuario');
 Route::delete('/usuarios/eliminar/{uid}', [UserController::class, 'destroy'])->name('deleteUsuario');
 Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
-Route::delete('/usuarios/{id}/delete-foto', [UserController::class, 'deleteFoto'])->name('usuarios.deleteFoto');
+Route::delete('/usuarios/{uid}/foto', [UserController::class, 'deleteFoto'])->name('deleteFotoUsuario');
 
 //  Rutas para la gestion de proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
