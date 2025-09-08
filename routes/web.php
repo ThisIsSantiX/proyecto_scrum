@@ -184,6 +184,11 @@ Route::get('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/show', [Sprin
 Route::post('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/store',[SprintBacklogController::class, 'store'])->name('storeSprintBacklog');
 
 
+// Tablero Routes
+
+Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/board', [SprintController::class, 'getSprintBoard']);
+Route::put('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}/progreso', [SprintController::class, 'updateItemProgreso']);
+
 //ruta para las invitaciones a proyectos
 Route::post('/proyectos/{proyecto}/enviar-invitacion',[ProyectoController::class,'enviarInvitacion'])->name('proyectos.enviarInvitacion');
 Route::get('/mis-invitaciones',[ProyectoController::class,'misInvitaciones'])->name('proyectos.misInvitaciones');
