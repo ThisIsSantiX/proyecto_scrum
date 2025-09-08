@@ -188,6 +188,7 @@
                 <div class="modal-body">
                     <form id="formHistoriaEdit">
                         <input type="hidden" id="edit_proyecto_uid" value="{{ $proyecto->uid }}">
+                        <input type="hidden" id="edit_historia_uid" value="">
 
                         <div class="mb-3">
                             <label for="edit_titulo" class="form-label">Título</label>
