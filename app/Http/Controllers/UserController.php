@@ -176,18 +176,26 @@ class UserController extends Controller
     }
 
 
-    public function deleteFoto($uid)
-    {
-        $user = User::where('uid', $uid)->firstOrFail();
+    public function deleteFotoPerfil($uid)
+        {
+        
+            $user = User::where('uid', $uid)->firstOrFail();
 
-        if ($user->foto_url) {
-            Storage::delete($user->foto_url); // eliminar archivo
-            $user->foto_url = null;
-            $user->save();
+            try {
+                
+                if ($user->foto_url && Storage::exists($user->foto_url)) {
+                    Storage::delete($user->foto_url);
+                }
+
+                $user->foto_url = null;
+                $user->save();
+
+                return response()->json(['success' => true]);
+            } catch (\Exception $e) {
+                Log::error('Error al eliminar foto: '.$e->getMessage());
+                return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+            }
         }
-
-        return response()->json(['success' => true]);
-    }
                 
 
 }    

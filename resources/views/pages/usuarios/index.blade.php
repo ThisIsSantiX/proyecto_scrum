@@ -197,7 +197,7 @@
                 color: isDark ? '#fff' : '#000'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    axios.delete(`/usuarios/${uid}/foto`, {
+                    axios.delete(`/usuarios/eliminar/${uid}`, {
                         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
                     })
 
