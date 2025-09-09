@@ -4,25 +4,24 @@
 
 @section('content')
     <div class="container-fluid content-inner mt-5 pt-4 py-0">
-        <div class="row">
-            <!-- Título principal -->
+        <div class="row sticky-subheader">
             <div class="col-12">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body py-2">
+                <div class="card shadow-sm border">
+                    <div class="card-body py-2 pb-0">
                         <h5 class="mb-4 mt-2 fw-semibold">
                             <span class="text-muted fw-bold">{{ $proyecto->nombre }}</span>
                         </h5>
 
-                        <!-- Navbar debajo del título -->
-                        <ul class="nav nav-tabs mt-2">
+                        <!-- Navbar de pestañas -->
+                        <ul class="nav flex-row mt-2">
                             <li class="nav-item">
-                                <a class="nav-link active" href="javascript:void(0);">Trabajo pendiente</a>
+                                <a class="nav-link active" href="javascript:void(0)" onclick="mostrarSeccion('vista-pendiente')">Trabajo pendiente</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="javascript:void(0);">Tablero</a>
+                                <a class="nav-link" href="javascript:void(0)" onclick="mostrarSeccion('tablero')">Tablero</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="javascript:void(0);">Reuniones</a>
+                                <a class="nav-link" href="javascript:void(0)" onclick="mostrarSeccion('reuniones')">Reuniones</a>
                             </li>
                         </ul>
                     </div>
@@ -30,74 +29,81 @@
             </div>
         </div>
 
+    <!-- Contenedor dinámico -->
+    <div id="contenido-tab" class="mt-3">
 
-        <div class="row g-3">
-            <!-- Sección izquierda - Historias de Usuario -->
-            <div class="col-md-6">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center py-2">
-                        <h6 class="mb-0 fw-semibold fs-6">
-                            <i class="bi bi-list-task text-primary me-1"></i>
-                            Product Backlog
-                        </h6>
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalHistoria">
-                            <i class="bi bi-plus-circle me-1"></i> Nueva
-                        </button>
-                    </div>
-                    <div class="card-body py-3 px-3" id="historias-content">
-                        <!-- Estado de carga -->
-                        <div class="d-flex justify-content-center py-3" id="loading-historias">
-                            <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                <span class="visually-hidden">Cargando...</span>
-                            </div>
-                        </div>
-
-                        <!-- Estado vacío -->
-                        <div class="empty-state text-center text-muted py-3 d-none" id="empty-historias">
-                            <i class="bi bi-journal fs-4 d-block mb-1"></i>
-                            <p class="small mb-1">No hay historias creadas</p>
+        <!-- Vista: Trabajo pendiente -->
+        <div id="vista-pendiente">
+            <div class="row g-3">
+                <!-- Sección izquierda - Historias de Usuario -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center py-2">
+                            <h6 class="mb-0 fw-semibold fs-6">
+                                <i class="bi bi-list-task text-primary me-1"></i>
+                                Backlog
+                            </h6>
                             <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalHistoria">
-                                + Crear historia
+                                <i class="bi bi-plus-circle me-1"></i> Nueva
                             </button>
+                        </div>
+                        <div class="card-body py-3 px-3" id="historias-content">
+                            <div class="d-flex justify-content-center py-3" id="loading-historias">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                            </div>
+                            <div class="empty-state text-center text-muted py-3 d-none" id="empty-historias">
+                                <i class="bi bi-journal fs-4 d-block mb-1"></i>
+                                <p class="small mb-1">No hay historias creadas</p>
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalHistoria">
+                                    + Crear historia
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Sección derecha - Sprints -->
-                    <div class="col-md-6"> 
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center py-2">
-                                <h6 class="mb-0 fw-semibold fs-6">
-                                    <i class="bi bi-flag text-success me-1"></i>
-                                    Sprints
-                                </h6>
-                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalSprint">
-                                    <i class="bi bi-plus-circle me-1"></i> Nuevo
-                                </button>
-                            </div>
-                            <div class="card-body py-3 px-3">
-                                <!-- Contenedor de sprints -->
-                                <div id="sprintsContainer">
-                                    <!-- Estado vacío inicial -->
-                                    <div id="emptyState" class="empty-state text-center text-muted py-4">
-                                        <i class="bi bi-flag-fill fs-3 d-block mb-2"></i>
-                                        <p class="small mb-2">No hay sprints creados</p>
-                                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalSprint">
-                                            + Crear primer sprint
-                                        </button>
-                                    </div>
-                                    
-                                    <!-- Lista de sprints (se llenará dinámicamente) -->
-                                    <div id="sprintsList" class="d-none">
-                                        <!-- Los sprints se cargarán aquí -->
-                                    </div>
+                <!-- Sección derecha - Sprints -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center py-2">
+                            <h6 class="mb-0 fw-semibold fs-6">
+                                <i class="bi bi-flag text-success me-1"></i>
+                                Sprints
+                            </h6>
+                            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalSprint">
+                                <i class="bi bi-plus-circle me-1"></i> Nuevo
+                            </button>
+                        </div>
+                        <div class="card-body py-3 px-3">
+                            <div id="sprintsContainer">
+                                <div id="emptyState" class="empty-state text-center text-muted ">
+                                    <i class="bi bi-flag-fill d-block mb-2"  style="font-size: 2.83rem;"></i>
+                                    <p class="small mb-2">No hay sprints creados</p>
+                                    <p class="text-muted small mb-3">Crea tu primer sprint para empezar a trabajar</p>
+                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalSprint">
+                                        + Crear primer sprint
+                                    </button>
+                                </div>
+                                <div id="sprintsList" class="d-none">
+                                    <!-- Los sprints se cargarán aquí -->
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Vista: Tablero -->
+        <div id="tablero" style="display: none;">
+            @include('pages.proyectos.backlog.board.tablero')
+        </div>
+
+        <!-- Vista: Reuniones -->
+        <div id="reuniones" style="display: none;">
+            <p>Aquí estarán las reuniones del proyecto.</p>
         </div>
     </div>
 
@@ -540,7 +546,6 @@
         
         .empty-state {
             text-align: center;
-            padding: 3rem 1rem;
             color: #6b7280;
         }
         
@@ -732,6 +737,16 @@
             outline: none;
             border-color: #352f89;
             box-shadow: 0 0 0 0.2rem rgba(32, 54, 201, 0.25);
+        }
+        .sticky-subheader {
+            position: sticky;
+            top: 70px;
+            z-index: 1025; 
+        }
+        .sticky-subheader .nav-link.active {
+            color: #0d6efd;
+            font-weight: 600;
+            border-bottom: 2px solid #0d6efd;
         }
         
     </style>
@@ -1791,29 +1806,33 @@
 
 
 
-        $('#formIniciarSprint').on('submit', function (e) {
-            e.preventDefault();
+    $('#formIniciarSprint').on('submit', function (e) {
+        e.preventDefault();
 
-            const proyectoUID = $('#uid_proyecto').val();
-            const sprintUID   = $(this).data('sprint-uid');
-            const fechaInicio = $(this).find('input[name="fecha_inicio"]').val();
-            const fechaFin    = $(this).find('input[name="fecha_fin"]').val();
+        const proyectoUID = $('#uid_proyecto').val();
+        const sprintUID   = $(this).data('sprint-uid');
+        const fechaInicio = $(this).find('input[name="fecha_inicio"]').val();
+        const fechaFin    = $(this).find('input[name="fecha_fin"]').val();
 
-            axios.post(`/proyectos/backlog/${proyectoUID}/sprints/${sprintUID}/items/start`, {
-                fecha_inicio: fechaInicio,
-                fecha_fin: fechaFin
-            })
-            .then(response => {
-                $('#modalIniciarSprint').modal('hide');
-                notyf.success('Sprint iniciado correctamente');
-                window.location.href = `/proyectos/${proyectoUID}/board`;
-                cargarSprints();
-            })
-            .catch(error => {
-                console.error(error);
-                notyf.error('Error al iniciar sprint');
-            });
+        axios.post(`/proyectos/backlog/${proyectoUID}/sprints/${sprintUID}/items/start`, {
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin
+        })
+        .then(response => {
+            $('#modalIniciarSprint').modal('hide');
+            notyf.success('Sprint iniciado correctamente');
+            
+            // Guardar el sprint UID para el tablero
+            sessionStorage.setItem('currentSprintUID', sprintUID);
+            
+            window.location.href = `/proyectos/${proyectoUID}/board`;
+            cargarSprints();
+        })
+        .catch(error => {
+            console.error(error);
+            notyf.error('Error al iniciar sprint');
         });
+    });
 
         // Editar sprint (abrir modal)
         $(document).on('click', '.editar-sprint', function (e) {
@@ -2273,8 +2292,6 @@
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             })
         });
-
-
 
     </script>
 @endsection

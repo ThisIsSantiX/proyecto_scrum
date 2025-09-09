@@ -113,8 +113,7 @@ Route::get('/usuarios/edit/{uid}', [UserController::class, 'edit'])->name('editU
 Route::put('/usuarios/update/{uid}', [UserController::class, 'update'])->name('updateUsuario');
 Route::delete('/usuarios/eliminar/{uid}', [UserController::class, 'destroy'])->name('deleteUsuario');
 Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
-Route::delete('/usuarios/{uid}/foto', [UserController::class, 'deleteFotoPerfil'])->name('deleteFotoUsuario');
-
+Route::delete('/usuarios/{id}/delete-foto', [UserController::class, 'deleteFoto'])->name('usuarios.deleteFoto');
 
 //  Rutas para la gestion de proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
@@ -184,6 +183,11 @@ Route::get('/proyectos/{uid}/board', [ProyectoController::class, 'board'])->name
 Route::get('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/show', [SprintBacklogController::class, 'show'])->name('showSprintBacklog ');
 Route::post('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/store',[SprintBacklogController::class, 'store'])->name('storeSprintBacklog');
 
+
+// Tablero Routes
+
+Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/board', [SprintController::class, 'getSprintBoard']);
+Route::put('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}/progreso', [SprintController::class, 'updateItemProgreso']);
 
 //ruta para las invitaciones a proyectos
 Route::post('/proyectos/{proyecto}/enviar-invitacion',[ProyectoController::class,'enviarInvitacion'])->name('proyectos.enviarInvitacion');
