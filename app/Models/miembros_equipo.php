@@ -18,4 +18,10 @@ class miembros_equipo extends Model
     ];
 
     protected $primaryKey = 'id';
+
+    public function usuario()
+{
+    return $this->belongsTo(User::class, 'id_usuario');
+}
+
 }

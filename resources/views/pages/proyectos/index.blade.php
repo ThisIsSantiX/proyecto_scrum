@@ -511,8 +511,10 @@
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         ${miembro.foto_url ? `
-                                        <img src="${miembro.foto_url}" class="rounded-circle me-3"
-                                        style="width: 48px; height: 48px; object-fit: cover;">
+                                       <img src="${miembro.foto_url ? miembro.foto_url + '?v=' + new Date().getTime() : ''}" 
+                                            class="rounded-circle me-3"
+                                            style="width: 48px; height: 48px; object-fit: cover;">
+
                                     ` : `
                                         <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3"
                                             style="width: 48px; height: 48px;">
@@ -699,44 +701,46 @@
             `;
         }
 
-        //funcion para listar a los miembros
-        function loadMembers(uid, container) {
-            axios.get(`/miembros-equipo/${uid}`)
-                .then(function(response) {
-                    if (response.data.miembros && response.data.miembros.length > 0) {
-                        let membersHtml = '';
+       // función para listar a los miembros
+            function loadMembers(uid, container) {
+                axios.get(`/miembros-equipo/${uid}`)
+                    .then(function(response) {
+                        if (response.data.miembros && response.data.miembros.length > 0) {
+                            let membersHtml = '';
 
-                        response.data.miembros.forEach(miembro => {
-                            if (miembro.foto_url) {
-                                // Si tiene foto
-                                membersHtml += `
-                                    <img src="${miembro.foto_url}" 
-                                        class="rounded-circle border border-2 border-primary"
-                                        style="width: 40px; height: 40px; object-fit: cover; margin-right: -10px; z-index: 1;"
-                                        data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                        title="${miembro.nombre} ${miembro.apellido}">
-                                 `;
-                            } else {
-                                // Si no tiene foto -> iniciales
-                                membersHtml += `
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
-                                        style="width: 40px; height: 40px; background-color: #6c757d; color: white; font-weight: bold; margin-right: -10px; z-index: 1;"
-                                        data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                        title="${miembro.nombre} ${miembro.apellido}">
-                                        ${getInitials(miembro.nombre + ' ' + miembro.apellido)}
-                                    </div>
-                                `;
-                            }
-                        });
+                            response.data.miembros.forEach(miembro => {
+                                if (miembro.foto_url) {
+                                    // Si tiene foto -> evitar caché con timestamp
+                                    membersHtml += `
+                                        <img src="${miembro.foto_url}?v=${new Date().getTime()}" 
+                                            class="rounded-circle border border-2 border-primary"
+                                            style="width: 40px; height: 40px; object-fit: cover; margin-right: -10px; z-index: 1;"
+                                            data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                            title="${miembro.nombre} ${miembro.apellido}">
+                                    `;
+                                } else {
+                                    // Si no tiene foto -> iniciales
+                                    membersHtml += `
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
+                                            style="width: 40px; height: 40px; background-color: #6c757d; color: white; font-weight: bold; margin-right: -10px; z-index: 1;"
+                                            data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                            title="${miembro.nombre} ${miembro.apellido}">
+                                            ${getInitials(miembro.nombre + ' ' + miembro.apellido)}
+                                        </div>
+                                    `;
+                                }
+                            });
 
-                        container.html(membersHtml);
-                    }
-                })
-                .catch(function(error) {
-                    console.error("Error cargando miembros:", error);
-                    container.html('<small class="text-danger">Error al cargar</small>');
-                });
-        }
+                            container.html(membersHtml);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error("Error cargando miembros:", error);
+                        container.html('<small class="text-danger">Error al cargar</small>');
+                    });
+            }
+            
+
         //------------
 
         document.addEventListener("DOMContentLoaded", function() {
