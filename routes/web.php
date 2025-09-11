@@ -17,6 +17,7 @@ use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
+use App\Models\SprintBacklogMiembro;
 
 /*
 |--------------------------------------------------------------------------
@@ -199,4 +200,8 @@ Route::post('/invitaciones/{uid}/responder',[ProyectoController::class,'responde
 //RUTAS PARA MOSTRAR LOS MIEMBROS DE UN EQUIPO
 Route::get('/miembros-equipo/{uidProyecto}',[MiembrosEquipoController::class,'show'])->name('miembros');
 //-----------------------
+
+//RUTA PARA PODER DEVOLVER UN PRODUCT_BACKLOG DEL SPRINT
+Route::delete('/proyectos/backlog/{uid}/sprints/items/{uidHistoria}/devolver',[SprintBacklogController::class,'devolverHistoria'])->name('devolverProduct');
+//_____________________________________
 
