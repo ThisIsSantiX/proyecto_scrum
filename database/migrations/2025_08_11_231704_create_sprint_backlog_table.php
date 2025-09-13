@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreign('id_sprint')->references('id')->on('sprints');
             $table->unsignedBigInteger('id_item_backlog');
             $table->foreign('id_item_backlog')->references('id')->on('product_backlog');
-            $table->string('titulo', 50);
             $table->string('progreso', 20);
             $table->integer('estado')->default(1);
             $table->text('uid');

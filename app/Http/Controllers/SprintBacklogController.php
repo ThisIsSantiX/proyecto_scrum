@@ -32,10 +32,9 @@ class SprintBacklogController extends Controller
     {
         $request->validate([
             'id_item_backlog' => 'required|integer',
-            'titulo' => 'required|string|max:255',
             'progreso' => 'required|string',
-            'asignado_a' => 'required|array', // IDs de miembros_equipos
-            'asignado_a.*' => 'integer'
+            // 'asignado_a' => 'required|array', // IDs de miembros_equipos
+            // 'asignado_a.*' => 'integer'
         ]);
 
         try {
@@ -45,7 +44,6 @@ class SprintBacklogController extends Controller
             $sprintBacklogId = DB::table('sprint_backlog')->insertGetId([
                 'id_sprint'       => $sprintId,
                 'id_item_backlog' => $request->id_item_backlog,
-                'titulo'          => $request->titulo,
                 'estado'          => 1,
                 'progreso'        => $request->progreso,
                 'uid'             => Str::uuid(),
