@@ -421,13 +421,7 @@
 
                     <!-- Título y Estado -->
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Título</label>
-                                <input type="text" id="tituloSpr" name="titulo" class="form-control" placeholder="Ej. Implementar login" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label">Estado</label>
                                 <select id="progresoSpr" name="progreso" class="form-select" required>
@@ -614,7 +608,7 @@
         }
         
         .sprint-backlog-area.drag-over {
-            background: #10223e;
+            background: rgba(var(--bs-primary-rgb), 0.1);
             border-color: #2196f3 !important;
             box-shadow: inset 0 2px 8px rgba(33, 150, 243, 0.2);
         }
@@ -741,7 +735,7 @@
         .sticky-subheader {
             position: sticky;
             top: 70px;
-            z-index: 1025; 
+            z-index: 500; 
         }
         .sticky-subheader .nav-link.active {
             color: #0d6efd;
@@ -883,6 +877,7 @@
                         historiasHtml += `
                             <div class="col-12 mb-2" data-historia-id="${historia.id}">
                                 <div class="card shadow-sm border rounded-2 historia-item ${prioridadClass}" 
+                                    draggable="true"
                                     style="font-size: 0.85rem;"
                                     data-uid="${historia.uid}"
                                     data-titulo="${historia.titulo}"
@@ -1268,14 +1263,15 @@
             });
 
             // Hacer historias arrastrables (preparado para futuro drag & drop)
-            $(document).on('dragstart', '.historia-item', function(e) {
+            $(document).on('dragstart', '.historia-item', function (e) {
+                e.originalEvent.dataTransfer.setData("historiaId", $(this).data("id"));
                 $(this).css('opacity', '0.5');
-                console.log('Arrastrando historia:', $(this).find('.card-title').text());
             });
 
-            $(document).on('dragend', '.historia-item', function(e) {
+            $(document).on('dragend', '.historia-item', function () {
                 $(this).css('opacity', '1');
             });
+
 
             // Botón de refrescar historias (opcional)
             $(document).on('click', '.btn-refresh-historias', function() {
@@ -1384,7 +1380,10 @@
                             <div class="sprint-backlog-wrapper" data-sprint-id="${sprint.id}">
                                 <!-- Sprint backlog area (cuando hay SBs) -->
                                 <div class="sprint-backlog-area rounded p-3 min-height-100" 
-                                    style="min-height: 100px; border-color: #dee2e6;">
+                                    style="min-height: 100px; border-color: #dee2e6;"
+                                    data-sprint-id="${sprint.id}"
+                                    data-sprint-uid="${sprint.uid}">
+                                    
                                     <div class="text-center text-body py-3">
                                         <i class="fas fa-arrow-down fs-4 mb-2 d-block"></i>
                                         <p class="small mb-0">
@@ -1397,9 +1396,12 @@
                                             >
                                                 Agregue un elemento
                                             </a> 
-                                            o simplemente arrastre y suelte Product Backlog.
+                                            o simplemente arrastre y suelte Backlog.
                                         </p>
                                     </div>
+
+                                    <div class="sprint-backlog-list"></div>
+
                                 </div>
                             </div>
                         </div>
@@ -1477,7 +1479,7 @@
                         },
                         drop: function(event, ui) {
                             $(this).removeClass('drag-over');
-                            notyf.success('Elemento movido al sprint (visual)');
+                            notyf.success('Elemento movido al sprint');
                         }
                     });
                 }
@@ -1488,47 +1490,70 @@
 
         // Función alternativa usando HTML5 drag and drop
         function habilitarDragDropHTML5() {
-            // Hacer los elementos de backlog arrastrables
-            $(document).on('mouseenter', '.backlog-item', function() {
+            // Hacer las historias arrastrables
+            $(document).on('mouseenter', '.historia-item', function() {
                 $(this).attr('draggable', 'true');
             });
-            
-            // Eventos de drag para elementos de backlog
-            $(document).on('dragstart', '.backlog-item', function(e) {
-                e.originalEvent.dataTransfer.setData('text/plain', $(this).data('backlog-id'));
-                $(this).addClass('dragging');
+
+            // Inicia el arrastre
+            $(document).on('dragstart', '.historia-item', function(e) {
+                e.originalEvent.dataTransfer.setData('historiaUid', $(this).data('uid'));
+                $(this).addClass('dragging').css('opacity', '0.5');
             });
-            
-            $(document).on('dragend', '.backlog-item', function(e) {
-                $(this).removeClass('dragging');
+
+            // Termina el arrastre
+            $(document).on('dragend', '.historia-item', function(e) {
+                $(this).removeClass('dragging').css('opacity', '1');
             });
-            
-            // Eventos de drop para áreas de sprint
+
+            // Permitir soltar en sprint
             $(document).on('dragover', '.sprint-backlog-area', function(e) {
                 e.preventDefault();
                 $(this).addClass('drag-over');
             });
-            
+
             $(document).on('dragleave', '.sprint-backlog-area', function(e) {
                 $(this).removeClass('drag-over');
             });
-            
+
+            // Soltar en sprint backlog
             $(document).on('drop', '.sprint-backlog-area', function(e) {
                 e.preventDefault();
                 $(this).removeClass('drag-over');
-                
-                const backlogId = e.originalEvent.dataTransfer.getData('text/plain');
-                const $draggedElement = $(`.backlog-item[data-backlog-id="${backlogId}"]`);
-                
-                // Mover el elemento visualmente
-                $(this).append($draggedElement);
-                
-                // Limpiar mensaje vacío si existe
+
+                const historiaUid = e.originalEvent.dataTransfer.getData('historiaUid');
+                const $historia = $(`.historia-item[data-uid="${historiaUid}"]`);
+
+                // Mover visualmente dentro del sprint backlog
+                $(this).find('.sprint-backlog-list').append($historia.closest('.col-12'));
+
+                // Borrar mensaje vacío si existía
                 $(this).find('.text-center').remove();
-                
-                notyf.success('Elemento movido al sprint (visual)');
+
+                // Obtener datos necesarios
+                const sprintId = $(this).data('sprint-id');
+                const proyectoUID = $('#uid_proyecto').val();
+                const progreso = $historia.data('progreso');
+                const historiaId = $historia.closest('[data-historia-id]').data('historia-id');
+
+                // Llamar al backend para guardar en sprint_backlog
+                axios.post(`/proyectos/backlog/${proyectoUID}/sprints/${sprintId}/sprbacklog/store`, {
+                    id_item_backlog: historiaId,
+                    progreso: progreso,
+                    asignado_a: [] // puedes enviar IDs de miembros después
+                }).then(res => {
+                    notyf.success('Historia agregada al Sprint Backlog');
+                    window.refreshAllSprintBacklogs();
+                    mostrarSprints();
+                    window.cargarHistorias();
+                }).catch(err => {
+                    notyf.error('Error al mover historia al Sprint');
+                    console.error(err.response?.data || err);
+                });
             });
         }
+
+
 
         // Función para actualizar orden de sprints (solo visual)
         function actualizarOrdenSprints() {
@@ -2070,7 +2095,9 @@
                                 // No hay items - mostrar mensaje para agregar
                                 sprintWrapper.html(`
                                     <div class="sprint-backlog-area rounded p-3 min-height-100" 
-                                        style="min-height: 100px; border-color: #dee2e6;">
+                                        style="min-height: 100px; border-color: #dee2e6;"
+                                        data-sprint-id="${sprintId}">
+
                                         <div class="text-center text-body py-3">
                                             <i class="fas fa-arrow-down fs-4 mb-2 d-block"></i>
                                             <p class="small mb-0">
@@ -2083,9 +2110,12 @@
                                                 >
                                                     Agregue un elemento
                                                 </a> 
-                                                o simplemente arrastre y suelte Product Backlog.
+                                                o simplemente arrastre y suelte Backlog.
                                             </p>
                                         </div>
+
+                                        <div class="sprint-backlog-list"></div>
+
                                     </div>
                                 `);
                             } else {
@@ -2159,19 +2189,21 @@
                                 });
                                 
                                 itemsHtml += `
-                                    <div class="text-center  mt-3">
-                                        <a 
-                                            href="#" 
-                                            class="text-primary fw-semibold small" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#modalRegSprBacklog" 
-                                            data-sprint-id="${sprintId}"
-                                        >
+                                    <div class="text-center mt-3 sprint-backlog-area p-2 rounded-2"
+                                        data-sprint-id="${sprintId}"
+                                        <a href="#"
+                                            class="text-primary fw-semibold small"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalRegSprBacklog"
+                                            data-sprint-id="${sprintId}">
                                             <i class="fas fa-plus me-1"></i>
                                             Agregar otro elemento
                                         </a>
+
+                                        <!-- Lista "virtual" para que tu drop funcione aquí también -->
+                                        <div class="sprint-backlog-list sprint-backlog-area d-none"></div>
                                     </div>
-                                </div>`;
+                                    `;
                                 
                                 sprintWrapper.html(itemsHtml);
                             }
