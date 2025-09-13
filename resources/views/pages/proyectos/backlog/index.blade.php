@@ -392,18 +392,33 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalRegSprBacklog" tabindex="-1" aria-labelledby="modalRegSprBacklogLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+     <div class="modal fade" id="modalRegSprBacklog" tabindex="-1" aria-labelledby="modalRegSprBacklogLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            
+            <!-- Encabezado -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalRegSprBacklogLabel">
+                    <i class="fas fa-tasks me-2"></i>
+                    Agregar al Sprint Backlog
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
 
-                <!-- Encabezado -->
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalRegSprBacklogLabel">
-                        <i class="fas fa-tasks me-2"></i>
-                        Agregar al Sprint Backlog
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
+            <!-- Cuerpo -->
+            <div class="modal-body">
+                <form id="formSprintBacklog">
+                    @csrf
+                    <input type="hidden" id="uid_proyecto" value="{{ $proyecto->uid }}">
+                    
+                    <!-- Seleccionar item del Product Backlog -->
+                    <div class="mb-3">
+                        <label class="form-label">Elemento del Product Backlog</label>
+                        <select name="id_item_backlog" class="form-select" id="id_item_backlog" required>
+                            <option value="">Seleccionar elemento</option>
+                        </select>
+                    </div>
+
                     <!-- Título y Estado -->
                     <div class="row">
                         <div class="col-md-12">
@@ -417,50 +432,51 @@
                                 </select>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Sprint</label>
-                            <select id="id_sprint" name="id_sprint" class="form-select" required>
-                                <option value="">Seleccionar Sprint</option>
-                            </select>
-                            <input type="hidden" id="current_sprint_id" value="">
+                    <div class="mb-3">
+                        <label class="form-label">Sprint</label>
+                        <select id="id_sprint" name="id_sprint" class="form-select" required>
+                            <option value="">Seleccionar Sprint</option>
+                        </select>
+                        <input type="hidden" id="current_sprint_id" value="">
 
-                        </div>
+                    </div>
 
 
-                        <!-- Asignación -->
-                        <div class="mb-3">
-                            <label class="form-label">Asignar usuarios</label>
-                            <div class="custom-dropdown border rounded-2">
-                                <div class="workspace-header">
-                                    <i class="fas fa-users me-2"></i>
-                                    Participantes del proyecto
-                                </div>
-                                <div class="dropdown-content modal-body">
-                                    <input type="text" class="search-box form-control" placeholder="Escriba el nombre de usuario" id="searchBox">
-                                    <div id="usersList">
-                                        <!-- Los usuarios se cargarán aquí -->
-                                    </div>
+                    <!-- Asignación -->
+                    <div class="mb-3">
+                        <label class="form-label">Asignar usuarios</label>
+                        <div class="custom-dropdown border rounded-2">
+                            <div class="workspace-header">
+                                <i class="fas fa-users me-2"></i>
+                                Participantes del proyecto
+                            </div>
+                            <div class="dropdown-content modal-body">
+                                <input type="text" class="search-box form-control" placeholder="Escriba el nombre de usuario" id="searchBox">
+                                <div id="usersList">
+                                    <!-- Los usuarios se cargarán aquí -->
                                 </div>
                             </div>
-                            <!-- Los campos hidden se crean dinámicamente para cada usuario seleccionado -->
                         </div>
+                        <!-- Los campos hidden se crean dinámicamente para cada usuario seleccionado -->
+                    </div>
 
-                    </form>
-                </div>
-
-                <!-- Footer -->
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="btnGuardarSprintBacklog" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>
-                        Guardar
-                    </button>
-                </div>
-
+                </form>
             </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnGuardarSprintBacklog" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>
+                    Guardar
+                </button>
+            </div>
+
         </div>
     </div>
+</div>
 
     <!-- Modal Iniciar Sprint -->
     <div class="modal fade" id="modalIniciarSprint" tabindex="-1" aria-labelledby="modalIniciarSprintLabel" aria-hidden="true">
