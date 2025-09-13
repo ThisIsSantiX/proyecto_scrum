@@ -52,11 +52,11 @@ class SprintBacklogController extends Controller
             ]);
 
             DB::table('product_backlog')
-            ->where('id', $request->id_item_backlog)
-            ->update([
-                'estado' => 0,
-                'updated_at' => now()
-            ]);
+                ->where('id', $request->id_item_backlog)
+                ->update([
+                    'estado' => 0,
+                    'updated_at' => now()
+                ]);
 
             // Relacionar los usuarios (miembros del equipo)
             foreach ($request->asignado_a as $miembroId) {
@@ -75,7 +75,6 @@ class SprintBacklogController extends Controller
             return response()->json([
                 'message' => 'Elemento agregado al Sprint Backlog correctamente'
             ], 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -95,14 +94,18 @@ class SprintBacklogController extends Controller
             $items = DB::table('sprint_backlog as sb')
                 ->join('product_backlog as pb', 'sb.id_item_backlog', '=', 'pb.id')
                 ->select(
+                    'sb.id as sprint_item_id',
                     'sb.*',
+                    'sb.uid as sprint_uid',
+                    'pb.uid',
                     'pb.titulo',
-                    'pb.descripcion', 
+                    'pb.descripcion',
                     'pb.prioridad',
                     'pb.valor_historia',
                     'pb.progreso'
                 )
                 ->where('sb.id_sprint', $sprintId)
+                ->where('sb.estado', 1)
                 ->get();
 
             // Obtener usuarios asignados desde sprint_backlog_miembros
@@ -114,10 +117,10 @@ class SprintBacklogController extends Controller
                     ->select(
                         'u.foto_url as foto_url',
                         DB::raw("CONCAT(u.nombre,' ',u.apellido) as nombre_completo")
-                        )
+                    )
                     ->pluck('nombre_completo')
                     ->toArray();
-                
+
                 $item->responsables = implode(', ', $usuarios);
                 return $item;
             });
@@ -126,7 +129,6 @@ class SprintBacklogController extends Controller
                 'success' => true,
                 'items' => $items
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -152,5 +154,54 @@ class SprintBacklogController extends Controller
     public function destroy($id)
     {
         // lógica para eliminar el recurso
+    }
+
+    public function devolverHistoria($uid, $uidHistoria)
+    {
+        try {
+            DB::beginTransaction();
+
+            $historia = DB::table('sprint_backlog')
+                ->where('uid', $uidHistoria)
+                ->first();
+            if (!$historia) {
+                return response()->json([
+                    "message" => "No se encontró la historia en el sprint backlog."
+                ], 404);
+            }
+
+            //eliminar la asignacion del usuario
+            DB::table('sprint_backlog_miembros')
+                ->where('id_sprint_backlog', $historia->id)
+                ->delete();
+
+            //quitar la historia del sprint
+            DB::table('sprint_backlog')
+                ->where('id', $historia->id)
+                ->update([
+                    'estado' => 0,
+                    'updated_at' => now()
+                ]);
+
+            //restaurar la historia al product backlog
+            DB::table('product_backlog')
+                ->where('id', $historia->id_item_backlog)
+                ->update([
+                    'estado' => 1,
+                    'updated_at' => now()
+                ]);
+
+            DB::commit();
+
+            return response()->json([
+                "success" => true,
+                "message" => "La historia fue devuelta al Product Backlog correctamente."
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                "message" => "Error: " . $e->getMessage()
+            ]);
+        }
     }
 }

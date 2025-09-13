@@ -17,6 +17,7 @@ use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
+use App\Models\SprintBacklogMiembro;
 
 /*
 |--------------------------------------------------------------------------
@@ -113,7 +114,7 @@ Route::get('/usuarios/edit/{uid}', [UserController::class, 'edit'])->name('editU
 Route::put('/usuarios/update/{uid}', [UserController::class, 'update'])->name('updateUsuario');
 Route::delete('/usuarios/eliminar/{uid}', [UserController::class, 'destroy'])->name('deleteUsuario');
 Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
-Route::delete('/usuarios/{id}/delete-foto', [UserController::class, 'deleteFoto'])->name('usuarios.deleteFoto');
+Route::delete('/usuarios/{uid}/foto', [UserController::class, 'deleteFotoPerfil'])->name('deleteFotoUsuario');
 
 //  Rutas para la gestion de proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
@@ -199,4 +200,8 @@ Route::post('/invitaciones/{uid}/responder',[ProyectoController::class,'responde
 //RUTAS PARA MOSTRAR LOS MIEMBROS DE UN EQUIPO
 Route::get('/miembros-equipo/{uidProyecto}',[MiembrosEquipoController::class,'show'])->name('miembros');
 //-----------------------
+
+//RUTA PARA PODER DEVOLVER UN PRODUCT_BACKLOG DEL SPRINT
+Route::delete('/proyectos/backlog/{uid}/sprints/items/{uidHistoria}/devolver',[SprintBacklogController::class,'devolverHistoria'])->name('devolverProduct');
+//_____________________________________
 
