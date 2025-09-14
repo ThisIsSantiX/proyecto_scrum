@@ -181,6 +181,7 @@ Route::post('/proyectos/backlog/{uid}/sprints/destroy', [SprintController::class
 Route::get('/proyectos/backlog/{uid}/sprints/items', [SprintController::class, 'showItems'])->name('showItems');
 Route::post('/proyectos/backlog/{uid}/sprints/{sprintUid}/items/start', [SprintController::class, 'startSprint'])->name('startSprint');
 Route::get('/proyectos/{uid}/board', [ProyectoController::class, 'board'])->name('board');
+Route::get('/proyectos/{proyectoUID}/sprints/activo', [SprintController::class, 'getSprintActivo']);
 
 
 // Sprint Backlog Routes
@@ -190,8 +191,10 @@ Route::post('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/store',[Spri
 
 // Tablero Routes
 
-Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/board', [SprintController::class, 'getSprintBoard']);
-Route::put('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}/progreso', [SprintController::class, 'updateItemProgreso']);
+
+Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/board/view', [SprintController::class, 'boardView'])->name('boardView');
+Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/board/items', [SprintController::class, 'getSprintBacklog']);
+Route::post('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}/progreso', [SprintController::class, 'updateItemProgreso']);
 
 //ruta para las invitaciones a proyectos
 Route::post('/proyectos/{proyecto}/enviar-invitacion',[ProyectoController::class,'enviarInvitacion'])->name('proyectos.enviarInvitacion');

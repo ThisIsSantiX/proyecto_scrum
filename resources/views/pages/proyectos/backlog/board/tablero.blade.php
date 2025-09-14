@@ -1,49 +1,42 @@
-
-    <div class="container-fluid">
-        <!-- Loading -->
-        {{-- <div class="loading-spinner" id="loading">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Cargando...</span>
+    <div class="kanban-board" id="kanban-board">
+        <!-- POR HACER -->
+        <div class="card kanban-column" data-status="por-hacer">
+            <div class="kanban-column-header d-flex justify-content-between align-items-center">
+                <span>POR HACER</span>
+                <span class="column-counter badge bg-light text-dark" id="counter-por-hacer">0</span>
             </div>
-            <p>Cargando tablero del sprint...</p>
-        </div> --}}
-
-        <!-- Tablero Kanban -->
-        <div class="kanban-board" id="kanban-board">
-            <!-- Por Hacer -->
-            <div class="card kanban-column column-por-hacer" data-status="por-hacer">
-                <div class="kanban-column-header">
-                    <i class="fas fa-clipboard-list"></i> Por Hacer
-                    <span class="column-counter" id="counter-por-hacer">0</span>
-                </div>
-                <div class="kanban-items" id="items-por-hacer">
-                    <div class="empty-column">No hay elementos por hacer</div>
-                </div>
+            <div class="kanban-items" id="items-por-hacer">
+                <div class="empty-column">No hay elementos</div>
             </div>
+            <button class="btn btn-link text-primary fw-semibold btn-create">+ Crear</button>
+        </div>
 
-            <!-- En Progreso -->
-            <div class="card kanban-column column-en-progreso" data-status="en-progreso">
-                <div class="kanban-column-header">
-                    <i class="fas fa-spinner"></i> En Progreso
-                    <span class="column-counter" id="counter-en-progreso">0</span>
-                </div>
-                <div class="kanban-items" id="items-en-progreso">
-                    <div class="empty-column">No hay elementos en progreso</div>
-                </div>
+        <!-- EN CURSO -->
+        <div class="card kanban-column" data-status="en-progreso">
+            <div class="kanban-column-header d-flex justify-content-between align-items-center">
+                <span>EN CURSO</span>
+                <span class="column-counter badge bg-light text-dark" id="counter-en-progreso">0</span>
             </div>
+            <div class="kanban-items" id="items-en-progreso">
+                <div class="empty-column">No hay elementos</div>
+            </div>
+            <button class="btn btn-link text-primary fw-semibold btn-create">+ Crear</button>
+        </div>
 
-            <!-- Terminado -->
-            <div class="card kanban-column column-terminado" data-status="terminado">
-                <div class="kanban-column-header">
-                    <i class="fas fa-check-circle"></i> Terminado
-                    <span class="column-counter" id="counter-terminado">0</span>
-                </div>
-                <div class="kanban-items" id="items-terminado">
-                    <div class="empty-column">No hay elementos terminados</div>
-                </div>
+        <!-- LISTO -->
+        <div class="card kanban-column" data-status="terminado">
+            <div class="kanban-column-header d-flex justify-content-between align-items-center">
+                <span>LISTO</span>
+                <span class="column-counter badge bg-light text-dark" id="counter-terminado">0</span>
             </div>
+            <div class="kanban-items" id="items-terminado">
+                <div class="empty-column">No hay elementos</div>
+            </div>
+            <button class="btn btn-link text-primary fw-semibold btn-create">+ Crear</button>
         </div>
     </div>
+
+
     <style>
         .kanban-board {
             display: flex;
@@ -53,140 +46,84 @@
         }
 
         .kanban-column {
-            border-radius: 8px;
-            min-width: 300px;
             flex: 1;
-            padding: 15px;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh;
+            border-radius: 3px;
+            background: var(--bs-card-bg);
         }
 
         .kanban-column-header {
-            text-align: center;
-            padding: 10px 0;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            color: white;
+            padding: 12px 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--bs-border-color);
+            color: var(--bs-body-color);
+            text-transform: uppercase;
         }
 
-        .column-por-hacer .kanban-column-header {
-            background: #6c757d;
+        .kanban-items {
+            flex: 1;
+            padding: 5px;
+            overflow-y: auto;
         }
 
-        .column-en-progreso .kanban-column-header {
-            background: #ffc107;
+        .kanban-items {
+            min-height: 200px; /* espacio para arrastrar aunque no haya items */
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s ease-in-out;
         }
 
-        .column-terminado .kanban-column-header {
-            background: #28a745;
+        /* feedback cuando pasas por encima */
+        .kanban-items.drag-over {
+            background: rgba(0, 123, 255, 0.1); /* usa el primario con transparencia */
+            border: 2px dashed rgba(0, 123, 255, 0.4);
         }
 
+                /* Tarjetas del backlog */
         .kanban-item {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 10px;
+            background-color: rgba(0, 123, 255, 0.08); /* azul suave translúcido */
+            border-radius: 4px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
             cursor: grab;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
+        /* Hover */
         .kanban-item:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            background-color: rgba(0, 123, 255, 0.15); /* azul un poco más notorio */
+            border-color: rgba(0, 123, 255, 0.35);
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.15);
             transform: translateY(-2px);
         }
 
-        .kanban-item.dragging {
-            opacity: 0.5;
-            cursor: grabbing;
-        }
-
-        .kanban-column.drag-over {
-            background: #e3f2fd;
-            border: 2px dashed #2196f3;
-        }
-
-        .item-title {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .item-priority {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            font-weight: bold;
-        }
-
-        .priority-alta {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .priority-media {
-            background: #fff3e0;
-            color: #ef6c00;
-        }
-
-        .priority-baja {
-            background: #e8f5e8;
-            color: #2e7d32;
-        }
-
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
 
         .empty-column {
             text-align: center;
-            color: #6c757d;
+            color: var(--bs-secondary-color);
             padding: 30px;
             font-style: italic;
+            font-size: 0.85rem;
         }
 
-        .item-actions {
-            margin-top: 10px;
-            display: flex;
-            gap: 5px;
+        .kanban-item.dragging {
+            opacity: 0.6;
         }
 
-        .btn-action {
-            padding: 2px 6px;
-            font-size: 0.7em;
+        .kanban-items.drag-over {
+            background: rgba(0, 123, 255, 0.08);
+            border: 2px dashed rgba(0, 123, 255, 0.4);
+            border-radius: 6px;
         }
 
-        .column-counter {
-            background: rgba(255,255,255,0.3);
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8em;
-            margin-left: 10px;
-        }
+
     </style>
 
 <script>
-
     
 
-    function mostrarSeccion(id) {
-    // Ocultar todas las vistas dentro del contenedor
-    document.querySelectorAll('#contenido-tab > div').forEach(seccion => {
-        seccion.style.display = 'none';
-    });
-
-    // Mostrar solo la seleccionada
-    document.getElementById(id).style.display = 'block';
-
-    // Manejar la clase "active" en las pestañas
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-    event.target.classList.add('active');
-}
 </script>

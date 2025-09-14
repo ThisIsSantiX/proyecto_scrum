@@ -15,13 +15,13 @@
                     <!-- Navbar de pestañas -->
                     <ul class="nav flex-row mt-2">
                         <li class="nav-item">
-                            <a class="nav-link active" href="javascript:void(0)" onclick="mostrarSeccion('vista-pendiente')">Trabajo pendiente</a>
+                            <a class="nav-link active" href="javascript:void(0)" data-target="vista-pendiente">Trabajo pendiente</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="javascript:void(0)" onclick="mostrarSeccion('tablero')">Tablero</a>
+                            <a class="nav-link" href="javascript:void(0)" data-target="tablero">Tablero</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="javascript:void(0)" onclick="mostrarSeccion('reuniones')">Reuniones</a>
+                            <a class="nav-link" href="javascript:void(0)" data-target="reuniones">Reuniones</a>
                         </li>
                     </ul>
                 </div>
@@ -95,12 +95,8 @@
                 </div>
             </div>
         </div>
-
         <!-- Vista: Tablero -->
-        <div id="tablero" style="display: none;">
-            @include('pages.proyectos.backlog.board.tablero')
-        </div>
-
+        <div id="tablero"></div>
         <!-- Vista: Reuniones -->
         <div id="reuniones" style="display: none;">
             <p>Aquí estarán las reuniones del proyecto.</p>
@@ -425,8 +421,7 @@
 
     <div class="modal fade" id="modalRegSprBacklog" tabindex="-1" aria-labelledby="modalRegSprBacklogLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-
+            <div class="modal-content">                
                 <!-- Encabezado -->
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalRegSprBacklogLabel">
@@ -441,7 +436,7 @@
                     <form id="formSprintBacklog">
                         @csrf
                         <input type="hidden" id="uid_proyecto" value="{{ $proyecto->uid }}">
-
+                        
                         <!-- Seleccionar item del Product Backlog -->
                         <div class="mb-3">
                             <label class="form-label">Elemento del Product Backlog</label>
@@ -449,7 +444,6 @@
                                 <option value="">Seleccionar elemento</option>
                             </select>
                         </div>
-
                         <!-- Título y Estado -->
                         <div class="row">
                             <div class="col-md-12">
@@ -1816,6 +1810,7 @@
                     notyf.success('Historia agregada al Sprint Backlog');
                     window.refreshAllSprintBacklogs();
                     mostrarSprints();
+                    cargarSprints();
                     window.cargarHistorias();
                 }).catch(err => {
                     notyf.error('Error al mover historia al Sprint');
@@ -2117,11 +2112,9 @@
                 .then(response => {
                     $('#modalIniciarSprint').modal('hide');
                     notyf.success('Sprint iniciado correctamente');
-
-                    // Guardar el sprint UID para el tablero
                     sessionStorage.setItem('currentSprintUID', sprintUID);
-
-                    window.location.href = `/proyectos/${proyectoUID}/board`;
+                    mostrarSeccion('tablero');
+                    cargarTablero(proyectoUID, sprintUID);
                     cargarSprints();
                 })
                 .catch(error => {
@@ -2129,6 +2122,165 @@
                     notyf.error('Error al iniciar sprint');
                 });
         });
+
+        function cargarTablero(proyectoUID, sprintUID) {
+            $("#tablero").attr("data-proyecto", proyectoUID);
+            $("#tablero").attr("data-sprint", sprintUID);
+
+            $("#tablero").html('<div class="text-center p-3">Cargando tablero...</div>');
+
+            // 1️⃣ Primero cargamos la estructura del tablero desde la vista Blade
+            axios.get(`/proyectos/${proyectoUID}/sprints/${sprintUID}/board/view`, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(response => {
+                // Pintar la estructura del tablero (HTML)
+                $("#tablero").html(response.data);
+
+                // 2️⃣ Luego traemos los ítems del sprint backlog
+                return axios.get(`/proyectos/${proyectoUID}/sprints/${sprintUID}/board/items`);
+            })
+            .then(response => {
+                if (!response.data.success) {
+                    notyf.error(response.data.message || "Error al cargar ítems del tablero");
+                    return;
+                }
+
+                const items = response.data.items || [];
+
+                // Limpiar columnas y contadores
+                ["por-hacer", "en-progreso", "terminado"].forEach(status => {
+                    const container = document.getElementById(`items-${status}`);
+                    if (container) container.innerHTML = `<div class="empty-column">No hay elementos en ${status.replace("-", " ")}</div>`;
+
+                    const counter = document.getElementById(`counter-${status}`);
+                    if (counter) counter.textContent = 0;
+                });
+
+                // Renderizar los ítems
+                items.forEach(item => renderKanbanItem(item));
+            })
+            .catch(error => {
+                console.error(error);
+                $("#tablero").html('<div class="alert alert-danger">Error al cargar el tablero</div>');
+            });
+        }
+        
+        function renderKanbanItem(item) {
+            // Usar item.progreso (texto) en vez de item.estado (número)
+            let estado = item.progreso;
+
+            if (estado === "Por hacer" || estado === "to_do") estado = "por-hacer";
+            if (estado === "En progreso" || estado === "in_progress") estado = "en-progreso";
+            if (estado === "Completado" || estado === "done" || estado === "Terminado") estado = "terminado";
+
+            const container = document.getElementById(`items-${estado}`);
+            if (!container) {
+                console.warn("Estado no reconocido:", estado, item);
+                return;
+            }
+
+            // Si hay mensaje "No hay elementos...", lo eliminamos
+            const emptyMsg = container.querySelector('.empty-column');
+            if (emptyMsg) emptyMsg.remove();
+
+            // Crear tarjeta
+            const card = document.createElement('div');
+            card.classList.add('kanban-item', 'card', 'mb-2', 'p-2');
+
+            // Guardar tanto el id como el uid
+            card.setAttribute('data-id', item.id);      // id en la BD (sprint backlog)
+            card.setAttribute('data-uid', item.uid);    // uid generado (si lo usas en frontend)
+
+            card.innerHTML = `
+                <div class="kanban-item-header d-flex justify-content-between align-items-center">
+                    <strong class="kanban-title">${item.titulo}</strong>
+                </div>
+                <div class="kanban-item-footer d-flex justify-content-between mt-2">
+                    <span class="badge bg-info">Pts: ${item.valor_historia}</span>
+                </div>
+            `;
+
+
+            container.appendChild(card);
+            enableDragAndDrop();
+
+            // Actualizar contador
+            const counter = document.getElementById(`counter-${estado}`);
+            counter.textContent = parseInt(counter.textContent) + 1;
+        }
+
+
+        function enableDragAndDrop() {
+            const items = document.querySelectorAll('.kanban-item');
+            const columns = document.querySelectorAll('.kanban-items');
+
+            items.forEach(item => {
+                if (!item.hasAttribute("draggable")) {
+                    item.setAttribute('draggable', true);
+
+                    item.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', item.getAttribute('data-uid')); // 👈 ahora pasamos el UID del item
+                        e.dataTransfer.effectAllowed = "move";
+                        item.classList.add('dragging');
+                    });
+
+                    item.addEventListener('dragend', () => {
+                        item.classList.remove('dragging');
+                    });
+                }
+            });
+
+            columns.forEach(column => {
+                column.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    column.classList.add('drag-over');
+                });
+
+                column.addEventListener('dragleave', () => {
+                    column.classList.remove('drag-over');
+                });
+
+                column.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    column.classList.remove('drag-over');
+
+                    const itemUID = e.dataTransfer.getData('text/plain');
+                    const item = document.querySelector(`.kanban-item[data-uid="${itemUID}"]`);
+                    if (!item) return;
+
+                    column.appendChild(item);
+
+                    // Detectar nuevo progreso
+                    const statusKey = column.parentElement.getAttribute('data-status');
+                    let newProgreso = "";
+                    if (statusKey === "por-hacer") newProgreso = "Por hacer";
+                    if (statusKey === "en-progreso") newProgreso = "En progreso";
+                    if (statusKey === "terminado") newProgreso = "Terminado";
+
+                    console.log(`Tarea ${itemUID} movida a: ${newProgreso}`);
+
+                    // Sacar proyectoUID y sprintUID desde el dataset del tablero
+                    const tablero = document.getElementById("tablero");
+                    const proyectoUID = tablero.getAttribute("data-proyecto");
+                    const sprintUID   = tablero.getAttribute("data-sprint");
+
+                    // ✅ Llamada al backend con UIDs
+                    axios.post(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${itemUID}/progreso`, {
+                        progreso: newProgreso
+                    }).then(res => {
+                        cargarTablero(proyectoUID, sprintUID); 
+                    }).catch(err => {
+                        console.error("Error al actualizar progreso ❌", err);
+                    });
+                });
+            });
+        }
+
+        // Activar drag & drop después de renderizar las tarjetas
+        enableDragAndDrop();
+
+
 
         // Editar sprint (abrir modal)
         $(document).on('click', '.editar-sprint', function(e) {
@@ -2430,36 +2582,36 @@
                                                             <span>
                                                                 <i class="bi bi-person-circle me-1"></i> ${item.responsables}
                                                             </span>
-
-                                                            <div class="dropup">
-                                                                <button class="btn btn-sm btn-secondary p-0 px-1" 
-                                                                        type="button" 
-                                                                        data-bs-toggle="dropdown" 
-                                                                        aria-expanded="false" 
-                                                                        data-bs-display="static">
-                                                                    <i class="bi bi-three-dots-vertical"></i>
-                                                                </button>
-                                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                                                    <li>
-                                                                        <a class="dropdown-item editar-item editar-historia" href="#" 
-                                                                        data-uid="${item.uid}"
-                                                                        data-titulo="${item.titulo || ''}"
-                                                                        data-descripcion="${item.descripcion || ''}"
-                                                                        data-prioridad="${item.prioridad || ''}"
-                                                                        data-valor="${item.valor_historia || ''}"
-                                                                        data-progreso="${item.progreso || ''}">
-                                                                            <i class="bi bi-pencil-square me-1"></i> Editar
-                                                                        </a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <a class="dropdown-item eliminar-item text-danger" href="#" data-item-id="${item.sprint_uid}">
-                                                                            <i class="bi bi-box-arrow-left me-1"></i> Devolver
-                                                                        </a>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
+                                                        
                                                         </div>
                                                     ` : ''}
+                                                    <div class="dropup">
+                                                        <button class="btn btn-sm btn-secondary p-0 px-1" 
+                                                                type="button" 
+                                                                data-bs-toggle="dropdown" 
+                                                                aria-expanded="false" 
+                                                                data-bs-display="static">
+                                                            <i class="bi bi-three-dots-vertical"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                            <li>
+                                                                <a class="dropdown-item editar-item editar-historia" href="#" 
+                                                                data-uid="${item.uid}"
+                                                                data-titulo="${item.titulo || ''}"
+                                                                data-descripcion="${item.descripcion || ''}"
+                                                                data-prioridad="${item.prioridad || ''}"
+                                                                data-valor="${item.valor_historia || ''}"
+                                                                data-progreso="${item.progreso || ''}">
+                                                                    <i class="bi bi-pencil-square me-1"></i> Editar
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item eliminar-item text-danger" href="#" data-item-id="${item.sprint_uid}">
+                                                                    <i class="bi bi-box-arrow-left me-1"></i> Devolver
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -2658,5 +2810,63 @@
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             })
         });
+
+        
+        function mostrarSeccion(id) {
+            // Ocultar todas las vistas
+            document.querySelectorAll('#contenido-tab > div').forEach(seccion => {
+                seccion.style.display = 'none';
+            });
+
+            // Mostrar solo la seleccionada
+            const target = document.getElementById(id);
+            if (target) target.style.display = 'block';
+
+            // Manejar clase active en tabs
+            document.querySelectorAll('.nav-link[data-target]').forEach(link => 
+                link.classList.remove('active')
+            );
+            const activeLink = document.querySelector(`.nav-link[data-target="${id}"]`);
+            if (activeLink) activeLink.classList.add('active');
+        }
+
+        // Tabs: manejar clicks solo si tienen data-target
+        document.querySelectorAll('.nav-link[data-target]').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const id = this.getAttribute('data-target');
+                if (id) {
+                    mostrarSeccion(id);
+                }
+            });
+        });
+
+
+        // 👉 Verificar si hay sprint activo al cargar
+        document.addEventListener('DOMContentLoaded', function () {
+            const proyectoUID = document.getElementById('uid_proyecto').value;
+
+            axios.get(`/proyectos/${proyectoUID}/sprints/activo`)
+                .then(response => {
+                    if (response.data.success && response.data.sprint) {
+                        const sprintUID = response.data.sprint.uid;
+
+                        sessionStorage.setItem('currentSprintUID', sprintUID);
+
+                        // Mostrar directamente tablero
+                        mostrarSeccion('tablero');
+                        cargarTablero(proyectoUID, sprintUID);
+                    } else {
+                        // Mostrar por defecto trabajo pendiente
+                        mostrarSeccion('vista-pendiente');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    mostrarSeccion('vista-pendiente');
+                });
+        });
+
+
     </script>
     @endsection
