@@ -17,6 +17,7 @@ use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
+use App\Models\CriteriosAceptacion;
 use App\Models\SprintBacklogMiembro;
 
 /*
@@ -134,6 +135,8 @@ Route::delete('/proyectos/backlog/{uid}/delete', [ProductBacklogController::clas
 
 // Rutas para la gestion de los criterios de aceptacion
 Route::post('/criterios/{historiaUid}/store', [CriteriosAceptacionController::class, 'store'])->name('storeCriterios');
+Route::put('/criterios/{uid}/update',[CriteriosAceptacionController::class,'update'])->name('updateCriterios');
+Route::delete('/criterio/{uid}/delete',[CriteriosAceptacionController::class,'destroy'])->name('deleteCriterios');
 
 //Roles---------------------------------------------------------------------------------------------------------------------------------------------------
 

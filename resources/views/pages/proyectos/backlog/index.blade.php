@@ -275,6 +275,37 @@
         </div>
     </div>
 
+    <!-- MODAL PARA PODER EDITAR UN CRITERIO DE ACEPTACION -->
+    <div class="modal fade" id="modalCriterioEdit" tabindex="-1" aria-labelledby="modalCriterioLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCriterioLabel">
+                        <i class="bi bi-check2-square me-2"></i> Nuevo Criterio de Aceptación
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCriterioEdit">
+                        <input type="hidden" id="criterio_uid">
+                        <div class="mb-3">
+                            <label for="criterio_descripcionEdit" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="criterio_descripcionEdit" rows="3" maxlength="255" required></textarea>
+                            <div class="form-text">Máximo 255 caracteres</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="formCriterioEdit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL PARA PODER EDITAR UN CRITERIO DE ACEPTACION -->
+
 
 
     <!-- Modal para crear sprint -->
@@ -392,91 +423,91 @@
         </div>
     </div>
 
-     <div class="modal fade" id="modalRegSprBacklog" tabindex="-1" aria-labelledby="modalRegSprBacklogLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            
-            <!-- Encabezado -->
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalRegSprBacklogLabel">
-                    <i class="fas fa-tasks me-2"></i>
-                    Agregar al Sprint Backlog
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
+    <div class="modal fade" id="modalRegSprBacklog" tabindex="-1" aria-labelledby="modalRegSprBacklogLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
 
-            <!-- Cuerpo -->
-            <div class="modal-body">
-                <form id="formSprintBacklog">
-                    @csrf
-                    <input type="hidden" id="uid_proyecto" value="{{ $proyecto->uid }}">
-                    
-                    <!-- Seleccionar item del Product Backlog -->
-                    <div class="mb-3">
-                        <label class="form-label">Elemento del Product Backlog</label>
-                        <select name="id_item_backlog" class="form-select" id="id_item_backlog" required>
-                            <option value="">Seleccionar elemento</option>
-                        </select>
-                    </div>
+                <!-- Encabezado -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalRegSprBacklogLabel">
+                        <i class="fas fa-tasks me-2"></i>
+                        Agregar al Sprint Backlog
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
 
-                    <!-- Título y Estado -->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label">Estado</label>
-                                <select id="progresoSpr" name="progreso" class="form-select" required>
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="pendiente">Pendiente</option>
-                                    <option value="en_progreso">En progreso</option>
-                                    <option value="completado">Completado</option>
-                                </select>
-                            </div>
+                <!-- Cuerpo -->
+                <div class="modal-body">
+                    <form id="formSprintBacklog">
+                        @csrf
+                        <input type="hidden" id="uid_proyecto" value="{{ $proyecto->uid }}">
+
+                        <!-- Seleccionar item del Product Backlog -->
+                        <div class="mb-3">
+                            <label class="form-label">Elemento del Product Backlog</label>
+                            <select name="id_item_backlog" class="form-select" id="id_item_backlog" required>
+                                <option value="">Seleccionar elemento</option>
+                            </select>
                         </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Sprint</label>
-                        <select id="id_sprint" name="id_sprint" class="form-select" required>
-                            <option value="">Seleccionar Sprint</option>
-                        </select>
-                        <input type="hidden" id="current_sprint_id" value="">
-
-                    </div>
-
-
-                    <!-- Asignación -->
-                    <div class="mb-3">
-                        <label class="form-label">Asignar usuarios</label>
-                        <div class="custom-dropdown border rounded-2">
-                            <div class="workspace-header">
-                                <i class="fas fa-users me-2"></i>
-                                Participantes del proyecto
-                            </div>
-                            <div class="dropdown-content modal-body">
-                                <input type="text" class="search-box form-control" placeholder="Escriba el nombre de usuario" id="searchBox">
-                                <div id="usersList">
-                                    <!-- Los usuarios se cargarán aquí -->
+                        <!-- Título y Estado -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Estado</label>
+                                    <select id="progresoSpr" name="progreso" class="form-select" required>
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="pendiente">Pendiente</option>
+                                        <option value="en_progreso">En progreso</option>
+                                        <option value="completado">Completado</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
-                        <!-- Los campos hidden se crean dinámicamente para cada usuario seleccionado -->
-                    </div>
 
-                </form>
+                        <div class="mb-3">
+                            <label class="form-label">Sprint</label>
+                            <select id="id_sprint" name="id_sprint" class="form-select" required>
+                                <option value="">Seleccionar Sprint</option>
+                            </select>
+                            <input type="hidden" id="current_sprint_id" value="">
+
+                        </div>
+
+
+                        <!-- Asignación -->
+                        <div class="mb-3">
+                            <label class="form-label">Asignar usuarios</label>
+                            <div class="custom-dropdown border rounded-2">
+                                <div class="workspace-header">
+                                    <i class="fas fa-users me-2"></i>
+                                    Participantes del proyecto
+                                </div>
+                                <div class="dropdown-content modal-body">
+                                    <input type="text" class="search-box form-control" placeholder="Escriba el nombre de usuario" id="searchBox">
+                                    <div id="usersList">
+                                        <!-- Los usuarios se cargarán aquí -->
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Los campos hidden se crean dinámicamente para cada usuario seleccionado -->
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btnGuardarSprintBacklog" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Guardar
+                    </button>
+                </div>
+
             </div>
-
-            <!-- Footer -->
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" id="btnGuardarSprintBacklog" class="btn btn-primary">
-                    <i class="fas fa-save me-2"></i>
-                    Guardar
-                </button>
-            </div>
-
         </div>
     </div>
-</div>
 
     <!-- Modal Iniciar Sprint -->
     <div class="modal fade" id="modalIniciarSprint" tabindex="-1" aria-labelledby="modalIniciarSprintLabel" aria-hidden="true">
@@ -809,7 +840,7 @@
         .sticky-subheader {
             position: sticky;
             top: 70px;
-            z-index: 500; 
+            z-index: 500;
 
         }
 
@@ -935,10 +966,36 @@
 
                             historia.criterios.forEach(function(criterio) {
                                 criteriosHtml += `
-                                    <li class="small">
-                                        <i class="bi ${criterio.estado ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted'} me-1"></i>
-                                        ${criterio.descripcion}
+                                    <li class="small d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi ${criterio.estado ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted'} me-1"></i>
+                                            ${criterio.descripcion}
+                                        </div>
+                                        <div class="dropup">
+                                            <button class="btn btn-sm btn-secondary p-0 px-1" 
+                                                type="button" 
+                                                data-bs-toggle="dropdown" 
+                                                aria-expanded="false" 
+                                                data-bs-display="static">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                <li>
+                                                    <a class="dropdown-item editar-criterio" href="#" 
+                                                    data-criterio-id="${criterio.uid}"
+                                                    data-criterio-descripcion="${criterio.descripcion}">
+                                                        <i class="bi bi-pencil-square me-1"></i> Editar
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item eliminar-criterio text-danger" href="#" data-criterio-id="${criterio.uid}">
+                                                        <i class="bi bi-trash me-1"></i> Eliminar
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </li>
+
                                 `;
                             });
 
@@ -1034,6 +1091,8 @@
                     mostrarEstadoVacio();
                 }
             }
+
+
 
 
             $(document).ready(function() {
@@ -1260,6 +1319,105 @@
                         notyf.error('Error interno del servidor');
                     });
             });
+            //FUNCION PARA EDITAR UN CRITERIO
+            $(document).on('click', '.editar-criterio', function(e) {
+                e.preventDefault();
+                const uid = $(this).data('criterio-id');
+                const descripcion = $(this).data('criterio-descripcion');
+
+                $("#criterio_uid").val(uid);
+                $("#criterio_descripcionEdit").val(descripcion);
+
+                $("#modalCriterioEdit").modal('show');
+            });
+
+            //mandar la informacion del critertio
+            $('#formCriterioEdit').on('submit', function(e) {
+                e.preventDefault();
+
+                let uid = $('#criterio_uid').val();
+                let descripcion = $('#criterio_descripcionEdit').val();
+
+                if (descripcion === '') {
+                    notyf.error('La descripción no puede estar vacía');
+                    return;
+                }
+                $.ajax({
+                    url: `/criterios/${uid}/update`,
+                    type: 'PUT',
+                    dataType: 'json',
+                    data: {
+                        descripcion: descripcion,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            notyf.success(response.message || 'Se edito correctamente');
+                            $('#modalCriterioEdit').modal('hide');
+                            cargarHistorias();
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMsg = "Error al actualizar el criterio.";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        notyf.error(errorMsg);
+                    }
+                })
+            })
+            //-----------------
+            //ELIMINAR UN CRITERIO
+            $(document).on('click', '.eliminar-criterio', function(e) {
+                e.preventDefault();
+
+                const uid = $(this).data('criterio-id');
+
+                if (!uid) {
+                    notyf.error("No se encontró el ID de la historia.");
+                    return;
+                }
+                const isDark = $("body").hasClass("dark");
+
+                Swal.fire({
+                    title: "¿Eliminar criterio?",
+                    text: "Esta acción no se puede deshacer.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "Cancelar",
+                    reverseButtons: true,
+                    background: isDark ? "#1e1e2d" : "#fff",
+                    color: isDark ? "#f1f1f1" : "#000",
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: isDark ? "#444" : "#aaa"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        axios.delete(`/criterio/${uid}/delete`)
+                            .then(function(response) {
+                                if (response.data.success) {
+                                    notyf.success(response.data.message);
+                                    
+                                    cargarHistorias();
+                                } else {
+                                    notyf.error(response.data.message || "No se pudo eliminar el criterio.");
+                                }
+                            })
+                            .catch(function(error) {
+                                console.error("Error al eliminar el criterio:", error);
+
+                                if (error.response && error.response.data && error.response.data.message) {
+                                    notyf.error(error.response.data.message);
+                                } else {
+                                    notyf.error("Error interno al intentar eliminar el criterio.");
+                                }
+                            });
+                    }
+                })
+
+            })
+            //--------------------
+            //____________________________
 
 
             // Función para mostrar estado vacío
@@ -1363,12 +1521,12 @@
             });
 
             // Hacer historias arrastrables (preparado para futuro drag & drop)
-            $(document).on('dragstart', '.historia-item', function (e) {
+            $(document).on('dragstart', '.historia-item', function(e) {
                 e.originalEvent.dataTransfer.setData("historiaId", $(this).data("id"));
                 $(this).css('opacity', '0.5');
             });
 
-            $(document).on('dragend', '.historia-item', function () {
+            $(document).on('dragend', '.historia-item', function() {
                 $(this).css('opacity', '1');
             });
 
@@ -2242,7 +2400,7 @@
 
                                     const badgeClass = item.prioridad === 'Alta' ? 'bg-danger' :
                                         item.prioridad === 'Media' ? 'bg-warning' : 'bg-success';
-                                    
+
 
                                     itemsHtml += `
                                         <div class="col-12 mb-2 sprint-item" data-item-id="${item.sprint_uid}">
@@ -2324,7 +2482,7 @@
                                         <div class="sprint-backlog-list sprint-backlog-area d-none"></div>
                                     </div>
                                     `;
-                        
+
                                 sprintWrapper.html(itemsHtml);
                             }
 
