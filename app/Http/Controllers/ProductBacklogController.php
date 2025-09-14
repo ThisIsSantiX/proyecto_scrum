@@ -37,12 +37,12 @@ class ProductBacklogController extends Controller
             )
             ->get();
 
-            $sprints = DB::table('sprints')
-                ->where('id_proyecto', $proyecto->id)
-                ->get();
+        $sprints = DB::table('sprints')
+            ->where('id_proyecto', $proyecto->id)
+            ->get();
 
-            $sprintBacklog = DB::table('sprint_backlog')
-                ->get();
+        $sprintBacklog = DB::table('sprint_backlog')
+            ->get();
 
         return view('pages.proyectos.backlog.index', compact('proyecto', 'historias', 'sprints', 'sprintBacklog'));
     }
@@ -115,14 +115,12 @@ class ProductBacklogController extends Controller
                     'uid' => $historia->uid
                 ]
             ], 201);
-
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Datos de validación incorrectos.',
                 'errors' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -138,7 +136,7 @@ class ProductBacklogController extends Controller
         try {
             // Buscar el proyecto por UID
             $proyecto = Proyecto::where('uid', $uid)->first();
-            
+
             if (!$proyecto) {
                 return response()->json([
                     'success' => false,
@@ -165,7 +163,8 @@ class ProductBacklogController extends Controller
                     'users.foto_url as foto_url',
                     'criterios_aceptacion.id as criterio_id',
                     'criterios_aceptacion.descripcion as criterio_descripcion',
-                    'criterios_aceptacion.estado as criterio_estado'
+                    'criterios_aceptacion.estado as criterio_estado',
+                    'criterios_aceptacion.uid as criterio_uid',
                 )
                 ->orderBy('product_backlog.valor_historia', 'desc')
                 ->get();
@@ -194,11 +193,12 @@ class ProductBacklogController extends Controller
                 }
 
                 // Agregar criterio si existe
-                if ($row->criterio_id) {
+                if ($row->criterio_id && $row->criterio_estado==1) {
                     $historiasProcesadas[$historiaId]['criterios'][] = [
                         'id' => $row->criterio_id,
                         'descripcion' => $row->criterio_descripcion,
-                        'estado' => (bool) $row->criterio_estado
+                        'estado' => (bool) $row->criterio_estado,
+                        'uid' => $row->criterio_uid,
                     ];
                 }
             }
@@ -212,7 +212,6 @@ class ProductBacklogController extends Controller
                 'historias' => $historias,
                 'total' => count($historias)
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -271,7 +270,6 @@ class ProductBacklogController extends Controller
                 'message' => 'Historia actualizada exitosamente.',
                 'historia' => $historia
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -304,7 +302,6 @@ class ProductBacklogController extends Controller
                 'success' => true,
                 'message' => 'Historia eliminada correctamente.'
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -313,5 +310,4 @@ class ProductBacklogController extends Controller
             ], 500);
         }
     }
-
 }

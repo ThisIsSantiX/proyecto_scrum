@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CriteriosAceptacion;
 use App\Models\product_backlog;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -45,7 +46,7 @@ class CriteriosAceptacionController extends Controller
             $criterio = new CriteriosAceptacion();
             $criterio->id_item_backlog = $historia->id;
             $criterio->descripcion = $request->descripcion;
-            $criterio->estado = 1; 
+            $criterio->estado = 1;
             $criterio->uid = Str::uuid();
             $criterio->save();
 
@@ -75,24 +76,70 @@ class CriteriosAceptacionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(CriteriosAceptacion $criteriosAceptacion)
-    {
-        //
-    }
+    public function edit() {}
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, CriteriosAceptacion $criteriosAceptacion)
+    public function update(Request $request, $uid)
     {
-        //
+        try {
+            //buscar el criterio
+            $criterio = CriteriosAceptacion::where('uid', $uid)->first();
+            if (!$criterio) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "El criterio no se encontro"
+                ], 400);
+            }
+            //validación
+            $validacionData = $request->validate(["descripcion" => "required|max:255|string"]);
+            $criterio->update($validacionData);
+            return response()->json([
+                'success' => true,
+                'message' => 'Criterio actualizado exitosamente',
+                'criterio' => $criterio
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el criterio.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CriteriosAceptacion $criteriosAceptacion)
+    public function destroy($uid)
     {
-        //
+        try {
+            $criterio = DB::table('criterios_aceptacion')
+                        ->where('uid',$uid)
+                        ->first();
+            if(!$criterio){
+                return response()->json([
+                    "success"=>false,
+                    "message"=>"No se encontro el criterio"
+                ], 404);
+            }
+
+            DB::table('criterios_aceptacion')
+                ->where('uid',$uid)
+                ->update(['estado'=>0,'updated_at'=>now()]);
+
+            return response()->json([
+                'success'=>true,
+                'message'=>'Criterio eliminado correctamente'
+            ]);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar el criterio.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
