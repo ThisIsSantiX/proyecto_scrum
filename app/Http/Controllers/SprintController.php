@@ -396,35 +396,63 @@ class SprintController extends Controller
         }
     }
 
-    public function getSprintBoard($proyectoUID, $sprintUID)
+
+    public function boardView($proyectoUID, $sprintUID)
+    {
+        $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+        $sprint   = DB::table('sprints')
+            ->where('uid', $sprintUID)
+            ->where('id_proyecto', $proyecto->id)
+            ->first();
+
+        if (!$proyecto || !$sprint) {
+            abort(404, 'Proyecto o Sprint no encontrado');
+        }
+
+        // Vista parcial SOLO del tablero
+        return view('pages.proyectos.backlog.board.tablero', compact('proyecto', 'sprint'));
+    }
+
+
+
+    public function getSprintBacklog($proyectoUID, $sprintUID)
     {
         try {
-            // Obtener proyecto
-            $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+            // Verificar que el proyecto existe
+            $proyecto = DB::table('proyectos')
+                ->where('uid', $proyectoUID)
+                ->first();
+
             if (!$proyecto) {
-                return response()->json(['success' => false, 'message' => 'Proyecto no encontrado.'], 404);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Proyecto no encontrado.'
+                ], 404);
             }
 
-            // Obtener sprint
+            // Verificar que el sprint existe y pertenece al proyecto
             $sprint = DB::table('sprints')
                 ->where('uid', $sprintUID)
                 ->where('id_proyecto', $proyecto->id)
                 ->first();
-                
+
             if (!$sprint) {
-                return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sprint no encontrado.'
+                ], 404);
             }
 
-            // Obtener items del sprint backlog con información del product backlog
+            // Traer únicamente los ítems del sprint backlog
             $items = DB::table('sprint_backlog as sb')
                 ->join('product_backlog as pb', 'sb.id_item_backlog', '=', 'pb.id')
                 ->where('sb.id_sprint', $sprint->id)
                 ->select(
                     'sb.id',
                     'sb.uid',
-                    'sb.titulo',
-                    'sb.progreso',
                     'sb.estado',
+                    'sb.progreso',
+                    'pb.titulo',
                     'pb.descripcion',
                     'pb.prioridad',
                     'pb.valor_historia'
@@ -433,23 +461,23 @@ class SprintController extends Controller
 
             return response()->json([
                 'success' => true,
-                'sprint' => $sprint,
                 'items' => $items
             ]);
 
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al cargar el tablero.',
+                'message' => 'Error al obtener el sprint backlog.',
                 'error' => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }
 
+
     public function updateItemProgreso(Request $request, $proyectoUID, $sprintUID, $itemUID)
     {
         $request->validate([
-            'progreso' => 'required|string|in:por hacer,en progreso,terminado'
+            'progreso' => 'required|string|in:Por hacer,En progreso,Terminado'
         ]);
 
         try {
@@ -498,6 +526,25 @@ class SprintController extends Controller
             ], 500);
         }
     }
+
+    public function getSprintActivo($proyectoUID)
+    {
+        $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+        if (!$proyecto) {
+            return response()->json(['success'=>false,'message'=>'Proyecto no encontrado']);
+        }
+
+        $sprint = DB::table('sprints')
+            ->where('id_proyecto', $proyecto->id)
+            ->where('progreso', 'iniciado') // o el campo que uses
+            ->first();
+
+        return response()->json([
+            'success' => true,
+            'sprint'  => $sprint
+        ]);
+    }
+
 
 
 }
