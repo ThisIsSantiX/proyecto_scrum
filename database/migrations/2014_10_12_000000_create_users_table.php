@@ -21,9 +21,12 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
+            $table->string('email_verification_token', 60)->nullable();
             $table->integer('estado')->default(1);
             $table->text('foto_url')->nullable();
             $table->text('uid');
+            $table->text('google_id')->nullable();
+            $table->string('avatar')->nullable();
             $table->timestamps();
         });
 

@@ -12,10 +12,16 @@ class miembros_equipo extends Model
     protected $fillable = [
         'id_equipo',
         'id_usuario',
-        'id_rol',
+        // 'id_rol',
         'estado',
         'uid',
     ];
 
     protected $primaryKey = 'id';
+
+    public function usuario()
+{
+    return $this->belongsTo(User::class, 'id_usuario');
+}
+
 }

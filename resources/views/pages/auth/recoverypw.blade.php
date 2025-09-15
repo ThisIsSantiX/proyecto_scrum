@@ -46,18 +46,22 @@
                     </a>
                     <h2 class="mb-2">Cambiar contraseña</h2>
                     <p>Ingresa tu dirección de correo electrónico y te enviaremos un correo electrónico con instrucciones para restablecer tu contraseña.</p>
-                    <form action="{{ route('confirmMail') }}" method="GET">
+                    <form action="{{ route('recoverypw.send') }}" method="POST">
                         @csrf
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="floating-label form-group">
-                                    <label for="email" class="form-label"></label>
-                                    <input type="email" class="form-control" id="email" aria-describedby="email" placeholder=" ">
-                                </div>
-                            </div>
+                        <div class="floating-label form-group">
+                            <label for="email" class="form-label">Correo electrónico</label>
+                            <input type="email" name="email" class="form-control" id="email" placeholder=" " required>
                         </div>
                         <button type="submit" class="btn btn-primary">Restablecer</button>
+                        @if($errors->any())
+                            <div class="alert alert-danger">
+                                {{ $errors->first() }}
+                            </div>
+                        @endif
+
                     </form>
+
+
                 </div>
             </div>               
             <div class="sign-bg sign-bg-right">
@@ -75,24 +79,5 @@
 @endsection
 
 @section('js')
-    <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
-            e.preventDefault();
 
-            const email = document.getElementById('email').value.trim();
-
-            if (email === '') {
-                const notyf = new Notyf({
-                    duration: 3000,
-                    position: { x: 'left', y: 'top' }
-                });
-
-                notyf.error('Completa el campo de correo');
-                return;
-            }
-
-
-            window.location.href = "{{ route('confirmMail') }}";
-        });
-    </script>
 @endsection

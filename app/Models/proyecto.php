@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\miembros_equipo;
 
 class proyecto extends Model
 {
@@ -22,4 +23,12 @@ class proyecto extends Model
     ];
 
     protected $primaryKey = 'id';
+
+    public function miembrosEquipos()
+{
+    return $this->hasMany(miembros_equipo::class, 'id_proyecto');
 }
+
+}
+
+

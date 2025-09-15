@@ -28,7 +28,7 @@
                 
                 
                 
-                <h4 class="logo-title">Scrum</h4>
+                <h4 class="logo-title">WorkScrum</h4>
             </a>
             <div class="sidebar-toggle" data-toggle="sidebar" data-active="true">
                 <i class="icon">
@@ -109,11 +109,17 @@
                     <!-- Usuario -->
                     <li class="nav-item dropdown">
                         <a class="nav-link p-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="{{ Auth::user()->foto_url }}" 
-                                alt="User-Profile" 
-                                class="img-fluid rounded-circle" 
+                            @php
+                                $foto = Auth::user()->foto_url;
+                                $esExterno = Str::startsWith($foto, ['http://', 'https://']);
+                            @endphp
+
+                            <img src="{{ $esExterno ? $foto : asset('storage/' . $foto) }}"
+                                alt="User-Profile"
+                                class="img-fluid rounded-circle"
                                 style="width: 35px; height: 35px;">
                         </a>
+
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="../dashboard/app/user-profile.html">Profile</a></li>
                             <li><a class="dropdown-item" href="../dashboard/app/user-privacy-setting.html">Privacy Setting</a></li>

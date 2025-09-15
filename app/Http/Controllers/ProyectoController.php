@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\miembros_equipo;
 use App\Models\Proyecto;
+use App\Models\proyecto_invitaciones;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+
 class ProyectoController extends Controller
 {
     /**
@@ -20,31 +24,40 @@ class ProyectoController extends Controller
     /**
      * Guardar proyecto en BD
      */
-   // Función show (ya actualizada)
+    // Función show (ya actualizada)
     public function show(Request $request)
     {
+        $userId = auth()->id();
+
         $query = Proyecto::select(
-                'proyectos.*',
-                'users.nombre as usuario_nombre',
-                'users.email as usuario_email'
-            )
+            'proyectos.*',
+            'users.nombre as usuario_nombre',
+            'users.email as usuario_email'
+        )
             ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
-            ->where('proyectos.estado', 1);
+            ->leftJoin('miembros_equipos', 'proyectos.id', '=', 'miembros_equipos.id_proyecto')
+            ->where('proyectos.estado', 1)
+            ->where(function($q) use ($userId) {
+                $q->where('proyectos.id_owner', $userId)
+                ->orWhere('miembros_equipos.id_usuario', $userId);
+            });
 
         if ($request->has('search') && !empty($request->search)) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('proyectos.nombre', 'LIKE', '%' . $request->search . '%')
-                ->orWhere('users.nombre', 'LIKE', '%' . $request->search . '%');
+                    ->orWhere('users.nombre', 'LIKE', '%' . $request->search . '%');
             });
         }
 
-        $proyectos = $query->get();
+
+        $proyectos = $query->distinct()->get();
         
         return response()->json([
             'success' => true,
             'data' => $proyectos
         ]);
     }
+
 
     // Función store
     public function store(Request $request)
@@ -65,10 +78,10 @@ class ProyectoController extends Controller
             $proyecto->estado = 1; // Activo por defecto
             $proyecto->uid = Str::uuid(); // Generar UUID único
             $proyecto->visibilidad = $request->visibilidad;
-            $proyecto->progreso = $request->progreso; 
+            $proyecto->progreso = $request->progreso;
             $proyecto->fecha_inicio = $request->fecha_inicio;
             $proyecto->fecha_fin = $request->fecha_fin;
-            
+
             $proyecto->save();
 
             return response()->json([
@@ -76,7 +89,6 @@ class ProyectoController extends Controller
                 'message' => 'Proyecto creado exitosamente',
                 'data' => $proyecto
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -95,13 +107,40 @@ class ProyectoController extends Controller
     public function detailsProyecto($uid)
     {
         try {
-            $proyecto = Proyecto::select(
+            $proyecto = DB::table('proyectos')
+                ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
+                ->leftJoin('product_backlog', function($join) {
+                    $join->on('proyectos.id', '=', 'product_backlog.id_proyecto')
+                        ->where('product_backlog.estado', '=', 1);
+                })
+                ->leftJoin('sprints', function($join) {
+                    $join->on('proyectos.id', '=', 'sprints.id_proyecto')
+                        ->where('sprints.estado', '=', 1);
+                })
+                ->select(
                     'proyectos.*',
                     'users.nombre as usuario_nombre',
-                    'users.email as usuario_email'
+                    'users.email as usuario_email',
+                    DB::raw('COUNT(DISTINCT product_backlog.id) as total_elementos'),
+                    DB::raw('COUNT(DISTINCT sprints.id) as total_sprints')
                 )
-                ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
                 ->where('proyectos.uid', $uid)
+                ->groupBy(
+                    'proyectos.id',
+                    'proyectos.uid',
+                    'proyectos.nombre',
+                    'proyectos.descripcion',
+                    'proyectos.id_owner',
+                    'proyectos.estado',
+                    'proyectos.visibilidad',
+                    'proyectos.progreso',
+                    'proyectos.fecha_inicio',
+                    'proyectos.fecha_fin',
+                    'proyectos.created_at',
+                    'proyectos.updated_at',
+                    'users.nombre',
+                    'users.email'
+                )
                 ->first();
 
             if (!$proyecto) {
@@ -115,7 +154,6 @@ class ProyectoController extends Controller
                 'success' => true,
                 'data' => $proyecto
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -123,6 +161,7 @@ class ProyectoController extends Controller
             ], 500);
         }
     }
+
 
     // Función edit
     public function edit($uid)
@@ -141,7 +180,6 @@ class ProyectoController extends Controller
                 'success' => true,
                 'data' => $proyecto
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -190,7 +228,6 @@ class ProyectoController extends Controller
                 'message' => 'Proyecto actualizado exitosamente',
                 'data' => $proyecto
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -212,7 +249,7 @@ class ProyectoController extends Controller
         try {
             // Buscar proyecto por uid
             $proyecto = Proyecto::where('uid', $uid)->firstOrFail();
-            
+
             // Verificar que el usuario tenga permisos para eliminar
             if ($proyecto->id_owner != auth()->id()) {
                 return response()->json([
@@ -232,7 +269,6 @@ class ProyectoController extends Controller
                 'success' => true,
                 'message' => 'Proyecto eliminado exitosamente'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -241,5 +277,177 @@ class ProyectoController extends Controller
         }
     }
 
+    public function board()
+    {
+        return view('pages.proyectos.backlog.board.index');
+    }
 
+    public function enviarInvitacion(Request $request, $idProyecto)
+    {
+        $request->validate(
+            [
+                "email" => "required|email|exists:users,email"
+            ],
+            [
+                "email.required" => "Ingrese un correo.",
+                "email.email" => "Ingrese un correo valido.",
+                "email.exists" => "El correo electronico no existe."
+            ]
+        );
+        DB::beginTransaction();
+        try {
+            $proyecto = Proyecto::findOrFail($idProyecto);
+
+            $usuarioActual = Auth::user();
+            // $tienePermisos = DB::table('miembros_equipo')
+            //     ->where('id_proyecto',$idProyecto)
+            //     ->where('id_usuario', $usuarioActual->id)
+            //     ->where('id_rol',);
+
+            $usuarioInvitado = User::where('email', $request->email)->first();
+
+            $yaEsMiembro = DB::table('miembros_equipos')
+                ->where('id_proyecto', $idProyecto)
+                ->where('id_usuario', $usuarioInvitado->id)
+                ->exists();
+            if ($yaEsMiembro) {
+                return response()->json([
+                    "message" => "El usuario ya es miembro del proyecto"
+                ], 400);
+            }
+
+            $invitacionPendiente = proyecto_invitaciones::where('proyecto_id', $idProyecto)
+                ->where('usuario_invitado', $usuarioInvitado->id)
+                ->where('estadoInvitacion', 'pendiente')
+                ->where(function ($q) {
+                    $q->whereNull('expira_en')
+                        ->orWhere('expira_en', '>', now());
+                })
+                ->exists();
+
+            if ($invitacionPendiente) {
+                return response()->json([
+                    'message' => 'El usuario ya tiene una invitacion pendiente para este proyecto'
+                ], 400);
+            }
+
+            $invitacion = proyecto_invitaciones::create([
+                'proyecto_id' => $idProyecto,
+                'invitado_por' => $usuarioActual->id,
+                'usuario_invitado' => $usuarioInvitado->id,
+                'estadoInvitacion' => 'pendiente',
+                'uid' => Str::uuid(),
+                'estado' => 1,
+                'expira_en' => now()->addDays(7)
+            ]);
+
+            Db::commit();
+
+            return response()->json([
+                'message' => 'Invitacion enviada exitosamente',
+                'invitacion' => [
+                    'usuario' => $usuarioInvitado->name,
+                    'email' => $usuarioInvitado->email,
+                    'proyecto' => $proyecto->nombre
+                ]
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                "message" => "Error: " . $e->getMessage()
+            ]);
+        }
+    }
+
+    //obtener invitaciones
+    public function misInvitaciones()
+    {
+        try {
+            $user = Auth::user();
+
+            $invitaciones = proyecto_invitaciones::with(['proyecto', 'invitadoPor'])
+                ->where('usuario_invitado', $user->id)
+                ->pendientes()
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Agregar información adicional del proyecto
+            $invitaciones->each(function ($invitacion) {
+                $invitacion->proyecto->makeHidden(['created_at', 'updated_at']);
+                $invitacion->invitadoPor->makeHidden(['created_at', 'updated_at']);
+            });
+
+            return response()->json([
+                'invitaciones' => $invitaciones
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    //responder a las invitaciones
+    public function responderInvitacion(Request $request, $uid)
+    {
+        $request->validate([
+            'accion' => 'required|in:aceptar,rechazar'
+        ]);
+
+        Db::beginTransaction();
+        try {
+            $user = Auth::user();
+
+            $invitacion = proyecto_invitaciones::where('uid', $uid)
+                ->where('usuario_invitado', $user->id)
+                ->where('estadoInvitacion', 'pendiente')
+                ->first();
+
+            if (!$invitacion) {
+                return response()->json([
+                    'message' => 'La invitacion no encontrada o ya procesada'
+                ], 404);
+            }
+
+            if ($invitacion->estaVencida()) {
+                return response()->json([
+                    'message' => 'La invitación ha expirado'
+                ], 400);
+            }
+
+            if ($request->accion === 'aceptar') {
+                $yaEsMiembro = DB::table('miembros_equipos')
+                    ->where('id_proyecto', $invitacion->id_proyecto)
+                    ->where('id_usuario', $user->id)
+                    ->exists();
+                if (!$yaEsMiembro) {
+                    //agregamos el usuario al proyecto
+                    DB::table('miembros_equipos')->insert([
+                        'id_usuario' => $user->id,
+                        'estado' => 1,
+                        'uid' => Str::uuid(),
+                        'id_proyecto' => $invitacion->proyecto_id
+                    ]);
+                }
+                $invitacion->estadoInvitacion = 'aceptada';
+                $mensaje = 'Te has unido al proyecto exitosamente';
+            } else {
+                $invitacion->estadoInvitacion = 'rechazada';
+                $mensaje = 'Invitacion rechazada';
+            }
+
+            $invitacion->save();
+            DB::commit();
+
+            return response()->json([
+                'message' => $mensaje,
+                'proyecto' => $invitacion->proyecto->nombre
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
