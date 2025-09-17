@@ -17,8 +17,6 @@ use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
-use App\Models\CriteriosAceptacion;
-use App\Models\SprintBacklogMiembro;
 
 /*
 |--------------------------------------------------------------------------
@@ -107,7 +105,9 @@ Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/storeCuenta', [AuthController::class, 'store'])->name('storeCuenta');
 
 // Rutas para gestión de usuarios
-Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
+Route::get('/usuarios', [UserController::class, 'index'])
+    ->name('usuarios.index')
+    ->middleware('auth');
 Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.create');
 Route::post('/usuarios/store', [UserController::class, 'store'])->name('usuarios.store');
 Route::get('/showUsuarios', [UserController::class, 'show'])->name('showUsuarios');
@@ -118,7 +118,9 @@ Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles'
 Route::delete('/usuarios/{uid}/foto', [UserController::class, 'deleteFotoPerfil'])->name('deleteFotoUsuario');
 
 //  Rutas para la gestion de proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
-Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
+Route::get('/proyectos', [ProyectoController::class, 'index'])
+    ->middleware('auth')
+    ->name('proyectos.index');
 Route::get('/showProyectos',[ProyectoController::class, 'show'])->name('showProyectos');
 Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('storeProyecto');
 Route::get('/proyecto/{uid}', [ProyectoController::class, 'detailsProyecto'])->name('detailsProyecto');
@@ -127,7 +129,9 @@ Route::put('/proyectos/update', [ProyectoController::class, 'update'])->name('up
 Route::delete('/proyectos/delete/{uid}', [ProyectoController::class, 'destroy'])->name('deleteProyecto');
 
 // Rutas para la gestion del backlog
-Route::get('/proyectos/backlog/{uid}', [ProductBacklogController::class, 'index'])->name('showProyectoBacklog');
+Route::get('/proyectos/backlog/{uid}', [ProductBacklogController::class, 'index'])
+    ->middleware('auth')
+    ->name('showProyectoBacklog');
 Route::get('proyectos/backlog/{uid}/show', [ProductBacklogController::class, 'show'])->name('showProductBacklog');
 Route::post('/proyectos/backlog/{uid}/store', [ProductBacklogController::class, 'store'])->name('storeProductBacklog');
 Route::put('/proyectos/backlog/{uid}/update/{historiaUid}', [ProductBacklogController::class, 'update'])->name('updateProductBacklog');
@@ -149,28 +153,28 @@ Route::delete('/roles/{uid}', [RolesController::class, 'destroy'])->name('delete
 Route::delete('/roles/{id}', [RolesController::class, 'destroy'])->name('roles.destroy');
 Route::get('/roles/{id}/delete', [RolesController::class, 'destroy'])->name('roles.delete');
 
-// Dashboard Routes
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware('auth')
-    ->name('dashboard');
+    // Dashboard Routes
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('auth')
+        ->name('dashboard');
 
-Route::get('/dashboard/proyectos', [DashboardController::class, 'getProyectos'])->name('getProyectos');
+    Route::get('/dashboard/proyectos', [DashboardController::class, 'getProyectos'])->name('getProyectos');
 
 
-// Authentication Routes
-Auth::routes(['reset' => true]);
+    // Authentication Routes
+    Auth::routes(['reset' => true]);
 
-Route::get('/auth/login', [AuthController::class, 'index'])->name('login');
-Route::redirect('/', '/auth/login');
-Route::get('/auth/register', [AuthController::class, 'register'])->name('register');
-Route::post('/auth/register', [AuthController::class, 'authRegister'])->name('auth.register');
-Route::post('/auth/login', [AuthController::class, 'authLogin'])->name('authLogin');
-Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
-Route::middleware(['web'])->group(function () {
-Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
-Route::post('/auth/recovery', [AuthController::class, 'sendRecoveryEmail'])->name('recoverypw.send');
-Route::get('/auth/mail-sent', [AuthController::class, 'showMailSent'])->name('mail.sent');
-});
+    Route::get('/auth/login', [AuthController::class, 'index'])->name('login');
+    Route::redirect('/', '/auth/login');
+    Route::get('/auth/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/auth/register', [AuthController::class, 'authRegister'])->name('auth.register');
+    Route::post('/auth/login', [AuthController::class, 'authLogin'])->name('authLogin');
+    Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::middleware(['web'])->group(function () {
+    Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
+    Route::post('/auth/recovery', [AuthController::class, 'sendRecoveryEmail'])->name('recoverypw.send');
+    Route::get('/auth/mail-sent', [AuthController::class, 'showMailSent'])->name('mail.sent');
+    });
 
 
 // Sprint Routes
@@ -192,7 +196,9 @@ Route::post('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/store',[Spri
 // Tablero Routes
 
 
-Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/board/view', [SprintController::class, 'boardView'])->name('boardView');
+Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/board/view', [SprintController::class, 'boardView'])
+    ->middleware('auth')
+    ->name('boardView');
 Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/board/items', [SprintController::class, 'getSprintBacklog']);
 Route::post('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}/progreso', [SprintController::class, 'updateItemProgreso']);
 

@@ -277,7 +277,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalCriterioLabel">
-                        <i class="bi bi-check2-square me-2"></i> Nuevo Criterio de Aceptación
+                        <i class="bi bi-check2-square me-2"></i> Editar Criterio de Aceptación
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
