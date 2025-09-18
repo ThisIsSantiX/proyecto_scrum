@@ -8,26 +8,39 @@
         <div class="col-12">
             <div class="card shadow-sm border">
                 <div class="card-body py-2 pb-0">
-                    <h5 class="mb-4 mt-2 fw-semibold">
+                    <h5 class="mb-2 mt-2 fw-semibold d-flex justify-content-between align-items-center">
                         <span class="text-muted fw-bold">{{ $proyecto->nombre }}</span>
+
+                        <!-- Botón para recoger/expandir -->
+                        <button class="btn btn-sm btn-primary" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#navOpciones" 
+                                aria-expanded="true" aria-controls="navOpciones">
+                            <i class="bi bi-chevron-up"></i>
+                        </button>
                     </h5>
 
-                    <!-- Navbar de pestañas -->
-                    <ul class="nav flex-row mt-2">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="javascript:void(0)" data-target="vista-pendiente">Trabajo pendiente</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="javascript:void(0)" data-target="tablero">Tablero</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="javascript:void(0)" data-target="reuniones">Reuniones</a>
-                        </li>
-                    </ul>
+                    <!-- Navbar de pestañas con collapse -->
+                    <div id="navOpciones" class="collapse show">
+                        <ul class="nav flex-row mt-2 small">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="javascript:void(0)" data-target="vista-pendiente">Trabajo pendiente</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="javascript:void(0)" data-target="tablero">Tablero</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="javascript:void(0)" data-target="reuniones">Reuniones</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="javascript:void(0)" data-target="calendario">Calendario</a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     <!-- Contenedor dinámico -->
     <div id="contenido-tab" class="mt-3">
@@ -101,6 +114,32 @@
         <div id="reuniones" style="display: none;">
             <p>Aquí estarán las reuniones del proyecto.</p>
         </div>
+
+        <div id="calendario" style="display: none;">
+            <div class="container-fluid">
+                <div class="row" style="height: 100%;">
+                    
+                    <!-- Columna izquierda - Sprints -->
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <h6 class="fw-bold m-3">Sprints</h6>
+                            <ul id="lista-sprints" class="list-group m-2">
+                                <!-- Aquí se insertarán los sprints con JS -->
+                            </ul>
+                        </div>
+                    </div>
+
+
+                    <!-- Columna derecha - Calendario -->
+                    <div class="col-md-8">
+                        <div id="calendar" class="card p-3" style="min-height: 80vh;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
     </div>
 
 
@@ -1685,6 +1724,7 @@
                     sprints = response.data;
                     mostrarSprints();
                     window.refreshAllSprintBacklogs();
+                    cargarTodosLosSprints();
                 })
                 .catch(error => {
                     console.error('Error al cargar sprints:', error);
@@ -1695,6 +1735,125 @@
                     }
                 });
         }
+
+        function cargarTodosLosSprints() {
+            const proyectoUID = $('#uid_proyecto').val();
+
+            axios.get(`/proyectos/backlog/${proyectoUID}/sprints/all`)
+                .then(response => {
+                    sprints = response.data; 
+                    console.log(sprints);
+
+                    // 🔹 Renderizar lista de sprints en la izquierda
+                    const lista = document.getElementById('lista-sprints');
+                    lista.innerHTML = "";
+
+                    if (sprints.length === 0) {
+                        lista.innerHTML = `<li class="list-group-item text-muted">No hay sprints creados</li>`;
+                    } else {
+                        const hoy = new Date();
+
+                        sprints.forEach(sprint => {
+                            const fechaInicio = new Date(sprint.fecha_inicio);
+                            const fechaFin = new Date(sprint.fecha_fin);
+
+                            // Determinar estado del sprint
+                            let estadoTexto = "";
+                            let estadoClase = "";
+
+                            if (hoy < fechaInicio) {
+                                estadoTexto = "Por hacer";
+                                estadoClase = "badge bg-secondary";
+                            } else if (hoy >= fechaInicio && hoy <= fechaFin) {
+                                estadoTexto = "En progreso";
+                                estadoClase = "badge bg-warning text-dark";
+                            } else {
+                                estadoTexto = "Finalizado";
+                                estadoClase = "badge bg-success";
+                            }
+
+                            lista.innerHTML += `
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <div class="fw-bold">${sprint.nombre}</div>
+                                        <small class="text-muted">
+                                            ${fechaInicio.toLocaleDateString()} - ${fechaFin.toLocaleDateString()}
+                                        </small>
+                                    </div>
+                                    <span class="${estadoClase}">${estadoTexto}</span>
+                                </li>
+                            `;
+                        });
+                    }
+
+                    // 🔹 limpiar calendario
+                    calendar.removeAllEvents();
+
+                    // 🔹 volver a agregar cada sprint al calendario
+                    sprints.forEach(sprint => {
+                        addSprintToCalendar(sprint);
+                    });
+
+                    // 🔹 mostrar calendario si está oculto
+                    mostrarCalendario();
+                })
+                .catch(error => {
+                    console.error('Error al cargar todos los sprints:', error);
+                    if (error.response && error.response.status === 404) {
+                        notyf.error('Proyecto no encontrado');
+                    } else {
+                        notyf.error('Error al cargar los sprints');
+                    }
+                });
+        }
+
+
+
+        let calendar;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es', // idioma español
+                selectable: false,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                },
+                events: [] // empieza vacío
+            });
+            calendar.render();
+        });
+
+        function mostrarCalendario() {
+            // Detectar clic en la pestaña "Calendario"
+            document.querySelector('[data-target="calendario"]').addEventListener('click', function () {
+                // Mostrar el contenedor
+                document.getElementById('calendario').style.display = "block";
+
+                // Forzar que el calendario se redibuje con el tamaño correcto
+                setTimeout(() => {
+                    calendar.updateSize();
+                }, 200);
+            });
+
+        }
+
+
+        // 🔹 Función para agregar un sprint al calendario
+        function addSprintToCalendar(sprint) {
+            calendar.addEvent({
+                title: sprint.nombre,
+                start: sprint.fecha_inicio,
+                end: sprint.fecha_fin,
+                allDay: true,
+                backgroundColor: '#198754',
+                borderColor: '#198754'
+            });
+        }
+
 
         // Función para mostrar sprints
         function mostrarSprints() {
@@ -2149,7 +2308,7 @@
                 const items = response.data.items || [];
 
                 // Limpiar columnas y contadores
-                ["por-hacer", "en-progreso", "terminado"].forEach(status => {
+                ["por-hacer", "en-progreso", "terminado", "en revision"].forEach(status => {
                     const container = document.getElementById(`items-${status}`);
                     if (container) container.innerHTML = `<div class="empty-column">No hay elementos en ${status.replace("-", " ")}</div>`;
 
@@ -2173,6 +2332,7 @@
             if (estado === "Por hacer" || estado === "to_do") estado = "por-hacer";
             if (estado === "En progreso" || estado === "in_progress") estado = "en-progreso";
             if (estado === "Completado" || estado === "done" || estado === "Terminado") estado = "terminado";
+            if (estado === "En revision" || estado === "in_revision" || estado === "en-revision") estado = "en revision";
 
             const container = document.getElementById(`items-${estado}`);
             if (!container) {

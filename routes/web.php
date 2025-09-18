@@ -100,6 +100,10 @@ Route::get('/', function () {
     return view('pages.auth.login');
 });
 
+Route::fallback(function () {
+    return response()->view('errors.404', [], 404);
+});
+
 // usuarios ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/storeCuenta', [AuthController::class, 'store'])->name('storeCuenta');
@@ -186,6 +190,8 @@ Route::get('/proyectos/backlog/{uid}/sprints/items', [SprintController::class, '
 Route::post('/proyectos/backlog/{uid}/sprints/{sprintUid}/items/start', [SprintController::class, 'startSprint'])->name('startSprint');
 Route::get('/proyectos/{uid}/board', [ProyectoController::class, 'board'])->name('board');
 Route::get('/proyectos/{proyectoUID}/sprints/activo', [SprintController::class, 'getSprintActivo']);
+Route::get('/proyectos/backlog/{uid}/sprints/all', [SprintController::class, 'showAll'])->name('sprints.all');
+
 
 
 // Sprint Backlog Routes
@@ -194,8 +200,6 @@ Route::post('/proyectos/backlog/{uid}/sprints/{sprintId}/sprbacklog/store',[Spri
 
 
 // Tablero Routes
-
-
 Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/board/view', [SprintController::class, 'boardView'])
     ->middleware('auth')
     ->name('boardView');

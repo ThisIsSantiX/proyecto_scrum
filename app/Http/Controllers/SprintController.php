@@ -545,6 +545,31 @@ class SprintController extends Controller
         ]);
     }
 
+    public function showAll($uid)
+    {
+        try {
+            // Buscar el proyecto
+            $proyecto = DB::table('proyectos')->where('uid', $uid)->first();
 
+            if (!$proyecto) {
+                return response()->json([
+                    'error' => 'Proyecto no encontrado'
+                ], 404);
+            }
+
+            // Traer TODOS los sprints (sin filtrar por estado, ni progreso)
+            $sprints = DB::table('sprints')
+                        ->where('id_proyecto', $proyecto->id)
+                        ->orderBy('created_at', 'asc')
+                        ->get();
+
+            return response()->json($sprints);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al obtener sprints: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
 }

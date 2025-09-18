@@ -75,7 +75,6 @@
             gap: 16px;
             min-height: calc(70vh - 120px);
             overflow-x: auto;
-            padding: 12px 0;
         }
 
         .kanban-column {
