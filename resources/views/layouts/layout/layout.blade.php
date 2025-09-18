@@ -123,6 +123,7 @@
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js'></script>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 const body = document.body;
@@ -165,37 +166,48 @@
                 });
             });
 
-            // document.addEventListener("DOMContentLoaded", function () {
-            //     const sidebar = document.querySelector("aside.sidebar");
-            //     const toggleBtn = document.getElementById("sidebar-toggle");
+            window.addEventListener("load", () => {
+                setTimeout(() => {
+                    const sidebar = document.querySelector("aside.sidebar");
+                    
+                    if (!sidebar) {
+                        console.warn("No se encontró el sidebar");
+                        return;
+                    }
 
-            //     if (!sidebar || !toggleBtn) return;
+                    const savedState = localStorage.getItem("sidebar") || "open";
+                    
+                    if (savedState === "closed") {
+                        sidebar.classList.add("sidebar-mini");
+                    } else {
+                        sidebar.classList.remove("sidebar-mini");
+                    }
 
-            //     sidebar.style.transition = "none";
+                    // ===== Guardar estado cuando cambie =====
+                    const observer = new MutationObserver(() => {
+                        const isClosed = sidebar.classList.contains("sidebar-mini");
+                        localStorage.setItem("sidebar", isClosed ? "closed" : "open");
+                    });
 
-            //     if (localStorage.getItem("sidebar") === "closed") {
-            //         sidebar.classList.add("sidebar-mini");
-            //     } else {
-            //         sidebar.classList.remove("sidebar-mini");
-            //     }
+                    observer.observe(sidebar, {
+                        attributes: true,
+                        attributeFilter: ['class']
+                    });
 
-            //     setTimeout(() => {
-            //         sidebar.style.transition = "";
-            //     }, 100);
+                    document.addEventListener('click', (e) => {
+                        if (e.target.closest('[data-toggle="sidebar"]')) {
+                            setTimeout(() => {
+                                const isClosed = sidebar.classList.contains("sidebar-mini");
+                                localStorage.setItem("sidebar", isClosed ? "closed" : "open");
+                            }, 50);
+                        }
+                    });
 
-            //     toggleBtn.addEventListener("click", function () {
-            //         sidebar.classList.toggle("sidebar-mini");
-
-            //         if (sidebar.classList.contains("sidebar-mini")) {
-            //             localStorage.setItem("sidebar", "closed");
-            //         } else {
-            //             localStorage.setItem("sidebar", "open");
-            //         }
-            //     });
-            // });
+                }, 300);
+            });
 
             $(window).on("load", function () {
-                $("#loading").fadeOut("slow"); // Animación suave para ocultar
+                $("#loading").fadeOut("slow");
             });
             
         </script>

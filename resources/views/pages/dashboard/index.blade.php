@@ -77,7 +77,9 @@
             <!-- Tarjeta Tareas -->
             <div class="card shadow-sm rounded-3">
                 <div class="card-body">
-                    <h6 class="fw-semibold mb-3"><i class="bi bi-check-circle me-2"></i> Tareas</h6>
+                    <h6 class="fw-semibold mb-3">
+                    <i class="bi bi-check-circle me-2">
+                    </i> Tareas</h6>
                     <div class="text-center p-4">
                         <img src="https://img.icons8.com/ios/150/000000/todo-list--v1.png" 
                             alt="Sin tareas" 
@@ -150,14 +152,19 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="tab-pane fade" id="mentions">No hay menciones nuevas.</div>
-                        <div class="tab-pane fade" id="projects" class="tab-pane fade show active">
-                            <div id="invitacionesProyectos">
-                                <!-- Las invitaciones se cargarán aquí -->
+                        <div class="tab-pane fade" id="mentions">
+                            <div class="empty-state py-4 text-center">
+                                <i class="bi bi-at fs-1 mb-3"></i>
+                                <p class="mb-0">No hay menciones nuevas</p>
+                                <small>Te notificaremos cuando alguien te mencione</small>
                             </div>
-                            <div id="noInvitacionesProyectos" class="text-center py-3" style="display: none;">
-                                <i class="bi bi-inbox fs-4 text-muted mb-2"></i>
-                                <p class="text-muted mb-0">No hay invitaciones pendientes</p>
+                        </div>
+                        <div class="tab-pane fade" id="projects">
+                            <div id="invitacionesProyectos"></div>
+                            <div id="noInvitacionesProyectos" class="empty-state py-4 text-center" style="display: none;">
+                                <i class="bi bi-inbox fs-1 mb-3"></i>
+                                <p class="mb-0">No hay invitaciones pendientes</p>
+                                <small>Las invitaciones a proyectos aparecerán aquí</small>
                             </div>
                         </div>
                     </div>
@@ -331,7 +338,7 @@
 
                 return `
                 <div class="notification-item alert alert-light d-flex align-items-start border rounded-3 mb-2" 
-                 onclick="abrirDetalleInvitacion('${invitacion.uid}')">
+                    onclick="abrirDetalleInvitacion('${invitacion.uid}')">
                     <span class="badge bg-primary me-2">!</span>
                     <div>
                         <strong>Invitación a proyecto: ${invitacion.proyecto.nombre}</strong><br>
