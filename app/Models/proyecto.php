@@ -19,16 +19,22 @@ class proyecto extends Model
         'visibilidad',
         'progreso',
         'fecha_inicio',
-        'fecha_fin',    
+        'fecha_fin',
     ];
 
     protected $primaryKey = 'id';
 
     public function miembrosEquipos()
-{
+    {
     return $this->hasMany(miembros_equipo::class, 'id_proyecto');
+    }
+
+    public function dailyScrums()
+    {
+        return $this->hasMany(Daily_scrum::class, 'id_proyectos');
+    }
 }
 
-}
+
 
 

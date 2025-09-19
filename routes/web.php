@@ -17,6 +17,12 @@ use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
+<<<<<<< Updated upstream
+=======
+use App\Models\CriteriosAceptacion;
+use App\Models\SprintBacklogMiembro;
+use App\Http\Controllers\DailyScrumController;
+>>>>>>> Stashed changes
 
 /*
 |--------------------------------------------------------------------------
@@ -221,3 +227,10 @@ Route::get('/miembros-equipo/{uidProyecto}',[MiembrosEquipoController::class,'sh
 Route::delete('/proyectos/backlog/{uid}/sprints/items/{uidHistoria}/devolver',[SprintBacklogController::class,'devolverHistoria'])->name('devolverProduct');
 //_____________________________________
 
+// RUTAS PARA DAILY SCRUM
+Route::get('/reuniones', [DailyScrumController::class, 'index'])->name('dailyScrum.index');
+Route::get('/proyectos/backlog/{uid}/reuniones/show', [DailyScrumController::class, 'show'])->name('showDailyScrum');
+Route::post('/proyectos/backlog/{uid}/reuniones/store', [DailyScrumController::class, 'store'])->name('storeDailyScrum');
+Route::put('/proyectos/backlog/{uid}/reuniones/update', [DailyScrumController::class, 'update'])->name('updateDailyScrum');
+Route::post('/proyectos/backlog/{uid}/reuniones/destroy', [DailyScrumController::class, 'destroy'])->name('destroyDailyScrum');
+//_____________________________________
