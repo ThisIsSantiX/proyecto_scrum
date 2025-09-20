@@ -17,12 +17,7 @@ use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
-<<<<<<< Updated upstream
-=======
-use App\Models\CriteriosAceptacion;
-use App\Models\SprintBacklogMiembro;
 use App\Http\Controllers\DailyScrumController;
->>>>>>> Stashed changes
 
 /*
 |--------------------------------------------------------------------------
