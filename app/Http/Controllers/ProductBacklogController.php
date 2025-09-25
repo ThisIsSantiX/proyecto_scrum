@@ -26,6 +26,7 @@ class ProductBacklogController extends Controller
         $historias = DB::table('product_backlog')
             ->join('criterios_aceptacion', 'product_backlog.id', '=', 'criterios_aceptacion.id_item_backlog')
             ->where('product_backlog.id_proyecto', $proyecto->id)
+            ->where('product_backlog.estado', 1) // Solo activas
             ->select(
                 'product_backlog.id as historia_id',
                 'product_backlog.titulo as historia_titulo',
