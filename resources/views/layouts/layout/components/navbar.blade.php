@@ -108,26 +108,34 @@
 
                     <!-- Usuario -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link p-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            @php
-                                $foto = Auth::user()->foto_url;
-                                $esExterno = Str::startsWith($foto, ['http://', 'https://']);
-                            @endphp
+                    <a class="nav-link p-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                @php
+                                                    $foto = Auth::user()->foto_url;
+                                                    $esExterno = Str::startsWith($foto, ['http://', 'https://']);
+                                                @endphp
 
-                            <img src="{{ $esExterno ? $foto : asset('storage/' . $foto) }}"
-                                alt="User-Profile"
-                                class="img-fluid rounded-circle"
-                                style="width: 35px; height: 35px;">
-                        </a>
+                                                <img src="{{ $esExterno ? $foto : asset('storage/' . $foto) }}"
+                                                    alt="User-Profile"
+                                                    class="img-fluid rounded-circle"
+                                                    style="width: 35px; height: 35px;">
+                                            </a>
 
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="../dashboard/app/user-profile.html">Profile</a></li>
-                            <li><a class="dropdown-item" href="../dashboard/app/user-privacy-setting.html">Privacy Setting</a></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('profile.index') }}">
+                                    <i class="fas fa-user-circle me-2"></i> Perfil
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="../dashboard/app/user-privacy-setting.html">
+                                    <i class="fas fa-lock me-2"></i>Ajustes Provacidad
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" href="#" 
                                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                Cerrar Sesion
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesion
                                 </a>
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                     @csrf
@@ -135,7 +143,6 @@
                             </li>
                         </ul>
                     </li>
-
                 </ul>
             </div>
 

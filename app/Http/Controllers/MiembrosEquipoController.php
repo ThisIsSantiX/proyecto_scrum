@@ -28,37 +28,98 @@ class MiembrosEquipoController extends Controller
     }
 
     // Método para mostrar un recurso específico
+    public function getMiembros($uid)
+    {
+        try {
+            // Buscar proyecto
+            $proyecto = Proyecto::where('uid', $uid)->firstOrFail();
+
+            // Traer miembros con la relación usuario
+            $miembros = Proyecto::with('usuario:id,nombre,apellido,email,foto_url')
+                ->where('id_proyecto', $uid)
+                ->get()
+                ->map(function ($miembro) {
+                    return [
+                        'id'       => $miembro->usuario->id,
+                        'nombre'   => $miembro->usuario->nombre,
+                        'apellido' => $miembro->usuario->apellido,
+                        'email'    => $miembro->usuario->email,
+                        'foto_url' => $miembro->usuario->foto_url
+                            ? asset('storage/' . $miembro->usuario->foto_url)   // ✅ URL pública
+                            : null,
+                    ];
+                });
+
+            // Retornar también al propietario como objeto
+            $propietario = [
+                'id'       => $proyecto->propietario->id,
+                'nombre'   => $proyecto->propietario->nombre,
+                'apellido' => $proyecto->propietario->apellido,
+                'email'    => $proyecto->propietario->email,
+                'foto_url' => $proyecto->propietario->foto_url 
+                    ? asset('storage/' . $proyecto->propietario->foto_url) 
+                    : null,
+                'rol'      => 'propietario',
+            ];
+
+            return response()->json([
+                'success'     => true,
+                'propietario' => $propietario,
+                'miembros'    => $miembros,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function show($proyectoUid)
     {
-        try{
-            $proyecto = proyecto::where('uid',$proyectoUid);
-            if(!$proyecto){
+        try {
+            $proyecto = proyecto::where('uid', $proyectoUid)->first();
+            if (!$proyecto) {
                 return response()->json([
-                    "message"=>"No se encontro el proyecto"
-                ],404);
+                    "message" => "No se encontro el proyecto"
+                ], 404);
             }
 
             $miembros = DB::table('miembros_equipos')
-                        ->join('users','miembros_equipos.id_usuario','=','users.id')
-                        ->join('proyectos','miembros_equipos.id_proyecto','=','proyectos.id')
-                        ->where('proyectos.uid',$proyectoUid)
-                        ->select(
-                            'users.id',
-                            'users.nombre',
-                            'users.apellido',
-                            'users.email',
-                            'users.foto_url',
-                        )
-                        ->get();
+                ->join('users', 'miembros_equipos.id_usuario', '=', 'users.id')
+                ->join('proyectos', 'miembros_equipos.id_proyecto', '=', 'proyectos.id')
+                ->where('proyectos.uid', $proyectoUid)
+                ->select(
+                    'users.id',
+                    'users.nombre',
+                    'users.apellido',
+                    'users.email',
+                    'users.foto_url',
+                )
+                ->get()
+                ->map(function ($u) {
+                    return [
+                        'id'       => $u->id,
+                        'nombre'   => $u->nombre,
+                        'apellido' => $u->apellido,
+                        'email'    => $u->email,
+                        'foto_url' => $u->foto_url
+                            ? asset('storage/' . $u->foto_url) 
+                            : "https://ui-avatars.com/api/?name=" 
+                                . urlencode($u->nombre . ' ' . $u->apellido) 
+                                . "&background=random&color=fff",
+                    ];
+                });
 
             return response()->json([
-                "miembros"=>$miembros
+                "miembros" => $miembros
             ]);
 
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
-                "message"=>"Error: ".$e->getMessage()
-            ]);
+                "message" => "Error: " . $e->getMessage()
+            ], 500);
         }
     }
 

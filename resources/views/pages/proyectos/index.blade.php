@@ -367,14 +367,14 @@
 <style>
     .project-card {
         transition: all 0.3s ease;
-        border: 1px solid rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(109, 109, 109, 1);
         border-radius: 12px;
         height: 100%;
     }
 
     .project-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 25px rgba(61, 61, 61, 1);
         border-color: var(--bs-primary);
     }
 
@@ -460,7 +460,7 @@
 
     /* Status badges colors */
     .status-planificacion {
-        background-color: #6f42c1;
+        background-color: #8054d1ff;
         color: white;
     }
 
@@ -493,262 +493,326 @@
         background-color: #495057;
         color: white;
     }
+    
+
+ .avatar-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #0d6efd;
+        margin-right: -10px;
+    }
+
+    /* Fallback con iniciales cuando no hay foto */
+    .avatar-fallback {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #0d6efd;
+        color: #fff;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: -10px;
+        border: 2px solid #fff;
+    }
+
+    /* Que los avatares se acomoden en fila */
+    #membersContainer_[id] {
+        display: flex;
+        align-items: center;
+    }
+
 </style>
 @endsection
 
 @section('js')
 <script>
-    //cargarlos como una tarje en el detalle
-    function loadProjectUsers(uid) {
-        axios.get(`/miembros-equipo/${uid}`)
-            .then(function(response) {
-                if (response.data.miembros && response.data.miembros.length > 0) {
-                    let html = '';
+        //cargarlos como una tarje en el detalle
+        function loadProjectUsers(uid) {
+            axios.get(`/miembros-equipo/${uid}`)
+                .then(function(response) {
+                    if (response.data.miembros && response.data.miembros.length > 0) {
+                        let html = '';
 
-                    response.data.miembros.forEach(miembro => {
-                        html += `
-                            <div class="card mb-2">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        ${miembro.foto_url ? `
-                                       <img src="${miembro.foto_url ? miembro.foto_url + '?v=' + new Date().getTime() : ''}" 
-                                            class="rounded-circle me-3"
-                                            style="width: 48px; height: 48px; object-fit: cover;">
+                        response.data.miembros.forEach(miembro => {
+                            html += `
+                                <div class="card mb-2">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            ${miembro.foto_url ? `
+                                        <img src="${miembro.foto_url ? miembro.foto_url + '?v=' + new Date().getTime() : ''}" 
+                                                class="rounded-circle me-3"
+                                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
 
-                                    ` : `
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3"
-                                            style="width: 48px; height: 48px;">
-                                            ${getInitials(miembro.nombre + ' ' + miembro.apellido)}
-                                        </div>
-                                    `}
-                                    <div>
-                                        <h6 class="fw-bold mb-1">${miembro.nombre} ${miembro.apellido}</h6>
-                                        <p class="text-muted small mb-2">${miembro.email}</p>
-                                            ${miembro.rol === 'propietario' ? `
-                                            <span class="badge bg-primary">Propietario</span>
-                                    ` : ''}
+                                        ` : `
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3"
+                                                 style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                                ${getInitials(miembro.nombre + ' ' + miembro.apellido)}
+                                            </div>
+                                        `}
+                                        <div>
+                                            <h6 class="fw-bold mb-1">${miembro.nombre} ${miembro.apellido}</h6>
+                                            <p class="text-muted small mb-2">${miembro.email}</p>
+                                                ${miembro.rol === 'propietario' ? `
+                                                <span class="badge bg-primary">Propietario</span>
+                                        ` : ''}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>`;
-                    });
+                                </div>`;
+                        });
 
-                    $("#projectUsersContainer").html(html);
-                } else {
-                    $("#projectUsersContainer").html('<p class="text-muted">No hay usuarios en este proyecto.</p>');
-                }
-            })
-            .catch(function(error) {
-                console.error("Error cargando miembros del proyecto:", error);
-                $("#projectUsersContainer").html('<p class="text-danger">Error al cargar usuarios.</p>');
-            });
-    }
-
-
-    $(document).ready(function() {
-        let searchTimeout;
-        let allProjects = [];
-
-        // Cargar proyectos al inicializar
-        loadProjects();
-
-        // Búsqueda en tiempo real
-        $('#searchInput').on('input', function() {
-            clearTimeout(searchTimeout);
-            const searchTerm = $(this).val().trim();
-
-            searchTimeout = setTimeout(function() {
-                if (searchTerm.length >= 2 || searchTerm.length === 0) {
-                    loadProjects(searchTerm);
-                }
-            }, 500);
-        });
-
-        function loadProjects(search = '') {
-            showLoading();
-
-            const params = search ? {
-                search: search
-            } : {};
-
-            axios.get('{{ route("showProyectos") }}', {
-                    params: params
-                })
-                .then(function(response) {
-                    if (response.data.success) {
-                        allProjects = response.data.data;
-                        renderProjects(allProjects, search);
+                        $("#projectUsersContainer").html(html);
                     } else {
-                        showError('Error al cargar los proyectos');
-                        showEmptyState();
+                        $("#projectUsersContainer").html('<p class="text-muted">No hay usuarios en este proyecto.</p>');
                     }
                 })
                 .catch(function(error) {
-                    console.error('Error:', error);
-                    showError('Error al cargar los proyectos: ' + (error.response?.data?.message || error.message));
-                    showEmptyState();
+                    console.error("Error cargando miembros del proyecto:", error);
+                    $("#projectUsersContainer").html('<p class="text-danger">Error al cargar usuarios.</p>');
                 });
         }
 
-        function renderProjects(projects, searchTerm = '') {
-            hideLoading();
 
-            if (projects.length === 0) {
-                showEmptyState();
-                return;
-            }
+        $(document).ready(function() {
+            let searchTimeout;
+            let allProjects = [];
 
-            const container = $('#projectsContainer');
-            container.empty().show();
-            $('#emptyState').hide();
+            // Cargar proyectos al inicializar
+            loadProjects();
 
-            projects.forEach(function(project) {
-                const card = createProjectCard(project, searchTerm);
-                container.append(card);
+            // Búsqueda en tiempo real
+            $('#searchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                const searchTerm = $(this).val().trim();
 
-                const membersContainer = $(`#membersContainer_${project.uid}`);
-                loadMembers(project.uid, membersContainer);
+                searchTimeout = setTimeout(function() {
+                    if (searchTerm.length >= 2 || searchTerm.length === 0) {
+                        loadProjects(searchTerm);
+                    }
+                }, 500);
             });
 
-            // Animar las cartas
-            $('.project-card').each(function(index) {
-                $(this).css('opacity', 0).delay(index * 100).animate({
-                    opacity: 1
-                }, 300);
-            });
-        }
+            function loadProjects(search = '') {
+                showLoading();
 
-        function createProjectCard(project, searchTerm = '') {
-            // Generar iniciales para el avatar
-            const initials = getInitials(project.usuario_nombre || 'Usuario');
+                const params = search ? {
+                    search: search
+                } : {};
 
-            // Destacar términos de búsqueda
-            const highlightedTitle = highlightSearchTerm(project.nombre || 'Sin título', searchTerm);
-            const highlightedOwner = highlightSearchTerm(project.usuario_nombre || 'Usuario desconocido', searchTerm);
-
-            // Determinar el progreso/estado
-            const progress = project.progreso;
-            const progressText = progress;
-            const progressClass = getProgressClass(progress);
-
-            return `
-                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
-                    <div class="card project-card">
-                        <div class="project-header">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <!-- Título -->
-                                <h5 class="project-title mb-2 project-link" data-id="${project.uid}">
-                                    ${highlightedTitle}
-                                </h5>
-
-                                <!-- Ícono Ver Detalles -->
-                                <button type="button" class="btn btn-sm btn-link text-white p-0 ms-2 btn-view"
-                                        data-id="${project.uid}" data-bs-toggle="tooltip" data-bs-placement="bottom" 
-                                        title="Ver detalles">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
-                                        class="bi bi-info-circle" viewBox="0 0 16 16">
-                                        <path d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zM8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0z"/>
-                                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533l.738-3.468c.194-.897-.105-1.319-.808-1.319z"/>
-                                        <circle cx="8" cy="4.5" r="1"/>
-                                    </svg>
-                                </button>
-
-                            </div>
-
-                            <!-- Descripción dentro del header -->
-                            <p class="project-description mb-0">
-                                ${project.descripcion || 'Sin descripción disponible'}
-                            </p>
-                        </div>
-
-                        
-                        <div class="card-body">
-                            <div class="mt-2 mb-3 d-flex justify-content-between align-items-center">
-                                <span class="badge badge-status ${progressClass}">
-                                    ${getProgressIcon(progress)}
-                                    ${progressText}
-                                </span>
-                            </div>
-
-                            <div class="owner-info d-flex mb-0 align-items-center">
-                                <!-- Avatar con iniciales (tooltip con nombre del propietario) -->
-                                <div class="owner-avatar rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
-                                    style="width: 40px; height: 40px; background-color: #0d6efd; color: white; font-weight: bold; margin-right: -10px; z-index: 1;"
-                                    data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                    title="Propietario del proyecto: ${highlightedOwner}">
-                                    ${initials}
-                                </div>
-
-                                <!-- miembros -->
-                                <div class="d-flex align-items-center" id="membersContainer_${project.uid}"></div>
-
-                                <!-- Botón con "+" (tooltip con añadir usuarios) -->
-                                <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary bg-white text-primary"
-                                    style="width: 40px; height: 40px; cursor: pointer; z-index: 2;"
-                                    id="btnAddUser_${project.id}"
-                                    data-project-id="${project.id}"
-                                    data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                    title="Añadir usuarios">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                                    </svg>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-       // función para listar a los miembros
-            function loadMembers(uid, container) {
-                axios.get(`/miembros-equipo/${uid}`)
+                axios.get('{{ route("showProyectos") }}', {
+                        params: params
+                    })
                     .then(function(response) {
-                        if (response.data.miembros && response.data.miembros.length > 0) {
-                            let membersHtml = '';
-
-                            response.data.miembros.forEach(miembro => {
-                                if (miembro.foto_url) {
-                                    // Si tiene foto -> evitar caché con timestamp
-                                    membersHtml += `
-                                        <img src="${miembro.foto_url}?v=${new Date().getTime()}" 
-                                            class="rounded-circle border border-2 border-primary"
-                                            style="width: 40px; height: 40px; object-fit: cover; margin-right: -10px; z-index: 1;"
-                                            data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                            title="${miembro.nombre} ${miembro.apellido}">
-                                    `;
-                                } else {
-                                    // Si no tiene foto -> iniciales
-                                    membersHtml += `
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
-                                            style="width: 40px; height: 40px; background-color: #6c757d; color: white; font-weight: bold; margin-right: -10px; z-index: 1;"
-                                            data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                            title="${miembro.nombre} ${miembro.apellido}">
-                                            ${getInitials(miembro.nombre + ' ' + miembro.apellido)}
-                                        </div>
-                                    `;
-                                }
-                            });
-
-                            container.html(membersHtml);
+                        if (response.data.success) {
+                            allProjects = response.data.data;
+                            renderProjects(allProjects, search);
+                        } else {
+                            showError('Error al cargar los proyectos');
+                            showEmptyState();
                         }
                     })
                     .catch(function(error) {
-                        console.error("Error cargando miembros:", error);
-                        container.html('<small class="text-danger">Error al cargar</small>');
+                        console.error('Error:', error);
+                        showError('Error al cargar los proyectos: ' + (error.response?.data?.message || error.message));
+                        showEmptyState();
                     });
             }
-            
 
-        //------------
+            function renderProjects(projects, searchTerm = '') {
+                hideLoading();
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
-                new bootstrap.Tooltip(tooltipTriggerEl)
-            })
+                if (projects.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+
+                const container = $('#projectsContainer');
+                container.empty().show();
+                $('#emptyState').hide();
+
+                projects.forEach(function(project) {
+                    const card = createProjectCard(project, searchTerm);
+                    container.append(card);
+
+                    const membersContainer = $(`#membersContainer_${project.uid}`);
+                    loadMembers(project.uid, membersContainer);
+                });
+
+                // Animar las cartas
+                $('.project-card').each(function(index) {
+                    $(this).css('opacity', 0).delay(index * 100).animate({
+                        opacity: 1
+                    }, 300);
+                });
+            }
+
+            function createProjectCard(project, searchTerm = '') {
+                // Generar iniciales para el avatar
+                const initials = getInitials(project.usuario_nombre || 'Usuario');
+
+                // Destacar términos de búsqueda
+                const highlightedTitle = highlightSearchTerm(project.nombre || 'Sin título', searchTerm);
+                const highlightedOwner = highlightSearchTerm(project.usuario_nombre || 'Usuario desconocido', searchTerm);
+
+                // Determinar el progreso/estado
+                const progress = project.progreso;
+                const progressText = progress;
+                const progressClass = getProgressClass(progress);
+
+                return `
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                        <div class="card project-card">
+                            <div class="project-header">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <!-- Título -->
+                                    <h5 class="project-title mb-2 project-link" data-id="${project.uid}">
+                                        ${highlightedTitle}
+                                    </h5>
+
+                                    <!-- Ícono Ver Detalles -->
+                                    <button type="button" class="btn btn-sm btn-link text-white p-0 ms-2 btn-view"
+                                            data-id="${project.uid}" data-bs-toggle="tooltip" data-bs-placement="bottom" 
+                                            title="Ver detalles">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                            class="bi bi-info-circle" viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zM8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0z"/>
+                                            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533l.738-3.468c.194-.897-.105-1.319-.808-1.319z"/>
+                                            <circle cx="8" cy="4.5" r="1"/>
+                                        </svg>
+                                    </button>
+
+                                </div>
+
+                                <!-- Descripción dentro del header -->
+                                <p class="project-description mb-0">
+                                    ${project.descripcion || 'Sin descripción disponible'}
+                                </p>
+                            </div>
+
+                            
+                            <div class="card-body">
+                                <div class="mt-2 mb-3 d-flex justify-content-between align-items-center">
+                                    <span class="badge badge-status ${progressClass}">
+                                        ${getProgressIcon(progress)}
+                                        ${progressText}
+                                    </span>
+                                </div>
+
+                                <div class="owner-info d-flex mb-0 align-items-center">
+                                    <!-- Avatar con iniciales (tooltip con nombre del propietario) -->
+                                    <div class="owner-avatar rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
+                                        style="width: 40px; height: 40px; background-color: #0d6efd; color: white; font-weight: bold; margin-right: -10px; z-index: 1;"
+                                        data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                        title="Propietario del proyecto: ${highlightedOwner}"> ${initials }
+                                        
+                                    </div>
+
+                                    <!-- miembros -->
+                                    <div class="d-flex align-items-center" id="membersContainer_${project.uid}"></div>
+
+                                    <!-- Botón con "+" (tooltip con añadir usuarios) -->
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary bg-white text-primary"
+                                        style="width: 40px; height: 40px; cursor: pointer; z-index: 2;"
+                                        id="btnAddUser_${project.id}"
+                                        data-project-id="${project.id}"
+                                        data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                        title="Añadir usuarios">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+        // función para listar a los miembros
+             function loadMembers(uid, container) {
+            axios.get(`/miembros-equipo/${uid}`)
+                .then(function(response) {
+                    if (response.data.miembros && response.data.miembros.length > 0) {
+                        let membersHtml = '';
+
+                response.data.miembros.forEach(miembro => {
+                    membersHtml += renderAvatar(miembro);
+                });
+
+                container.html(membersHtml);
+            }
+        })
+        .catch(function(error) {
+            console.error("Error cargando miembros:", error);
+            container.html('<small class="text-danger">Error al cargar</small>');
         });
+}
+
+
+// 🔹 Función que genera avatar según si hay foto o no
+function renderAvatar(usuario) {
+    const initials = getInitials(usuario.nombre + ' ' + usuario.apellido);
+
+    if (usuario.foto_url) {
+        const img = document.createElement("img");
+        img.src = usuario.foto_url;
+        img.className = "avatar-img";
+        img.title = `${usuario.nombre} ${usuario.apellido} (${usuario.rol})`;
+
+        img.onerror = function () {
+            this.replaceWith(getFallbackAvatarElement(initials, usuario.nombre, usuario.apellido, usuario.rol));
+        };
+
+        return img.outerHTML;
+    } else {
+        return getFallbackAvatar(initials, usuario.nombre, usuario.apellido, usuario.rol);
+    }
+}
+
+
+
+function getFallbackAvatar(initials, nombre, apellido, rol) {
+    return `
+        <div class="avatar-fallback"
+             title="${nombre} ${apellido} (${rol})">
+            ${initials}
+        </div>
+    `;
+}
+
+window.getFallbackAvatarElement = function(initials, nombre, apellido, rol) {
+    const div = document.createElement('div');
+    div.className = 'avatar-fallback';
+    div.title = `${nombre} ${apellido} (${rol})`;
+    div.textContent = initials;
+    return div;
+};
+
+
+
+
+// Esta función devuelve un nodo real para el replaceWith
+function getFallbackAvatarElement(initials, nombre, apellido, rol) {
+    const div = document.createElement('div');
+    div.className = 'avatar-fallback';
+    div.title = `${nombre} ${apellido} (${rol})`;
+    div.textContent = initials;
+    return div;
+}
+
+            //------------
+
+            document.addEventListener("DOMContentLoaded", function() {
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                    new bootstrap.Tooltip(tooltipTriggerEl)
+                })
+            });
 
         // Funcion para crear un proyecto
         $(document).ready(function() {

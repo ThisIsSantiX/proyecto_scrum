@@ -177,9 +177,9 @@ class UserController extends Controller
 
 
     public function deleteFotoPerfil($uid)
-{
+    {
     $user = User::where('uid', $uid)->firstOrFail();
-
+    
     if ($user->foto_url && Storage::exists($user->foto_url)) {
         Storage::delete($user->foto_url);
     }
@@ -188,6 +188,40 @@ class UserController extends Controller
     $user->save();
 
     return response()->json(['success' => true]);
-}
+    }   
+
+    public function profile()
+    {
+    $user = auth()->user(); // Usuario autenticado
+    return view('pages.profile.index', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+    $user = User::findOrFail(auth()->id());
+
+    // Validaciones (coherentes con tu tabla)
+    $request->validate([
+        'nombre'    => 'required|string|max:50',
+        'apellido'  => 'required|string|max:50',
+        'email'     => 'required|email|max:255|unique:users,email,' . $user->id,
+        'foto_url'  => 'nullable|file|image|max:2048',
+    ]);
+
+    $data = $request->only(['nombre', 'apellido', 'email']);
+
+    // Procesar foto
+    if ($request->hasFile('foto_url')) {
+        $data['foto_url'] = $request->file('foto_url')->store('usuarios', 'public');
+    } elseif (!$user->foto_url) {
+        $data['foto_url'] = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
+    }
+
+    // Actualizar usuario
+    $user->update($data);
+
+    return redirect()->route('profile.index')->with('success', 'Perfil actualizado correctamente.');
+    }
+
 
 }    

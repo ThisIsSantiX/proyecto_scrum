@@ -11,30 +11,38 @@
                         <h4 class="card-title">Editar Usuario</h4>
                     </div>
                 </div>
-                <div class="card-body">
-                    {{-- Foto --}}
-                    <div class="form-group">
-                        <div class="profile-img-edit position-relative">
-                            <img id="fotoPreview" 
-                                src="{{ $user->foto_url ? asset('storage/' . $user->foto_url) : 'https://ui-avatars.com/api/?name='.urlencode($user->nombre.' '.$user->apellido).'&background=random&color=fff' }}"
-                                alt="profile-pic"
-                                class="theme-color-default-img profile-pic rounded avatar-100">
+               <div class="form-group">
+                <div class="d-flex justify-content-center"> <!-- centramos solo la foto -->
+                    <div class="position-relative" style="display: inline-block;">
+                        <img id="preview"
+                            src="{{ $user->foto_url 
+                                    ? (Str::startsWith($user->foto_url, 'http') 
+                                        ? $user->foto_url 
+                                        : asset('storage/'.$user->foto_url)) 
+                                    : 'https://ui-avatars.com/api/?name=' . urlencode($user->nombre . ' ' . $user->apellido) . '&background=random&color=fff' }}"
+                            alt="Foto de perfil"
+                            class="rounded-circle img-fluid"
+                            style="width: 200px; height:200px; object-fit: cover;"
+                            onclick="verFoto(document.getElementById('preview').src, '{{ $user->uid }}')"
+                            onerror="this.onerror=null;this.src='/images/avatar/01.jpg';">
 
 
-                            <div class="upload-icone bg-primary">
-                                <label for="foto_url" class="mb-0 d-flex align-items-center justify-content-center">
-                                    <svg class="upload-button icon-14" width="14" viewBox="0 0 24 24">
-                                        <path fill="#ffffff"
-                                            d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z"/>
-                                    </svg>
-                                </label>
-                                <input id="foto_url" class="file-upload d-none" type="file" name="foto_url" accept="image/*">
-                            </div>
-                        </div>
-                        <div class="img-extension mt-2">
-                            <span>Formatos permitidos: <b>.jpg .png .jpeg</b></span>
-                        </div>
+                        <!-- Botón flotante -->
+                        <label for="foto_url"
+                            class="btn btn-primary d-flex align-items-center justify-content-center position-absolute shadow"
+                            style="bottom: 5px; right: 5px; 
+                                width: 45px; height: 45px; border-radius: 50%; cursor: pointer;">
+                            <i class="bi bi-pencil-square"></i>
+                        </label>
+                        <input id="foto_url" class="d-none" type="file" name="foto_url" accept="image/*">
                     </div>
+                </div>
+            </div>
+                <div class="img-extension mt-2 text-center">    
+                    <span>Formatos permitidos: <b>.jpg .png .jpeg</b></span>
+                </div>
+            
+                <div class="card-body">
 
                     {{-- Estado --}}
                     <div class="form-group mt-3">
@@ -104,6 +112,13 @@
 @endsection
 
 @section('css')
+@media (max-width: 576px) {
+    #id_rol {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
 
 @endsection
 
@@ -164,7 +179,7 @@
     $(document).ready(function () {
         const select = $('#id_rol'); 
         const notyf = new Notyf(); 
-        const userRol = "{{ $user->id_rol }}";
+        const userRol = "{{$userRole }}";
 
         axios.get("{{ route('showRoles') }}")
             .then(response => {
@@ -183,41 +198,122 @@
             });
     });
 
-    $(document).ready(function () {
-        const select = $('#id_rol'); 
-        const notyf = new Notyf(); 
-        const userRol = "{{ $userRole }}"; // viene del controlador
+// Cambiar la imagen de vista previa al seleccionar un archivo
+document.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("foto_url");
+    const preview = document.getElementById("preview");
 
-        axios.get("{{ route('showRoles') }}")
-            .then(response => {
-                const roles = response.data; 
-                console.log(roles);
-                select.empty();
-                select.append('<option value="">Seleccione un rol...</option>');
-
-                roles.forEach(r => {
-                    // Si coincide con el rol actual, lo marcamos como seleccionado
-                    select.append(`<option value="${r.id}" ${r.id == userRol ? 'selected' : ''}>${r.nombre}</option>`);
-                });
-            })
-            .catch(error => {
-                console.error(error);
-                notyf.error('No se pudieron cargar los roles.');
-            });
-    });
-
-        document.getElementById('foto_url').addEventListener('change', function(e) {
+    if (input && preview) {
+        input.addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(ev) {
-                    document.querySelector('.profile-pic').src = ev.target.result;
-                }
+                reader.onload = (ev) => {
+                    preview.src = ev.target.result;
+                };
                 reader.readAsDataURL(file);
             }
         });
+    }
+});
 
 
+// este diseño es para que la imagen ocupe todo el espacio del modal 
+// el border hace que la imagen sea circular
+function verFoto(url, uid ) {
+    const esAvatar = url.includes('/images/avatar/'); // avatar por defecto
+    Swal.fire({
+        html: `
+            <div style="
+                width: 80vw;                /* ocupa el 80% del ancho de la pantalla */
+                max-width: 350px;           /* límite en pantallas grandes */
+                aspect-ratio: 1 / 1;        /* cuadrado perfecto */
+                margin: auto;
+                position: relative;
+                border-radius: 50%;
+                overflow: hidden;           /* recorta sobrante */
+                box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            ">
+                <img src="${url}" 
+                     alt="Foto de perfil" 
+                     style="
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;   /* ajusta sin deformar */
+                    "> 
+            </div>
+
+            <!-- Botón de eliminar -->
+                 <button onclick="deleteFotoPerfil('${uid}')" 
+                        style="
+                            position:absolute;
+                            top:18px;
+                            left:18px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            width:40px;
+                            height:40px;
+                            background: linear-gradient(135deg, #ff4b5c, #c9184a);
+                            border:none;
+                            border-radius:50%;
+                            color:white;
+                            cursor:pointer;
+                            box-shadow:0 4px 12px rgba(0,0,0,0.25);
+                            transition: all 0.25s ease;
+                        "
+                        onmouseover="this.style.transform='scale(1.1)'; this.style.background='linear-gradient(135deg,#ff6b75,#e63956)';"
+                        onmouseout="this.style.transform='scale(1)'; this.style.background='linear-gradient(135deg,#ff4b5c,#c9184a)';"
+                        title="Eliminar foto">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" 
+                         viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5.5a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                        <path fill-rule="evenodd" 
+                              d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1 0-2h3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1h3a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118z"/>
+                    </svg>
+                </button>
+            </div>
+        `,
+        showCloseButton: true,
+        showConfirmButton: false,
+        background: '#000000cc',
+        width: 'auto',
+        padding: 0
+    });
+}
+function deleteFotoPerfil(uid) {
+    Swal.fire({
+        title: '¿Eliminar foto de perfil?',
+        text: "No podrás revertir esta acción.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#dc3545'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Usamos la URL directa que coincide con tu ruta web.php
+            axios.delete(`/usuarios/${uid}/foto`, {
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+            })
+            .then(response => {
+                if (response.data.success) {
+                    Swal.fire('Eliminada!', 'La foto de perfil ha sido eliminada.', 'success')
+                          .then(() => location.reload()); 
+                } else {
+                    Swal.fire('Error', 'No se pudo eliminar la foto.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                Swal.fire('Error', 'Ocurrió un error en el servidor.', 'error');
+            });
+        }
+    });
+}
 
 </script>
 @endsection

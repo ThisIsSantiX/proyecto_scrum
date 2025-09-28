@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\miembros_equipo;
 use App\Models\Proyecto;
 use App\Models\proyecto_invitaciones;
 use Illuminate\Http\Request;
@@ -11,6 +9,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ProyectoReciente;
+use App\Models\miembros_equipo;
 
 class ProyectoController extends Controller
 {
@@ -450,4 +450,26 @@ class ProyectoController extends Controller
             ], 500);
         }
     }
+
+    
+    public function proyectosRecientes()
+    {
+        try {
+            $proyectos = ProyectoReciente::with(['propietario', 'miembros.usuario'])
+                ->recientes()
+                ->take(5) // últimos 5 proyectos
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $proyectos
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener proyectos recientes: ' . $e->getMessage()
+            ], 500);
+        }  
+  }
+
 }
