@@ -883,6 +883,39 @@
         font-weight: 600;
         border-bottom: 2px solid #0d6efd;
     }
+
+    /* Dropdown con colores oscuros */
+    .custom-dropdown {
+        background-color: #2b2f38;
+        /* gris oscuro */
+        color: #f1f1f1;
+        /* texto claro */
+        font-size: 0.85rem;
+        min-width: 130px;
+        min-height: 70px;
+        padding: 0.25rem 0;
+        margin-top: 0.25rem;
+        /* separa un poco del botón */
+        border-radius: 0.5rem;
+        border: 1px solid #444;
+    }
+
+    /* Items del dropdown */
+    .custom-dropdown .dropdown-item {
+        color: #f1f1f1;
+        padding: 0.35rem 0.75rem;
+    }
+
+    .custom-dropdown .dropdown-item:hover {
+        background-color: #3b4250;
+        /* highlight sutil */
+        color: #fff;
+    }
+
+    .dropdown-toggle:focus {
+        outline: none;
+        box-shadow: none;
+    }
 </style>
 @endsection
 
@@ -1133,12 +1166,12 @@
 
             let crearDesdeTablero = false;
             //crear solo desde el area de tarea pendiente
-            $(document).on('click','[data-bs-target="#modalHistoria"]', function(){
+            $(document).on('click', '[data-bs-target="#modalHistoria"]', function() {
                 crearDesdeTablero = false;
             });
 
             //crear cuando esta en el tablero
-            $(document).on('click','.btn-create', function(){
+            $(document).on('click', '.btn-create', function() {
                 crearDesdeTablero = true;
                 $('#modalHistoria').modal('show');
             })
@@ -1177,25 +1210,25 @@
                             // TODO: refrescar la lista de historias
                             cargarHistorias();
 
-                            if(crearDesdeTablero){
+                            if (crearDesdeTablero) {
                                 const historiaId = response.data.historia.id;
                                 const proyectoUID = $("#proyecto_uid").val();
                                 const sprintUID = sessionStorage.getItem('currentSprintUID') // sprint acticvo
                                 let sprintId = null;
-                                if(window.sprints && sprintUID){
-                                    const sprintObj = window.sprints.find( s => s.uid === sprintUID);
-                                    if(sprintObj) sprintId = sprintObj.id;
+                                if (window.sprints && sprintUID) {
+                                    const sprintObj = window.sprints.find(s => s.uid === sprintUID);
+                                    if (sprintObj) sprintId = sprintObj.id;
                                 }
-                                if(sprintId){
-                                    axios.post(`/proyectos/backlog/${proyectoUID}/sprints/${sprintId}/sprbacklog/store`,{
-                                        id_item_backlog:historiaId,
+                                if (sprintId) {
+                                    axios.post(`/proyectos/backlog/${proyectoUID}/sprints/${sprintId}/sprbacklog/store`, {
+                                        id_item_backlog: historiaId,
                                         progreso: data.progreso,
-                                        asignado_a:[]
-                                    }).then(()=>{
-                                        cargarTablero(proyectoUID,sprintUID);
-                                    }).catch((err)=>{
+                                        asignado_a: []
+                                    }).then(() => {
+                                        cargarTablero(proyectoUID, sprintUID);
+                                    }).catch((err) => {
                                         notyf.error("No se pudo agregar al tablero automáticamente.");
-                                        console.log("error",err);
+                                        console.log("error", err);
                                     });
                                 }
                             }
@@ -2415,6 +2448,7 @@
     function renderKanbanItem(item) {
         // Usar item.progreso (texto) en vez de item.estado (número)
         let estado = item.progreso;
+        console.log("historias del tablero",item);
 
         if (estado === "Por hacer" || estado === "to_do") estado = "por-hacer";
         if (estado === "En progreso" || estado === "in_progress") estado = "en-progreso";
@@ -2442,6 +2476,27 @@
         card.innerHTML = `
                 <div class="kanban-item-header d-flex justify-content-between align-items-center">
                     <strong class="kanban-title">${item.titulo}</strong>
+                    <div class="dropdown ms-2">
+                        <button class="btn btn-sm btn-dark p-0 px-1 rounded-circle" 
+                                type="button" 
+                                data-bs-toggle="dropdown" 
+                                data-bs-display="static"
+                                aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu shadow custom-dropdown">
+                            <li>
+                                <a class="dropdown-item editar-item editar-historia" href="#" data-uid="${item.product_uid}">
+                                    <i class="bi bi-pencil-square me-1"></i> Editar
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item eliminar-historia text-danger" href="#" data-item-id="${item.product_uid}">
+                                    <i class="bi bi-box-arrow-left me-1"></i> Eliminar
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="kanban-item-footer d-flex justify-content-between mt-2">
                     <span class="badge bg-info">Pts: ${item.valor_historia}</span>
@@ -2451,6 +2506,8 @@
 
         container.appendChild(card);
         enableDragAndDrop();
+
+        enableRightDropdowns(card);
 
         // Actualizar contador
         const counter = document.getElementById(`counter-${estado}`);
@@ -3112,6 +3169,85 @@
                 console.error(err);
                 mostrarSeccion('vista-pendiente');
             });
+    });
+
+    function enableRightDropdowns(scope) {
+        // scope = tarjeta nueva, o todo el documento si no pasas nada
+        const root = scope || document;
+        root.querySelectorAll('.dropdown').forEach(function(drop) {
+            if (drop.dataset.rightDropdownAttached) return; // ya lo tiene
+            drop.dataset.rightDropdownAttached = '1';
+
+            const toggle = drop.querySelector('[data-bs-toggle="dropdown"]');
+            const menu = drop.querySelector('.dropdown-menu');
+
+            if (!toggle || !menu) return;
+
+            // al abrir
+            drop.addEventListener('shown.bs.dropdown', function() {
+                // guardar referencia
+                menu.__origParent = menu.parentNode;
+                menu.__origNext = menu.nextSibling;
+                menu.__toggle = toggle;
+
+                // mover al body
+                document.body.appendChild(menu);
+
+                menu.style.position = 'absolute';
+                menu.style.zIndex = 2000;
+
+                positionMenu(menu, toggle);
+            });
+
+            // al cerrar
+            drop.addEventListener('hidden.bs.dropdown', function() {
+                if (menu.__origParent) {
+                    if (menu.__origNext) {
+                        menu.__origParent.insertBefore(menu, menu.__origNext);
+                    } else {
+                        menu.__origParent.appendChild(menu);
+                    }
+                }
+                menu.style.position = '';
+                menu.style.left = '';
+                menu.style.top = '';
+                menu.style.zIndex = '';
+                menu.__origParent = null;
+                menu.__origNext = null;
+                menu.__toggle = null;
+            });
+        });
+    }
+
+    // Calcula la posición a la derecha del botón, centrado verticalmente
+    function positionMenu(menu, toggle) {
+        const rect = toggle.getBoundingClientRect();
+        const menuRect = menu.getBoundingClientRect();
+
+        const left = rect.right + 8 + window.scrollX; // 8px espacio
+        let top = rect.top + (rect.height / 2) - (menuRect.height / 2) + window.scrollY;
+
+        // evitar que se salga de pantalla
+        const maxTop = document.documentElement.clientHeight - menuRect.height + window.scrollY - 8;
+        const minTop = window.scrollY + 8;
+        if (top > maxTop) top = maxTop;
+        if (top < minTop) top = minTop;
+
+        menu.style.left = left + 'px';
+        menu.style.top = top + 'px';
+    }
+
+    // re-posicionar si haces scroll o resize
+    window.addEventListener('scroll', function() {
+        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+            if (menu.__toggle) positionMenu(menu, menu.__toggle);
+        });
+    }, true);
+
+    window.addEventListener('resize', function() {
+        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+            if (menu.__toggle) positionMenu(menu, menu.__toggle);
+        });
     });
 </script>
 @endsection
