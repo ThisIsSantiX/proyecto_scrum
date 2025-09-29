@@ -31,7 +31,7 @@ class ProyectoController extends Controller
 
         $query = Proyecto::select(
             'proyectos.*',
-            'users.nombre as usuario_nombre',
+            'users.username as usuario_username',
             'users.email as usuario_email'
         )
             ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
@@ -45,7 +45,7 @@ class ProyectoController extends Controller
         if ($request->has('search') && !empty($request->search)) {
             $query->where(function ($q) use ($request) {
                 $q->where('proyectos.nombre', 'LIKE', '%' . $request->search . '%')
-                    ->orWhere('users.nombre', 'LIKE', '%' . $request->search . '%');
+                    ->orWhere('users.username', 'LIKE', '%' . $request->search . '%');
             });
         }
 
@@ -119,7 +119,7 @@ class ProyectoController extends Controller
                 })
                 ->select(
                     'proyectos.*',
-                    'users.nombre as usuario_nombre',
+                    'users.username as usuario_username',
                     'users.email as usuario_email',
                     DB::raw('COUNT(DISTINCT product_backlog.id) as total_elementos'),
                     DB::raw('COUNT(DISTINCT sprints.id) as total_sprints')
@@ -138,7 +138,7 @@ class ProyectoController extends Controller
                     'proyectos.fecha_fin',
                     'proyectos.created_at',
                     'proyectos.updated_at',
-                    'users.nombre',
+                    'users.username',
                     'users.email'
                 )
                 ->first();
@@ -346,7 +346,7 @@ class ProyectoController extends Controller
             return response()->json([
                 'message' => 'Invitacion enviada exitosamente',
                 'invitacion' => [
-                    'usuario' => $usuarioInvitado->name,
+                    'usuario' => $usuarioInvitado->username,
                     'email' => $usuarioInvitado->email,
                     'proyecto' => $proyecto->nombre
                 ]

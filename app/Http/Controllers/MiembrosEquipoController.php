@@ -35,14 +35,13 @@ class MiembrosEquipoController extends Controller
             $proyecto = Proyecto::where('uid', $uid)->firstOrFail();
 
             // Traer miembros con la relación usuario
-            $miembros = Proyecto::with('usuario:id,nombre,apellido,email,foto_url')
+            $miembros = Proyecto::with('usuario:id,username,email,foto_url')
                 ->where('id_proyecto', $uid)
                 ->get()
                 ->map(function ($miembro) {
                     return [
                         'id'       => $miembro->usuario->id,
-                        'nombre'   => $miembro->usuario->nombre,
-                        'apellido' => $miembro->usuario->apellido,
+                        'username'   => $miembro->usuario->username,
                         'email'    => $miembro->usuario->email,
                         'foto_url' => $miembro->usuario->foto_url
                             ? asset('storage/' . $miembro->usuario->foto_url)   // ✅ URL pública
@@ -53,8 +52,7 @@ class MiembrosEquipoController extends Controller
             // Retornar también al propietario como objeto
             $propietario = [
                 'id'       => $proyecto->propietario->id,
-                'nombre'   => $proyecto->propietario->nombre,
-                'apellido' => $proyecto->propietario->apellido,
+                'username'   => $proyecto->propietario->username,
                 'email'    => $proyecto->propietario->email,
                 'foto_url' => $proyecto->propietario->foto_url 
                     ? asset('storage/' . $proyecto->propietario->foto_url) 
@@ -92,8 +90,7 @@ class MiembrosEquipoController extends Controller
                 ->where('proyectos.uid', $proyectoUid)
                 ->select(
                     'users.id',
-                    'users.nombre',
-                    'users.apellido',
+                    'users.username',
                     'users.email',
                     'users.foto_url',
                 )
@@ -101,8 +98,7 @@ class MiembrosEquipoController extends Controller
                 ->map(function ($u) {
                     return [
                         'id'       => $u->id,
-                        'nombre'   => $u->nombre,
-                        'apellido' => $u->apellido,
+                        'username'   => $u->username,
                         'email'    => $u->email,
                         'foto_url' => $u->foto_url
                             ? asset('storage/' . $u->foto_url) 

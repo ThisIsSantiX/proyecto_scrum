@@ -44,7 +44,7 @@
     <!-- Saludo -->
     <div class="text-center mb-4">
         <p class="text-muted mb-1">{{ $fecha }}</p>
-        <h2 class="fw-bold">{{ $saludo }}, {{ Auth::user()->nombre }}</h2>
+        <h2 class="fw-bold">{{ $saludo }}, {{ Auth::user()->username }}</h2>
     </div>
 
     <!-- Barra de búsqueda -->
@@ -146,7 +146,7 @@
                             <div class="alert alert-light d-flex align-items-start border rounded-3">
                                 <span class="badge bg-danger me-2">2</span>
                                 <div>
-                                    <strong>Hola  {{ Auth::user()->nombre }}, ¡Bienvenido a Scrum!</strong><br>
+                                    <strong>Hola  {{ Auth::user()->username }}, ¡Bienvenido a Scrum!</strong><br>
                                     Estamos encantados de tenerte a bordo. Disfruta.
                                     <div class="mt-1"><small class="text-muted">21 de agosto</small></div>
                                 </div>
@@ -316,7 +316,7 @@
                             <strong>${invitacion.proyecto.nombre}</strong>
                             <br>
                             <small>
-                                Invitado por ${invitacion.invitado_por.nombre} • ${fechaInvitacion}
+                                Invitado por ${invitacion.invitado_por.username} • ${fechaInvitacion}
                             </small>
                         </div>
                         <div class="text-end">
@@ -334,7 +334,7 @@
             //mostrar las invitaciones en el tab de todo
             const invitacionesTodo = invitaciones.map(invitacion => {
                 const fechaInvitacion = new Date(invitacion.created_at).toLocaleDateString('es-ES');
-                console.log(invitacion.invitado_por.nombre);
+                console.log(invitacion.invitado_por.username);
 
                 return `
                 <div class="notification-item alert alert-light d-flex align-items-start border rounded-3 mb-2" 
@@ -342,7 +342,7 @@
                     <span class="badge bg-primary me-2">!</span>
                     <div>
                         <strong>Invitación a proyecto: ${invitacion.proyecto.nombre}</strong><br>
-                        ${invitacion.invitado_por.nombre} te ha invitado a unirte al proyecto.
+                        ${invitacion.invitado_por.username} te ha invitado a unirte al proyecto.
                         <div class="mt-1"><small class="text-muted">${fechaInvitacion}</small></div>
                     </div>
                 </div>  
@@ -384,12 +384,12 @@
                     $('#nombreProyecto').text(invitacion.proyecto.nombre);
                     $('#fechaInvitacion').text(`Invitacion recibida el ${new Date(invitacion.created_at).toLocaleDateString('es-ES')}`);
                     $('#descripcionProyecto').text(invitacion.proyecto.descripcion || 'Sin descripcion');
-                    $('#nombreInvitador').text(invitacion.invitado_por.nombre);
+                    $('#nombreInvitador').text(invitacion.invitado_por.username);
                     $('#emailInvitador').text(invitacion.invitado_por.email);
                     $('#tiempoExpiracion').text(calcularDiasRestantes(invitacion.expira_en));
 
                     //iniciales para el avatar
-                    const nombres = invitacion.invitado_por.nombre.split(' ');
+                    const nombres = invitacion.invitado_por.username.split(' ');
                     const iniciales = nombres.map(nombre => nombre.charAt(0)).join('').toUpperCase().substring(0, 2);
                     $('#initialsInvitador').text(iniciales);
 

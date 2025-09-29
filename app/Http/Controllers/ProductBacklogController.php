@@ -160,7 +160,7 @@ class ProductBacklogController extends Controller
                     'product_backlog.progreso',
                     'product_backlog.uid as historia_uid',
                     'product_backlog.created_at',
-                    'users.nombre as creador_nombre',
+                    'users.username as creador_nombre',
                     'users.foto_url as foto_url',
                     'criterios_aceptacion.id as criterio_id',
                     'criterios_aceptacion.descripcion as criterio_descripcion',

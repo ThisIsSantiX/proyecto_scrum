@@ -65,18 +65,11 @@
                         <form id="registerForm" action="route{{ ('register') }}" method="POST">
                             @csrf
                             <div class="row">
-                                <div class="col-lg-6">
+                                <div class="col-lg-12">
                                     <div class="form-group">
                                         <label for="full-name" class="form-label">Nombre</label>
-                                        <input type="text" class="form-control" id="full-name" placeholder="Cesar" required>
+                                        <input type="text" class="form-control" id="full-name" placeholder="Cesar Yepes" required>
                                         <div class="invalid-feedback">El nombre es obligatorio</div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <label for="last-name" class="form-label">Apellido</label>
-                                        <input type="text" class="form-control" id="last-name" placeholder="Yepes" required>
-                                        <div class="invalid-feedback">El apellido es obligatorio</div>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
@@ -144,8 +137,7 @@
                 $(".form-control").removeClass("is-invalid");
 
                 let data = {
-                    nombre: $("#full-name").val(),
-                    apellido: $("#last-name").val(),
+                    username: $("#full-name").val(),
                     email: $("#email").val(),
                     password: $("#password").val(),
                     password_confirmation: $("#confirm-password").val(),
@@ -163,13 +155,9 @@
                         if (error.response && error.response.status === 422) {
                             let errors = error.response.data.errors;
 
-                            if (errors.nombre) {
+                            if (errors.username) {
                                 $("#full-name").addClass("is-invalid")
-                                    .siblings(".invalid-feedback").text(errors.nombre[0]);
-                            }
-                            if (errors.apellido) {
-                                $("#last-name").addClass("is-invalid")
-                                    .siblings(".invalid-feedback").text(errors.apellido[0]);
+                                    .siblings(".invalid-feedback").text(errors.username[0]);
                             }
                             if (errors.email) {
                                 $("#email").addClass("is-invalid")
