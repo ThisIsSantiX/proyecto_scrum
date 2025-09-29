@@ -453,6 +453,7 @@ class SprintController extends Controller
                     'sb.estado',
                     'sb.progreso',
                     'pb.titulo',
+                    'pb.uid as product_uid',
                     'pb.descripcion',
                     'pb.prioridad',
                     'pb.valor_historia'
