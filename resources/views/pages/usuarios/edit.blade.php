@@ -78,13 +78,9 @@
                             @csrf
                             @method('PUT')
                             <div class="row">
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-12">
                                     <label class="form-label">Nombre</label>
-                                    <input type="text" name="nombre" id="nombre" class="form-control" value="{{ $user->nombre }}" required>
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <label class="form-label">Apellido</label>
-                                    <input type="text" name="apellido" id="apellido" class="form-control" value="{{ $user->apellido }}" required>
+                                    <input type="text" name="username" id="username" class="form-control" value="{{ $user->username }}" required>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Email</label>

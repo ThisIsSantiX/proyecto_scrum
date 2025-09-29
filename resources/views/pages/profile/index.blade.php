@@ -7,143 +7,123 @@
 
 <div class="container-fluid content-inner mt-2 pt-3 py-0">
     <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card p-4 shadow-lg animate__animated animate__fadeIn">
-                
-                <!-- Encabezado con avatar, nombre y correo -->
-                <div class="row align-items-center mb-3" id="profileHeader">
-                    <!-- Avatar -->
-                    <div class="col-12 col-md-3 text-center mb-3 mb-md-0">
-                        <div class="position-relative d-inline-block">
-                                 <img id="preview"
-                            src="{{ $user->foto_url 
-                                    ? (Str::startsWith($user->foto_url, 'http') 
-                                        ? $user->foto_url 
-                                        : asset('storage/'.$user->foto_url)) 
-                                    : 'https://ui-avatars.com/api/?name=' . urlencode($user->nombre . ' ' . $user->apellido) . '&background=random&color=fff' }}"
-                            alt="Foto de perfil"
-                            class="rounded-circle img-fluid"
-                            style="width: 200px; height:200px; object-fit: cover;"
-                            onclick="verFoto(document.getElementById('preview').src, '{{ $user->uid }}')"
-                            onerror="this.onerror=null;this.src='/images/avatar/01.jpg';">
-
-
-                            <!-- Botón ver foto -->
-                            <button 
-                            onclick="verFoto('{{ $user->foto_url 
-                                ? (Str::startsWith($user->foto_url, 'http') 
-                                    ? $user->foto_url 
-                                    : asset('storage/'.$user->foto_url)) 
-                                : asset('images/avatar/01.jpg') }}', '{{ $user->uid }}')" 
-
-                            class="btn btn-secondary d-flex align-items-center justify-content-center position-absolute shadow"
-                            style="bottom: 10px; right: -10px; 
-                                width: 50px; height: 50px; 
-                                border-radius: 50%; cursor: pointer;">
-                            <i class="bi bi-eye fs-4"></i>
-                        </button>
-                        </div>
-                    </div>
-
-                    <!-- Nombre y correo -->
-                    <div class="col-12 col-md-9 text-center text-md-start">
-                        <h3 class="fw-bold text-uppercase mb-1 text-gradient">
-                            {{ $user->nombre }} {{ $user->apellido }}
-                        </h3>
-                        <p class="text-muted small mb-0">
-                            <i class="bi bi-envelope"></i> {{ $user->email }}
-                        </p>
-                    </div>
-                </div>
-
-                <hr class="opacity-50">
-
-                <!-- Botón que despliega el formulario -->
-                <div class="text-center">
-                    <button id="btnEditarPerfil" 
-                            class="btn btn-primary mb-3 shadow-sm animate__animated animate__fadeInUp" 
-                            type="button" 
-                            data-bs-toggle="collapse" 
-                            data-bs-target="#editProfileForm" 
-                            aria-expanded="false" 
-                            aria-controls="editProfileForm"> 
-                        Editar Perfil
-                    </button>
-                </div>
-
-                <!-- Formulario colapsable -->
-                <div class="collapse" id="editProfileForm">
-                    <form id="formProfileUpdate" 
-                          action="{{ route('profile.update') }}" 
-                          method="POST" 
-                          enctype="multipart/form-data" 
-                          class="mt-3 animate__animated animate__fadeIn">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="row align-items-center">
-                            <!-- Avatar columna izquierda -->
-                            <div class="col-12 col-md-4 text-center mb-4 mb-md-0">
-                                <div class="position-relative" style="display: inline-block;">
-                                      <img id="preview"
-                            src="{{ $user->foto_url 
-                                    ? (Str::startsWith($user->foto_url, 'http') 
-                                        ? $user->foto_url 
-                                        : asset('storage/'.$user->foto_url)) 
-                                    : 'https://ui-avatars.com/api/?name=' . urlencode($user->nombre . ' ' . $user->apellido) . '&background=random&color=fff' }}"
-                            alt="Foto de perfil"
-                            class="rounded-circle img-fluid"
-                            style="width: 200px; height:200px; object-fit: cover;"
-                            onclick="verFoto(document.getElementById('preview').src, '{{ $user->uid }}')"
-                            onerror="this.onerror=null;this.src='/images/avatar/01.jpg';">
-
-
-                                        
-                                        
-
-                                    <!-- Botón editar foto -->
-                                    <label for="foto_url"  
-                                        class="btn btn-primary d-flex align-items-center justify-content-center position-absolute shadow pulse-btn"
-                                        style="bottom: 10px; right: -10px; 
-                                            width: 50px; height: 50px; border-radius: 50%; cursor: pointer;">
-                                        <i class="bi bi-pencil-square fs-4"></i>
-                                    </label>
-                                    <input id="foto_url" class="d-none" type="file" name="foto_url" accept="image/*">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <div class="profile-container">
+                        <!-- Avatar Section -->
+                        <div class="profile-avatar-section">
+                            <div class="avatar-wrapper position-relative">
+                                <img id="avatarPreview"
+                                    src="{{ $user->foto_url 
+                                            ? (Str::startsWith($user->foto_url, 'http') 
+                                                ? $user->foto_url 
+                                                : asset('storage/'.$user->foto_url)) 
+                                            : 'https://ui-avatars.com/api/?name=' . urlencode($user->username) . '&background=6e40c9&color=fff' }}"
+                                    alt="Foto de perfil"
+                                    class="profile-avatar"
+                                    onclick="verFoto(this.src, '{{ $user->uid }}')"
+                                    onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($user->username) }}&background=6e40c9&color=fff';">
+                                
+                                @if(auth()->check() && auth()->user()->uid === $user->uid)
+                                <div class="avatar-overlay" onclick="document.getElementById('foto_url').click()">
+                                    <i class="bi bi-camera-fill"></i>
+                                    <small class="d-block mt-1">Cambiar</small>
                                 </div>
-                                <p class="mt-2 small text-muted">Formatos permitidos: <b>.jpg .png .jpeg</b></p>
+                                @endif
                             </div>
+                        </div>
 
-                            <!-- Campos del formulario columna derecha -->
-                            <div class="col-12 col-md-8">
-                                <!-- Nombre -->
-                                <div class="mb-3">
-                                    <label for="nombre" class="form-label fw-semibold">Nombre</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ old('nombre', $user->nombre) }}">
-                                </div>
-
-                                <!-- Apellido -->
-                                <div class="mb-3">
-                                    <label for="apellido" class="form-label fw-semibold">Apellido</label>
-                                    <input type="text" class="form-control" id="apellido" name="apellido" value="{{ old('apellido', $user->apellido) }}">
-                                </div>
-
-                                <!-- Correo -->
-                                <div class="mb-3">
-                                    <label for="email" class="form-label fw-semibold">Correo</label>
-                                    <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $user->email) }}">
-                                </div>
-
-                                <!-- Botón guardar -->
-                                <div class="text-end">
-                                    <button type="submit" class="btn btn-success shadow-sm">
-                                        <i class="bi bi-check-circle"></i> Actualizar
+                        <!-- Info Section -->
+                        <div class="profile-info-section">
+                            <div id="displayMode">
+                                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                                    <div>
+                                        <h2 class="profile-username mb-2" id="displayUsername">{{ $user->username }}</h2>
+                                        <div class="profile-meta">
+                                            <div class="meta-item">
+                                                <i class="bi bi-envelope"></i>
+                                                <span>{{ $user->email }}</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <i class="bi bi-calendar3"></i>
+                                                <span>Miembro desde {{ $user->created_at->format('M Y') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    @if(auth()->check() && auth()->user()->uid === $user->uid)
+                                    <button type="button" class="btn btn-outline-primary" onclick="toggleEditMode()">
+                                        <i class="bi bi-pencil me-1"></i> Editar perfil
                                     </button>
+                                    @endif
                                 </div>
                             </div>
-                        </div>
-                    </form>
-                </div>
 
+                            @if(auth()->check() && auth()->user()->uid === $user->uid)
+                            <div id="editMode" style="display: none;">
+                                <form id="formProfileUpdate" 
+                                      action="{{ route('profile.update') }}" 
+                                      method="POST" 
+                                      enctype="multipart/form-data">
+                                    @csrf
+                                    @method('PUT')
+
+                                    <input type="file" 
+                                           class="d-none" 
+                                           id="foto_url" 
+                                           name="foto_url" 
+                                           accept="image/*" 
+                                           onchange="handlePhotoChange(event)">
+
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label for="username" class="form-label fw-semibold">
+                                                <i class="bi bi-person-badge me-1"></i>
+                                                Nombre de usuario
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   id="username" 
+                                                   name="username" 
+                                                   value="{{ old('username', $user->username) }}"
+                                                   placeholder="Ingresa tu nombre de usuario"
+                                                   required>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label for="email" class="form-label fw-semibold">
+                                                <i class="bi bi-envelope me-1"></i>
+                                                Correo electrónico
+                                            </label>
+                                            <input type="email" 
+                                                   class="form-control" 
+                                                   id="email" 
+                                                   name="email" 
+                                                   value="{{ old('email', $user->email) }}"
+                                                   placeholder="tu@email.com"
+                                                   required>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div class="d-flex gap-2 mt-2">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="bi bi-check-lg me-1"></i>
+                                                    Guardar cambios
+                                                </button>
+                                                <button type="button" class="btn btn-secondary" onclick="toggleEditMode()">
+                                                    <i class="bi bi-x-lg me-1"></i>
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -153,182 +133,263 @@
 
 @section('css')
 <style>
-/* Avatar hover */
-.avatar-hover {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.avatar-hover:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+.card {
+    border-radius: 12px;
 }
 
-/* Botón de editar con pulso */
-.pulse-btn {
-    animation: pulse 1.8s infinite;
-}
-@keyframes pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.6); }
-    70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(13, 110, 253, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+.profile-container {
+    display: flex;
+    gap: 2.5rem;
+    align-items: flex-start;
 }
 
-/* Texto degradado */
-.text-gradient {
-    background: linear-gradient(90deg, #0d6efd, #6610f2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+/* Avatar Section */
+.profile-avatar-section {
+    flex-shrink: 0;
 }
 
-/* Animación collapse más suave */
-.collapse {
-    transition: all 0.5s ease-in-out;
+.avatar-wrapper {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    display: block;
+}
+
+.avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    cursor: pointer;
+    color: white;
+    font-size: 13px;
+}
+
+.avatar-wrapper:hover .avatar-overlay {
+    opacity: 1;
+}
+
+.avatar-overlay i {
+    font-size: 28px;
+}
+
+/* Profile Info */
+.profile-info-section {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-username {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.profile-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    font-size: 0.9375rem;
+}
+
+.meta-item i {
+    font-size: 1rem;
+    color: #9ca3af;
+}
+
+/* Form adjustments */
+.form-label {
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .profile-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 2rem;
+    }
+    
+    .profile-info-section {
+        width: 100%;
+    }
+    
+    .profile-meta {
+        align-items: center;
+    }
+    
+    .meta-item {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .avatar-wrapper {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .profile-username {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .avatar-wrapper {
+        width: 130px;
+        height: 130px;
+    }
 }
 </style>
 @endsection
 
 @section('js')
 <script>
-    // Mostrar/ocultar encabezado y botón
-    document.addEventListener("DOMContentLoaded", () => {
-        const collapseEl = document.getElementById("editProfileForm");
-        const headerEl = document.getElementById("profileHeader");
-        const btnEditarPerfil = document.getElementById("btnEditarPerfil");
-
-        collapseEl.addEventListener("show.bs.collapse", () => {
-            headerEl.style.display = "none"; 
-            btnEditarPerfil.style.display = "none"; 
-        });
-
-        collapseEl.addEventListener("hide.bs.collapse", () => {
-            headerEl.style.display = "flex"; 
-            btnEditarPerfil.style.display = "inline-block"; 
-        });
-    });
-
-document.addEventListener("DOMContentLoaded", () => {
-    const input = document.getElementById("foto_url");
-    const preview = document.getElementById("preview");
-
-    // avatar del encabezado
-    const headerPreview = document.querySelector("#profileHeader img");
-
-    // variable global para la última foto cargada
-    let tempFoto = null;
-
-    if (input && preview) {
-        input.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    tempFoto = ev.target.result;
-
-                    // refrescar imagen en el formulario
-                    preview.src = tempFoto;
-
-                    // refrescar también el avatar del encabezado
-                    if (headerPreview) {
-                        headerPreview.src = tempFoto;
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+function toggleEditMode() {
+    const displayMode = document.getElementById('displayMode');
+    const editMode = document.getElementById('editMode');
+    
+    if (displayMode.style.display === 'none') {
+        displayMode.style.display = 'block';
+        editMode.style.display = 'none';
+    } else {
+        displayMode.style.display = 'none';
+        editMode.style.display = 'block';
     }
+}
 
-    // sobrescribimos verFoto para usar la temporal si existe
-    window.verFoto = function(url, uid) {
-        const finalUrl = tempFoto || url;
-        Swal.fire({
-            html: `
-                <div style="
-                width:80vw;
-                max-width:350px;
-                aspect-ratio:1/1;
-                margin:auto;
-                position:relative;
-                border-radius:50%;
-                overflow:hidden;
-                box-shadow:0 4px 12px rgba(0,0,0,0.35);
-                display:flex;align-items:center;
-                justify-content:center;
-                ">
+function handlePhotoChange(event) {
+    const file = event.target.files[0];
+    if (file) {
+        // Validar tamaño (máximo 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Archivo muy grande',
+                text: 'La imagen no debe superar los 5MB'
+            });
+            event.target.value = '';
+            return;
+        }
+        
+        // Validar tipo
+        if (!file.type.startsWith('image/')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Formato inválido',
+                text: 'Por favor selecciona una imagen válida'
+            });
+            event.target.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('avatarPreview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}
 
-                  <img src="${finalUrl}" 
-                       alt="Foto de perfil" 
-                       style="width:100%; height:100%; object-fit:cover;">
-                </div>
-
-                <!-- Botón de eliminar -->
-                 <button onclick="deleteFotoPerfil('${uid}')" 
-                        style="
-                            position:absolute;
-                            top:18px;
-                            left:18px;
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            width:40px;
-                            height:40px;
-                            background: linear-gradient(135deg, #ff4b5c, #c9184a);
-                            border:none;
-                            border-radius:50%;
-                            color:white;
-                            cursor:pointer;
-                            box-shadow:0 4px 12px rgba(0,0,0,0.25);
-                            transition: all 0.25s ease;
-                        "
-                        onmouseover="this.style.transform='scale(1.1)'; this.style.background='linear-gradient(135deg,#ff6b75,#e63956)';"
-                        onmouseout="this.style.transform='scale(1)'; this.style.background='linear-gradient(135deg,#ff4b5c,#c9184a)';"
-                        title="Eliminar foto">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" 
-                         viewBox="0 0 16 16">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5.5a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                        <path fill-rule="evenodd" 
-                              d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1 0-2h3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1h3a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118z"/>
-                    </svg>
-                </button>
+function verFoto(url, uid) {
+    const isOwner = {{ auth()->check() && auth()->user()->uid === $user->uid ? 'true' : 'false' }};
+    
+    const deleteButton = isOwner ? `
+        <button onclick="deleteFotoPerfil('${uid}')" 
+                class="btn btn-danger position-absolute"
+                style="top: 20px; right: 20px; z-index: 10; border-radius: 50%; width: 48px; height: 48px; padding: 0;"
+                title="Eliminar foto">
+            <i class="bi bi-trash"></i>
+        </button>
+    ` : '';
+    
+    Swal.fire({
+        html: `
+            <div style="position: relative; max-width: 600px; margin: auto;">
+                <img src="${url}" 
+                     alt="Foto de perfil" 
+                     style="width: 100%; height: auto; border-radius: 12px;">
+                ${deleteButton}
             </div>
-            `,
-            showCloseButton: true,
-            showConfirmButton: false,
-            background: '#000000cc',
-            width: 'auto',
-            padding: 0
-        });
-    };
-});
+        `,
+        showCloseButton: true,
+        showConfirmButton: false,
+        background: '#ffffff',
+        width: 'auto',
+        padding: '2rem',
+        customClass: {
+            popup: 'rounded-3'
+        }
+    });
+}
 
-
-
-    // Eliminar foto
 function deleteFotoPerfil(uid) {
     Swal.fire({
         title: '¿Eliminar foto de perfil?',
-        text: "No podrás revertir esta acción.",
+        text: "Esta acción no se puede deshacer.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Sí, eliminar',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#dc3545'
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Usamos la URL directa que coincide con tu ruta web.php
             axios.delete(`/usuarios/${uid}/foto`, {
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
             })
             .then(response => {
                 if (response.data.success) {
-                    Swal.fire('Eliminada!', 'La foto de perfil ha sido eliminada.', 'success')
-                        .then(() => location.reload());
-
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Eliminada!',
+                        text: 'La foto de perfil ha sido eliminada correctamente.'
+                    }).then(() => location.reload());
                 } else {
-                    Swal.fire('Error', 'No se pudo eliminar la foto.', 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo eliminar la foto.'
+                    });
                 }
             })
             .catch(error => {
                 console.error(error);
-                Swal.fire('Error', 'Ocurrió un error en el servidor.', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error del servidor',
+                    text: 'Ocurrió un error al procesar la solicitud.'
+                });
             });
         }
     });

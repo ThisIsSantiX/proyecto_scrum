@@ -319,7 +319,7 @@ class SprintController extends Controller
                 'me.id_proyecto',
                 'me.id_usuario',
                 'me.estado',
-                DB::raw("CONCAT(u.nombre, ' ', u.apellido) as nombre_completo")
+                DB::raw("CONCAT(u.username) as nombre_completo")
             )
             ->where('me.id_proyecto', $id)
             ->where('me.estado', 1)
@@ -353,12 +353,23 @@ class SprintController extends Controller
                 return response()->json(['success'=>false,'message'=>'Proyecto no encontrado.'], 404);
             }
 
-            // Sprint dentro del proyecto (ajusta columna id_proyecto/proyecto_id según tu esquema)
+            // Validar que NO exista otro sprint activo en este proyecto
+            $sprintActivo = DB::table('sprints')
+                ->where('id_proyecto', $proyecto->id)
+                ->where('progreso', 'iniciado')
+                ->first();
+
+            if ($sprintActivo) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ya existe un sprint iniciado en este proyecto. Finalízalo antes de iniciar otro.'
+                ], 422);
+            }
+
+            // Sprint dentro del proyecto
             $sprint = DB::table('sprints')
                 ->where('uid', $sprintUid)
-                ->where(function($q) use ($proyecto) {
-                    $q->where('id_proyecto', $proyecto->id);
-                })
+                ->where('id_proyecto', $proyecto->id)
                 ->first();
 
             if (!$sprint) {
@@ -374,9 +385,9 @@ class SprintController extends Controller
                 ], 422);
             }
 
-            // Iniciar sprint (ajusta campos: estado/status, fecha_inicio/fin)
+            // Iniciar sprint
             DB::table('sprints')->where('id', $sprint->id)->update([
-                'estado'       => 0,
+                'estado'       => 0, // opcional según tu esquema
                 'progreso'     => 'iniciado',
                 'fecha_inicio' => $request->fecha_inicio,
                 'fecha_fin'    => $request->fecha_fin,
@@ -395,6 +406,7 @@ class SprintController extends Controller
             ], 500);
         }
     }
+
 
 
     public function boardView($proyectoUID, $sprintUID)

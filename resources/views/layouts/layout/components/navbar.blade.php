@@ -122,7 +122,7 @@
 
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <li>
-                                <a class="dropdown-item" href="{{ route('profile.index') }}">
+                                <a class="dropdown-item" href="{{ route('user.profile', Auth::user()->username) }}">
                                     <i class="fas fa-user-circle me-2"></i> Perfil
                                 </a>
                             </li>

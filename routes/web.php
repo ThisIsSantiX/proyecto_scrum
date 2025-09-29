@@ -110,10 +110,11 @@ Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/storeCuenta', [AuthController::class, 'store'])->name('storeCuenta');
 
 // perfil ---------------------------------------------------------------------------------------------------------------------------------------------------
-Route::get('/profile', [UserController::class, 'profile'])
+Route::get('/perfil/{username}', [UserController::class, 'profile'])
     ->middleware('auth')
-    ->name('profile.index');
-Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
+    ->name('user.profile');
+
+Route::put('/perfil/update', [UserController::class, 'updateProfile'])->name('profile.update');
 
 // Rutas para gestión de usuarios
 Route::get('/usuarios', [UserController::class, 'index'])

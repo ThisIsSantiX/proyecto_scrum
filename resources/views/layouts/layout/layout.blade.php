@@ -19,7 +19,6 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 
@@ -49,10 +48,19 @@
 
         
         <style>
-            body {
-                font-family: 'Nunito', sans-serif;
-            }
-                                    
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Source+Sans+Pro:wght@600&display=swap');
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-weight: 600;
+}
+
+body, p, span, li {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+}
+
+                                                                            
             .icon-21 {
                 height: 2rem;
                 width: 1.9rem;

@@ -18,10 +18,10 @@ return new class extends Migration
             $table->unsignedBigInteger('creado_por');
             $table->foreign('creado_por')->references('id')->on('users');
             $table->string('titulo', 50);
-            $table->string('descripcion', 255);
-            $table->string('prioridad', 10);
-            $table->integer('valor_historia');
-            $table->string('progreso', 20);
+            $table->string('descripcion', 255)->nullable();
+            $table->string('prioridad', 10)->nullable();
+            $table->integer('valor_historia')->nullable();
+            $table->string('progreso', 20)->nullable();
             $table->integer('estado')->default(1);
             $table->text('uid');
             $table->timestamps();

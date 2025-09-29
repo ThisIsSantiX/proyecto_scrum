@@ -490,7 +490,7 @@
                                     <label class="form-label">Estado</label>
                                     <select id="progresoSpr" name="progreso" class="form-select" required>
                                         <option value="">Seleccionar estado</option>
-                                        <option value="pendiente">Pendiente</option>
+                                        <option value="pendiente">Por hacer</option>
                                         <option value="en_progreso">En progreso</option>
                                         <option value="completado">Completado</option>
                                     </select>
@@ -2340,7 +2340,7 @@
             })
             .then(response => {
                 $('#modalIniciarSprint').modal('hide');
-                notyf.success('Sprint iniciado correctamente');
+                notyf.success(response.data.message || 'Sprint iniciado correctamente');
                 sessionStorage.setItem('currentSprintUID', sprintUID);
                 mostrarSeccion('tablero');
                 cargarTablero(proyectoUID, sprintUID);
@@ -2348,9 +2348,11 @@
             })
             .catch(error => {
                 console.error(error);
-                notyf.error('Error al iniciar sprint');
+                const msg = error.response?.data?.message || 'Error al iniciar sprint';
+                notyf.error(msg);
             });
     });
+
 
     function cargarTablero(proyectoUID, sprintUID) {
         $("#tablero").attr("data-proyecto", proyectoUID);

@@ -17,9 +17,9 @@ return new class extends Migration
             $table->text('objetivo', 255);
             $table->unsignedBigInteger('id_proyecto');
             $table->foreign('id_proyecto')->references('id')->on('proyectos');
-            $table->date('fecha_inicio');
-            $table->date('fecha_fin');
-            $table->string('progreso', 20);
+            $table->date('fecha_inicio')->nullable();
+            $table->date('fecha_fin')->nullable();
+            $table->string('progreso', 20)->nullable();
             $table->integer('estado')->default(1);
             $table->text('uid');
             $table->timestamps();
