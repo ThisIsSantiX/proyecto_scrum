@@ -458,6 +458,7 @@
         </div>
     </div>
 
+    <!-- Modal para agregar un product al sprint -->
     <div class="modal fade" id="modalRegSprBacklog" tabindex="-1" aria-labelledby="modalRegSprBacklogLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -541,6 +542,7 @@
             </div>
         </div>
     </div>
+    <!--Fin del modal para agregar un product al sprint -->
 
     <!-- Modal Iniciar Sprint -->
     <div class="modal fade" id="modalIniciarSprint" tabindex="-1" aria-labelledby="modalIniciarSprintLabel" aria-hidden="true">
@@ -2448,7 +2450,7 @@
     function renderKanbanItem(item) {
         // Usar item.progreso (texto) en vez de item.estado (número)
         let estado = item.progreso;
-        console.log("historias del tablero",item);
+        console.log("historias del tablero", item);
 
         if (estado === "Por hacer" || estado === "to_do") estado = "por-hacer";
         if (estado === "En progreso" || estado === "in_progress") estado = "en-progreso";
@@ -2472,6 +2474,8 @@
         // Guardar tanto el id como el uid
         card.setAttribute('data-id', item.id); // id en la BD (sprint backlog)
         card.setAttribute('data-uid', item.uid); // uid generado (si lo usas en frontend)
+        card.setAttribute('data-item', item.product_uid); // con esta nueva data coges el uid del product por si lo necesitas
+        console.log("uid de las historias", item.product_uid); 
 
         card.innerHTML = `
                 <div class="kanban-item-header d-flex justify-content-between align-items-center">
@@ -2513,7 +2517,6 @@
         const counter = document.getElementById(`counter-${estado}`);
         counter.textContent = parseInt(counter.textContent) + 1;
     }
-
 
     function enableDragAndDrop() {
         const items = document.querySelectorAll('.kanban-item');
@@ -2635,6 +2638,25 @@
                         </div>
                     `);
 
+                usersList.append(userOption);
+            });
+        }
+
+        function renderUsersListTablero(users, asignados = []) {
+            const usersList = $("#usersListTablero");
+            usersList.empty();
+
+            users.forEach(function(usuario) {
+                const isSelected = asignados.includes(usuario.id);
+                const initials = getInitials(usuario.nombre_completo);
+
+                const userOption = $(`
+                    <div class="user-option" data-user-id="${usuario.id}">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''}>
+                        <div class="user-avatar">${initials}</div>
+                        <span>${usuario.nombre_completo}</span>
+                    </div>
+                `);
                 usersList.append(userOption);
             });
         }

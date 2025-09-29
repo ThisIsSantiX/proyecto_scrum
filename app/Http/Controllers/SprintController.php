@@ -18,16 +18,13 @@ class SprintController extends Controller
 {
 
     // Método para mostrar una lista de recursos
-    public function index()
-    {
-
-    }
+    public function index() {}
 
     // Método para mostrar el formulario de creación
     public function create()
     {
         // lógica para mostrar el formulario
-        return view('pages.sprints.create'); 
+        return view('pages.sprints.create');
     }
 
     // Método para guardar un nuevo recurso
@@ -36,13 +33,13 @@ class SprintController extends Controller
         try {
             // Obtener el proyecto por UID
             $proyecto = DB::table('proyectos')->where('uid', $uid)->first();
-            
+
             if (!$proyecto) {
                 return response()->json([
                     'error' => 'Proyecto no encontrado'
                 ], 404);
             }
-            
+
             // Validar datos
             $request->validate([
                 'nombre' => 'required|string|max:50',
@@ -57,10 +54,10 @@ class SprintController extends Controller
                 'fecha_fin.required' => 'La fecha de fin es requerida',
                 'fecha_fin.after' => 'La fecha de fin debe ser posterior a la fecha de inicio'
             ]);
-            
+
             // Calcular progreso inicial basado en fechas
             $progreso = $this->calcularProgreso($request->fecha_inicio, $request->fecha_fin);
-            
+
             // Crear sprint
             $sprintId = DB::table('sprints')->insertGetId([
                 'nombre' => $request->nombre,
@@ -74,22 +71,20 @@ class SprintController extends Controller
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
-            
+
             // Obtener el sprint creado
             $sprint = DB::table('sprints')->where('id', $sprintId)->first();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Sprint creado correctamente',
                 'sprint' => $sprint
             ]);
-            
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'error' => 'Datos inválidos',
                 'errors' => $e->errors()
             ], 422);
-            
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Error al crear sprint: ' . $e->getMessage()
@@ -103,22 +98,21 @@ class SprintController extends Controller
         try {
             // Obtener el proyecto por UID
             $proyecto = DB::table('proyectos')->where('uid', $uid)->first();
-            
+
             if (!$proyecto) {
                 return response()->json([
                     'error' => 'Proyecto no encontrado'
                 ], 404);
             }
-            
+
             // Obtener sprints del proyecto
             $sprints = DB::table('sprints')
-                        ->where('id_proyecto', $proyecto->id)
-                        ->where('estado', 1) 
-                        ->orderBy('created_at', 'asc')
-                        ->get();
-            
+                ->where('id_proyecto', $proyecto->id)
+                ->where('estado', 1)
+                ->orderBy('created_at', 'asc')
+                ->get();
+
             return response()->json($sprints);
-            
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Error al obtener sprints: ' . $e->getMessage()
@@ -130,7 +124,7 @@ class SprintController extends Controller
     public function edit($id)
     {
         // lógica para mostrar el formulario de edición
-        $sprint = Sprint::findOrFail($id); 
+        $sprint = Sprint::findOrFail($id);
         return view('pages.sprints.edit', compact('sprint'));
     }
 
@@ -140,13 +134,13 @@ class SprintController extends Controller
         try {
             // Obtener el proyecto por UID
             $proyecto = DB::table('proyectos')->where('uid', $uid)->first();
-            
+
             if (!$proyecto) {
                 return response()->json([
                     'error' => 'Proyecto no encontrado'
                 ], 404);
             }
-            
+
             // Validar datos
             $request->validate([
                 'uid' => 'required|string|exists:sprints,uid',
@@ -164,38 +158,38 @@ class SprintController extends Controller
                 'fecha_fin.required' => 'La fecha de fin es requerida',
                 'fecha_fin.after' => 'La fecha de fin debe ser posterior a la fecha de inicio'
             ]);
-            
+
             // Verificar que el sprint pertenece al proyecto
             $sprint = DB::table('sprints')
-                    ->where('uid', $request->uid)
-                    ->where('id_proyecto', $proyecto->id)
-                    ->first();
-            
+                ->where('uid', $request->uid)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+
             if (!$sprint) {
                 return response()->json([
                     'error' => 'Sprint no encontrado en este proyecto'
                 ], 404);
             }
-            
+
             // Calcular progreso basado en fechas
             $progreso = $this->calcularProgreso($request->fecha_inicio, $request->fecha_fin);
-            
+
             // Actualizar sprint
             $updated = DB::table('sprints')
-                        ->where('uid', $request->uid)
-                        ->update([
-                            'nombre' => $request->nombre,
-                            'objetivo' => $request->objetivo,
-                            'fecha_inicio' => $request->fecha_inicio,
-                            'fecha_fin' => $request->fecha_fin,
-                            'progreso' => $progreso,
-                            'updated_at' => now()
-                        ]);
-            
+                ->where('uid', $request->uid)
+                ->update([
+                    'nombre' => $request->nombre,
+                    'objetivo' => $request->objetivo,
+                    'fecha_inicio' => $request->fecha_inicio,
+                    'fecha_fin' => $request->fecha_fin,
+                    'progreso' => $progreso,
+                    'updated_at' => now()
+                ]);
+
             if ($updated) {
                 // Obtener el sprint actualizado
                 $sprintActualizado = DB::table('sprints')->where('uid', $request->uid)->first();
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Sprint actualizado correctamente',
@@ -206,13 +200,11 @@ class SprintController extends Controller
                     'error' => 'No se pudo actualizar el sprint'
                 ], 500);
             }
-            
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'error' => 'Datos inválidos',
                 'errors' => $e->errors()
             ], 422);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error al actualizar sprint:',
@@ -227,7 +219,7 @@ class SprintController extends Controller
         try {
             // Obtener el proyecto por UID
             $proyecto = DB::table('proyectos')->where('uid', $uidProyecto)->first();
-            
+
             if (!$proyecto) {
                 return response()->json([
                     'error' => 'Proyecto no encontrado'
@@ -244,9 +236,9 @@ class SprintController extends Controller
 
             // Verificar que el sprint pertenece al proyecto
             $sprint = DB::table('sprints')
-                    ->where('uid', $request->uid)
-                    ->where('id_proyecto', $proyecto->id)
-                    ->first();
+                ->where('uid', $request->uid)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
 
             if (!$sprint) {
                 return response()->json([
@@ -256,11 +248,11 @@ class SprintController extends Controller
 
             // Cambiar estado en lugar de eliminar
             $updated = DB::table('sprints')
-                        ->where('uid', $request->uid)
-                        ->update([
-                            'estado' => 0, // marcamos como inactivo
-                            'updated_at' => now()
-                        ]);
+                ->where('uid', $request->uid)
+                ->update([
+                    'estado' => 0, // marcamos como inactivo
+                    'updated_at' => now()
+                ]);
 
             if ($updated) {
                 return response()->json([
@@ -272,13 +264,11 @@ class SprintController extends Controller
                     'error' => 'No se pudo desactivar el sprint'
                 ], 500);
             }
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'error' => 'Datos inválidos',
                 'errors' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error al desactivar sprint',
@@ -294,7 +284,7 @@ class SprintController extends Controller
         $inicio = \Carbon\Carbon::parse($fechaInicio);
         $fin = \Carbon\Carbon::parse($fechaFin);
         $hoy = \Carbon\Carbon::now();
-        
+
         if ($hoy->lt($inicio)) {
             return 'Por hacer';
         } elseif ($hoy->gt($fin)) {
@@ -342,27 +332,27 @@ class SprintController extends Controller
     public function startSprint(Request $request, $uid, $sprintUid)
     {
         $request->validate([
-            'fecha_inicio' => ['required','date'],
-            'fecha_fin'    => ['required','date','after_or_equal:fecha_inicio'],
+            'fecha_inicio' => ['required', 'date'],
+            'fecha_fin'    => ['required', 'date', 'after_or_equal:fecha_inicio'],
         ]);
 
         try {
             // Proyecto
             $proyecto = DB::table('proyectos')->where('uid', $uid)->first();
             if (!$proyecto) {
-                return response()->json(['success'=>false,'message'=>'Proyecto no encontrado.'], 404);
+                return response()->json(['success' => false, 'message' => 'Proyecto no encontrado.'], 404);
             }
 
             // Sprint dentro del proyecto (ajusta columna id_proyecto/proyecto_id según tu esquema)
             $sprint = DB::table('sprints')
                 ->where('uid', $sprintUid)
-                ->where(function($q) use ($proyecto) {
+                ->where(function ($q) use ($proyecto) {
                     $q->where('id_proyecto', $proyecto->id);
                 })
                 ->first();
 
             if (!$sprint) {
-                return response()->json(['success'=>false,'message'=>'Sprint no encontrado.'], 404);
+                return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
             }
 
             // Validar que tenga Sprint Backlog
@@ -464,7 +454,6 @@ class SprintController extends Controller
                 'success' => true,
                 'items' => $items
             ]);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -493,7 +482,7 @@ class SprintController extends Controller
                 ->where('uid', $sprintUID)
                 ->where('id_proyecto', $proyecto->id)
                 ->first();
-                
+
             if (!$sprint) {
                 return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
             }
@@ -518,7 +507,6 @@ class SprintController extends Controller
                     'message' => 'Item no encontrado.'
                 ], 404);
             }
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -532,7 +520,7 @@ class SprintController extends Controller
     {
         $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
         if (!$proyecto) {
-            return response()->json(['success'=>false,'message'=>'Proyecto no encontrado']);
+            return response()->json(['success' => false, 'message' => 'Proyecto no encontrado']);
         }
 
         $sprint = DB::table('sprints')
@@ -560,12 +548,11 @@ class SprintController extends Controller
 
             // Traer TODOS los sprints (sin filtrar por estado, ni progreso)
             $sprints = DB::table('sprints')
-                        ->where('id_proyecto', $proyecto->id)
-                        ->orderBy('created_at', 'asc')
-                        ->get();
+                ->where('id_proyecto', $proyecto->id)
+                ->orderBy('created_at', 'asc')
+                ->get();
 
             return response()->json($sprints);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error al obtener sprints: ' . $e->getMessage()
