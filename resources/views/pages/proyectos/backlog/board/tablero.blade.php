@@ -6,31 +6,19 @@
                 <span class="column-counter badge" id="counter-por-hacer">0</span>
             </div>
             <div class="kanban-items" id="items-por-hacer">
-                <div class="empty-column">
-                    <i class="fas fa-plus-circle mb-2"></i>
-                    <div>No hay elementos</div>
-                </div>
+            
             </div>
-            <button class="btn btn-link text-primary fw-semibold btn-create">
-                <i class="fas fa-plus me-1"></i>Crear
-            </button>
         </div>
 
         <!-- EN CURSO -->
         <div class="card kanban-column" data-status="en-progreso">
             <div class="kanban-column-header d-flex justify-content-between align-items-center">
-                <span><i class="fas fa-play-circle me-2"></i>EN CURSO</span>
+                <span><i class="fas fa-play-circle me-2"></i>EN PROGRESO</span>
                 <span class="column-counter badge" id="counter-en-progreso">0</span>
             </div>
             <div class="kanban-items" id="items-en-progreso">
-                <div class="empty-column">
-                    <i class="fas fa-cogs mb-2"></i>
-                    <div>No hay elementos</div>
-                </div>
+                
             </div>
-            <button class="btn btn-link text-warning fw-semibold btn-create">
-                <i class="fas fa-plus me-1"></i>Crear
-            </button>
         </div>
 
         <!-- EN REVISIÓN -->
@@ -40,31 +28,19 @@
                 <span class="column-counter badge" id="counter-en-revision">0</span>
             </div>
             <div class="kanban-items" id="items-en-revision">
-                <div class="empty-column">
-                    <i class="fas fa-eye mb-2"></i>
-                    <div>No hay elementos</div>
-                </div>
+                
             </div>
-            <button class="btn btn-link text-info fw-semibold btn-create">
-                <i class="fas fa-plus me-1"></i>Crear
-            </button>
         </div>
 
         <!-- LISTO -->
         <div class="card kanban-column" data-status="terminado">
             <div class="kanban-column-header d-flex justify-content-between align-items-center">
-                <span><i class="fas fa-check-circle me-2"></i>LISTO</span>
+                <span><i class="fas fa-check-circle me-2"></i>COMPLETADO</span>
                 <span class="column-counter badge" id="counter-terminado">0</span>
             </div>
             <div class="kanban-items" id="items-terminado">
-                <div class="empty-column">
-                    <i class="fas fa-trophy mb-2"></i>
-                    <div>No hay elementos</div>
-                </div>
+        
             </div>
-            <button class="btn btn-link text-success fw-semibold btn-create">
-                <i class="fas fa-plus me-1"></i>Crear
-            </button>
         </div>
     </div>
 
@@ -86,13 +62,12 @@
             border-radius: 8px;
             transition: all 0.3s ease;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
         .kanban-column-header {
             padding: 12px 16px;
             font-size: 0.85rem;
             font-weight: 600;
-            border-bottom: 1px solid var(--bs-border-color);
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
@@ -124,42 +99,13 @@
 
         .kanban-item {
             background-color: var(--bs-body-bg);
-            border: 1px solid var(--bs-border-color);
-            border-radius: 6px;
+            border-radius: 4px;
             padding: 10px;
             margin-bottom: 8px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: grab;
             position: relative;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .kanban-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background-color: var(--bs-secondary);
-            border-radius: 3px 0 0 3px;
-            transition: all 0.3s ease;
-        }
-
-        .kanban-column[data-status="por-hacer"] .kanban-item::before {
-            background-color: var(--bs-danger);
-        }
-
-        .kanban-column[data-status="en-progreso"] .kanban-item::before {
-            background-color: var(--bs-warning);
-        }
-
-        .kanban-column[data-status="en-revision"] .kanban-item::before {
-            background-color: var(--bs-info);
-        }
-
-        .kanban-column[data-status="terminado"] .kanban-item::before {
-            background-color: var(--bs-success);
         }
 
         .kanban-item:hover {
@@ -179,7 +125,6 @@
             padding: 24px 16px;
             font-style: italic;
             font-size: 0.8rem;
-            border: 2px dashed var(--bs-border-color);
             border-radius: 6px;
             margin: 12px 0;
             transition: all 0.3s ease;

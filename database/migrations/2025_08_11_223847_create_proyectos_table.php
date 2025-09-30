@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('proyectos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 50);
-            $table->string('descripcion',255);
+            $table->string('descripcion',255)->nullable();
             $table->unsignedBigInteger('id_owner');
             $table->foreign('id_owner')->references('id')->on('users');
             $table->integer('estado')->default(1); // 1 = activo, 0 = inactivo

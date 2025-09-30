@@ -487,20 +487,19 @@ class SprintController extends Controller
     }
 
 
-    public function updateItemProgreso(Request $request, $proyectoUID, $sprintUID, $itemUID)
+    // ============================================
+    // OBTENER ITEM INDIVIDUAL
+    // ============================================
+    public function getItem($proyectoUID, $sprintUID, $itemUID)
     {
-        $request->validate([
-            'progreso' => 'required|string|in:Por hacer,En progreso,Terminado'
-        ]);
-
         try {
-            // Verificar que el proyecto existe
+            // Verificar proyecto
             $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
             if (!$proyecto) {
                 return response()->json(['success' => false, 'message' => 'Proyecto no encontrado.'], 404);
             }
 
-            // Verificar que el sprint existe y pertenece al proyecto
+            // Verificar sprint
             $sprint = DB::table('sprints')
                 ->where('uid', $sprintUID)
                 ->where('id_proyecto', $proyecto->id)
@@ -510,9 +509,261 @@ class SprintController extends Controller
                 return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
             }
 
-            // Actualizar progreso del item en sprint_backlog
-            $updated = DB::table('sprint_backlog')
+            // Obtener item desde product_backlog usando su UID
+            $item = DB::table('product_backlog as pb')
+                ->leftJoin('sprint_backlog as sb', function($join) use ($sprint) {
+                    $join->on('pb.id', '=', 'sb.id_item_backlog')
+                        ->where('sb.id_sprint', '=', $sprint->id);
+                })
+                ->where('pb.uid', $itemUID)
+                ->where('pb.id_proyecto', $proyecto->id)
+                ->select(
+                    'pb.*',
+                    'sb.progreso as sprint_progreso',
+                    'sb.uid as sprint_uid',
+                    'sb.id as sprint_backlog_id'
+                )
+                ->first();
+
+            if (!$item) {
+                return response()->json(['success' => false, 'message' => 'Item no encontrado.'], 404);
+            }
+
+            // Usar el progreso del sprint si existe, sino el del product_backlog
+            $item->progreso = $item->sprint_progreso ?? $item->progreso;
+
+            return response()->json([
+                'success' => true,
+                'item' => $item
+            ]);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener el item.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    // ============================================
+    // ACTUALIZAR ITEM COMPLETO
+    // ============================================
+    public function updateItem(Request $request, $proyectoUID, $sprintUID, $itemUID)
+    {
+        $request->validate([
+            'titulo' => 'required|string|max:50',
+            'descripcion' => 'nullable|string|max:255',
+            'prioridad' => 'required|string|in:Alta,Media,Baja',
+            'valor_historia' => 'required|integer|min:1|max:100',
+            'progreso' => 'required|string|in:Por hacer,En progreso,En revision,Completado'
+        ]);
+
+        try {
+            // Verificar proyecto
+            $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+            if (!$proyecto) {
+                return response()->json(['success' => false, 'message' => 'Proyecto no encontrado.'], 404);
+            }
+
+            // Verificar sprint
+            $sprint = DB::table('sprints')
+                ->where('uid', $sprintUID)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+                
+            if (!$sprint) {
+                return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
+            }
+
+            // Verificar que el item existe en product_backlog
+            $productItem = DB::table('product_backlog')
                 ->where('uid', $itemUID)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+
+            if (!$productItem) {
+                return response()->json(['success' => false, 'message' => 'Item no encontrado.'], 404);
+            }
+
+            // Actualizar en product_backlog
+            DB::table('product_backlog')
+                ->where('id', $productItem->id)
+                ->update([
+                    'titulo' => $request->titulo,
+                    'descripcion' => $request->descripcion,
+                    'prioridad' => $request->prioridad,
+                    'valor_historia' => $request->valor_historia,
+                    'updated_at' => now()
+                ]);
+
+            // Actualizar progreso en sprint_backlog si el item está en el sprint
+            DB::table('sprint_backlog')
+                ->where('id_item_backlog', $productItem->id)
+                ->where('id_sprint', $sprint->id)
+                ->update([
+                    'progreso' => $request->progreso,
+                    'updated_at' => now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Historia actualizada correctamente.'
+            ]);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la historia.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    // ============================================
+    // ACTUALIZAR SOLO TÍTULO (EDICIÓN INLINE)
+    // ============================================
+    public function updateItemTitulo(Request $request, $proyectoUID, $sprintUID, $itemUID)
+    {
+        $request->validate([
+            'titulo' => 'required|string|max:50'
+        ]);
+
+        try {
+            // Verificar proyecto
+            $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+            if (!$proyecto) {
+                return response()->json(['success' => false, 'message' => 'Proyecto no encontrado.'], 404);
+            }
+
+            // Actualizar solo el título en product_backlog usando su UID
+            $updated = DB::table('product_backlog')
+                ->where('uid', $itemUID)
+                ->where('id_proyecto', $proyecto->id)
+                ->update([
+                    'titulo' => $request->titulo,
+                    'updated_at' => now()
+                ]);
+
+            if ($updated) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Título actualizado correctamente.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Item no encontrado.'
+            ], 404);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el título.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    // ============================================
+    // ELIMINAR ITEM DEL SPRINT
+    // ============================================
+    public function deleteItem($proyectoUID, $sprintUID, $itemUID)
+    {
+        try {
+            // Verificar proyecto
+            $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+            if (!$proyecto) {
+                return response()->json(['success' => false, 'message' => 'Proyecto no encontrado.'], 404);
+            }
+
+            // Verificar sprint
+            $sprint = DB::table('sprints')
+                ->where('uid', $sprintUID)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+                
+            if (!$sprint) {
+                return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
+            }
+
+            // Obtener el item de product_backlog usando su UID
+            $productItem = DB::table('product_backlog')
+                ->where('uid', $itemUID)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+
+            if (!$productItem) {
+                return response()->json(['success' => false, 'message' => 'Item no encontrado.'], 404);
+            }
+
+            // Eliminar solo de sprint_backlog (mantener en product_backlog)
+            $deleted = DB::table('sprint_backlog')
+                ->where('id_item_backlog', $productItem->id)
+                ->where('id_sprint', $sprint->id)
+                ->delete();
+
+            if ($deleted) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Historia removida del sprint correctamente.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'El item no está en este sprint.'
+            ], 404);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar la historia del sprint.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    // ============================================
+    // ACTUALIZAR PROGRESO (Drag & Drop)
+    // ============================================
+    public function updateItemProgreso(Request $request, $proyectoUID, $sprintUID, $itemUID)
+    {
+        $request->validate([
+            'progreso' => 'required|string|in:Por hacer,En progreso,En revision,Terminado'
+        ]);
+
+        try {
+            // Verificar proyecto
+            $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+            if (!$proyecto) {
+                return response()->json(['success' => false, 'message' => 'Proyecto no encontrado.'], 404);
+            }
+
+            // Verificar sprint
+            $sprint = DB::table('sprints')
+                ->where('uid', $sprintUID)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+                
+            if (!$sprint) {
+                return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
+            }
+
+            // Obtener el item de product_backlog usando su UID
+            $productItem = DB::table('product_backlog')
+                ->where('uid', $itemUID)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+
+            if (!$productItem) {
+                return response()->json(['success' => false, 'message' => 'Item no encontrado.'], 404);
+            }
+
+            // Actualizar progreso en sprint_backlog
+            $updated = DB::table('sprint_backlog')
+                ->where('id_item_backlog', $productItem->id)
                 ->where('id_sprint', $sprint->id)
                 ->update([
                     'progreso' => $request->progreso,
@@ -524,17 +775,109 @@ class SprintController extends Controller
                     'success' => true,
                     'message' => 'Progreso actualizado correctamente.'
                 ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Item no encontrado.'
-                ], 404);
             }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'El item no está en este sprint.'
+            ], 404);
 
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al actualizar el progreso.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    // ============================================
+    // CREAR ITEM EN PRODUCT_BACKLOG Y SPRINT_BACKLOG
+    // ============================================
+    public function createItem(Request $request, $proyectoUID, $sprintUID)
+    {
+        $request->validate([
+            'titulo' => 'required|string|max:50',
+            'descripcion' => 'nullable|string|max:255',
+            'prioridad' => 'required|string|in:Alta,Media,Baja',
+            'valor_historia' => 'required|integer|min:1|max:100',
+            'progreso' => 'required|string|in:Por hacer,En progreso,En revision,Terminado'
+        ]);
+
+        try {
+            // Verificar proyecto
+            $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+            if (!$proyecto) {
+                return response()->json(['success' => false, 'message' => 'Proyecto no encontrado.'], 404);
+            }
+
+            // Verificar sprint
+            $sprint = DB::table('sprints')
+                ->where('uid', $sprintUID)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+                
+            if (!$sprint) {
+                return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
+            }
+
+            // Generar UID único para el item
+            $itemUID = (string) Str::uuid();
+
+            // Crear en product_backlog
+            $itemId = DB::table('product_backlog')->insertGetId([
+                'uid' => $itemUID,
+                'id_proyecto' => $proyecto->id,
+                'titulo' => $request->titulo,
+                'descripcion' => $request->descripcion,
+                'creado_por' => Auth::id(),
+                'prioridad' => $request->prioridad,
+                'valor_historia' => $request->valor_historia,
+                'progreso' => 'Por hacer', // Progreso por defecto en product_backlog
+                'estado' => 0, 
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            // Agregar a sprint_backlog con el progreso específico
+            DB::table('sprint_backlog')->insert([
+                'uid' => (string) Str::uuid(),
+                'id_sprint' => $sprint->id,
+                'id_item_backlog' => $itemId,
+                'progreso' => $request->progreso, // Progreso según la columna
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            // Obtener el item creado con toda su información
+            $item = DB::table('product_backlog as pb')
+                ->leftJoin('sprint_backlog as sb', function($join) use ($sprint) {
+                    $join->on('pb.id', '=', 'sb.id_item_backlog')
+                        ->where('sb.id_sprint', '=', $sprint->id);
+                })
+                ->where('pb.id', $itemId)
+                ->select(
+                    'pb.*',
+                    'sb.progreso as sprint_progreso',
+                    'sb.uid as sprint_uid'
+                )
+                ->first();
+
+            // Usar el progreso del sprint
+            if ($item) {
+                $item->progreso = $item->sprint_progreso ?? $item->progreso;
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Historia creada correctamente.',
+                'item' => $item
+            ], 201);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear la historia.',
                 'error' => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
@@ -584,5 +927,7 @@ class SprintController extends Controller
             ], 500);
         }
     }
+
+    
 
 }

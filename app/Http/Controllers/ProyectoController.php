@@ -65,10 +65,9 @@ class ProyectoController extends Controller
         try {
             $request->validate([
                 'nombre' => 'required|string|max:50',
-                'descripcion' => 'nullable|string|max:255',
-                'fecha_inicio' => 'nullable|date',
-                'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
-                'visibilidad' => 'required|integer|in:0,1'
+            ], [
+                'nombre.required' => 'El nombre del proyecto es obligatorio.',
+                'nombre.max' => 'El nombre del proyecto no debe exceder los 50 caracteres.'
             ]);
 
             $proyecto = new Proyecto();
