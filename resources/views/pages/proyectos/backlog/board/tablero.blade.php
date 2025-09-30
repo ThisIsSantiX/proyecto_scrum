@@ -84,17 +84,17 @@
         .kanban-items {
             flex: 1;
             padding: 8px;
-            overflow-y: auto;
             min-height: 150px;
             border-radius: 6px;
-            transition: all 0.3s ease;
+            transition: all 0.3s ease;  
         }
 
         .kanban-items.drag-over {
+            padding: 6px;
             background-color: var(--bs-primary-bg-subtle);
             border: 2px dashed var(--bs-primary);
-            border-radius: 6px;
-            transform: scale(1.01);
+            border-radius: 15px;
+            transform: scale(0.95);
         }
 
         .kanban-item {
