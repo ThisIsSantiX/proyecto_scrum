@@ -110,10 +110,11 @@ Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/storeCuenta', [AuthController::class, 'store'])->name('storeCuenta');
 
 // perfil ---------------------------------------------------------------------------------------------------------------------------------------------------
-Route::get('/profile', [UserController::class, 'profile'])
+Route::get('/perfil/{username}', [UserController::class, 'profile'])
     ->middleware('auth')
-    ->name('profile.index');
-Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
+    ->name('user.profile');
+
+Route::put('/perfil/update', [UserController::class, 'updateProfile'])->name('profile.update');
 
 // Rutas para gestión de usuarios
 Route::get('/usuarios', [UserController::class, 'index'])
@@ -211,7 +212,27 @@ Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/board/view', [SprintCon
     ->middleware('auth')
     ->name('boardView');
 Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/board/items', [SprintController::class, 'getSprintBacklog']);
-Route::post('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}/progreso', [SprintController::class, 'updateItemProgreso']);
+Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}', 
+    [SprintController::class, 'getItem']
+)->name('sprint.item.get');
+
+Route::post('/proyectos/{proyectoUID}/sprints/{sprintUID}/items', 
+    [SprintController::class, 'createItem'])->name('items.create');
+
+Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}', 
+    [SprintController::class, 'getItem']);
+
+Route::put('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}', 
+    [SprintController::class, 'updateItem']);
+
+Route::patch('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}/titulo', 
+    [SprintController::class, 'updateItemTitulo']);
+
+Route::post('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}/progreso', 
+    [SprintController::class, 'updateItemProgreso']);
+
+Route::delete('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}', 
+    [SprintController::class, 'deleteItem']);
 
 //ruta para las invitaciones a proyectos
 Route::post('/proyectos/{proyecto}/enviar-invitacion',[ProyectoController::class,'enviarInvitacion'])->name('proyectos.enviarInvitacion');

@@ -80,8 +80,7 @@ class AuthController extends Controller
         $request->validate([
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|min:8|confirmed',
-            'nombre'   => 'required|string|max:255',
-            'apellido' => 'required|string|max:255'
+            'username'   => 'required|string|max:255',
         ], [
             'email.required'     => 'El correo es requerido',
             'email.email'        => 'El correo no es válido',
@@ -89,19 +88,17 @@ class AuthController extends Controller
             'password.required'  => 'La contraseña es requerida',
             'password.min'       => 'La contraseña debe tener al menos 8 caracteres',
             'password.confirmed' => 'Las contraseñas no coinciden',
-            'nombre.required'    => 'El nombre es requerido',
-            'apellido.required'  => 'El apellido es requerido'
+            'username.required'    => 'El nombre es requerido',
         ]);
 
         try {
             $user = DB::transaction(function () use ($request) {
                 return User::create([
-                    'nombre'   => $request->nombre,
-                    'apellido' => $request->apellido,
+                    'username'   => $request->username,
                     'email'    => $request->email,
                     'password' => Hash::make($request->password),
                     'estado'   => 1,
-                    'foto_url' => "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff",
+                    'foto_url' => "https://ui-avatars.com/api/?name=" . urlencode("{$request->username}") . "&background=random&color=fff",
                     'uid'      => Str::uuid(),
                 ]);
             });

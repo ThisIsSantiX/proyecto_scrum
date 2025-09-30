@@ -147,11 +147,6 @@
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="descripcion-tab" data-bs-toggle="tab" data-bs-target="#descripcion" type="button" role="tab">
-                                    Descripción
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios" type="button" role="tab">
                                     Usuarios del proyecto
                                 </button>
@@ -367,14 +362,14 @@
 <style>
     .project-card {
         transition: all 0.3s ease;
-        border: 1px solid rgba(109, 109, 109, 1);
+        border: 1px solid var(--bs-primary);
         border-radius: 12px;
         height: 100%;
     }
 
     .project-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(61, 61, 61, 1);
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.10);
         border-color: var(--bs-primary);
     }
 
@@ -495,7 +490,7 @@
     }
     
 
- .avatar-img {
+    .avatar-img {
         width: 40px;
         height: 40px;
         border-radius: 50%;
@@ -549,12 +544,12 @@
 
                                         ` : `
                                             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3"
-                                                 style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                                                ${getInitials(miembro.nombre + ' ' + miembro.apellido)}
+                                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                                ${getInitials(miembro.username)}
                                             </div>
                                         `}
                                         <div>
-                                            <h6 class="fw-bold mb-1">${miembro.nombre} ${miembro.apellido}</h6>
+                                            <h6 class="fw-bold mb-1">${miembro.username}</h6>
                                             <p class="text-muted small mb-2">${miembro.email}</p>
                                                 ${miembro.rol === 'propietario' ? `
                                                 <span class="badge bg-primary">Propietario</span>
@@ -652,11 +647,11 @@
 
             function createProjectCard(project, searchTerm = '') {
                 // Generar iniciales para el avatar
-                const initials = getInitials(project.usuario_nombre || 'Usuario');
+                const initials = getInitials(project.usuario_username || 'Usuario');
 
                 // Destacar términos de búsqueda
                 const highlightedTitle = highlightSearchTerm(project.nombre || 'Sin título', searchTerm);
-                const highlightedOwner = highlightSearchTerm(project.usuario_nombre || 'Usuario desconocido', searchTerm);
+                const highlightedOwner = highlightSearchTerm(project.usuario_username || 'Usuario desconocido', searchTerm);
 
                 // Determinar el progreso/estado
                 const progress = project.progreso;
@@ -669,7 +664,7 @@
                             <div class="project-header">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <!-- Título -->
-                                    <h5 class="project-title mb-2 project-link" data-id="${project.uid}">
+                                    <h5 class="project-title text-white mb-2 project-link" data-id="${project.uid}">
                                         ${highlightedTitle}
                                     </h5>
 
@@ -677,19 +672,14 @@
                                     <button type="button" class="btn btn-sm btn-link text-white p-0 ms-2 btn-view"
                                             data-id="${project.uid}" data-bs-toggle="tooltip" data-bs-placement="bottom" 
                                             title="Ver detalles">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
-                                            class="bi bi-info-circle" viewBox="0 0 16 16">
-                                            <path d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zM8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0z"/>
-                                            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533l.738-3.468c.194-.897-.105-1.319-.808-1.319z"/>
-                                            <circle cx="8" cy="4.5" r="1"/>
-                                        </svg>
+                                            <svg class="icon-32" width="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">                                <path opacity="0.4" d="M22 11.9998C22 17.5238 17.523 21.9998 12 21.9998C6.477 21.9998 2 17.5238 2 11.9998C2 6.47776 6.477 1.99976 12 1.99976C17.523 1.99976 22 6.47776 22 11.9998Z" fill="currentColor"></path>                                <path fill-rule="evenodd" clip-rule="evenodd" d="M7.52075 10.8035C6.85975 10.8035 6.32275 11.3405 6.32275 11.9995C6.32275 12.6595 6.85975 13.1975 7.52075 13.1975C8.18175 13.1975 8.71875 12.6595 8.71875 11.9995C8.71875 11.3405 8.18175 10.8035 7.52075 10.8035ZM11.9999 10.8035C11.3389 10.8035 10.8019 11.3405 10.8019 11.9995C10.8019 12.6595 11.3389 13.1975 11.9999 13.1975C12.6609 13.1975 13.1979 12.6595 13.1979 11.9995C13.1979 11.3405 12.6609 10.8035 11.9999 10.8035ZM15.2813 11.9995C15.2813 11.3405 15.8183 10.8035 16.4793 10.8035C17.1403 10.8035 17.6773 11.3405 17.6773 11.9995C17.6773 12.6595 17.1403 13.1975 16.4793 13.1975C15.8183 13.1975 15.2813 12.6595 15.2813 11.9995Z" fill="currentColor"></path>                                </svg>                            
                                     </button>
 
                                 </div>
 
                                 <!-- Descripción dentro del header -->
                                 <p class="project-description mb-0">
-                                    ${project.descripcion || 'Sin descripción disponible'}
+                                    ${project.descripcion || ''}
                                 </p>
                             </div>
 
@@ -734,7 +724,7 @@
             }
 
         // función para listar a los miembros
-             function loadMembers(uid, container) {
+        function loadMembers(uid, container) {
             axios.get(`/miembros-equipo/${uid}`)
                 .then(function(response) {
                     if (response.data.miembros && response.data.miembros.length > 0) {
@@ -756,39 +746,39 @@
 
 // 🔹 Función que genera avatar según si hay foto o no
 function renderAvatar(usuario) {
-    const initials = getInitials(usuario.nombre + ' ' + usuario.apellido);
+    const initials = getInitials(usuario.username);
 
     if (usuario.foto_url) {
         const img = document.createElement("img");
         img.src = usuario.foto_url;
         img.className = "avatar-img";
-        img.title = `${usuario.nombre} ${usuario.apellido} (${usuario.rol})`;
+        img.title = `${usuario.username} (${usuario.rol})`;
 
         img.onerror = function () {
-            this.replaceWith(getFallbackAvatarElement(initials, usuario.nombre, usuario.apellido, usuario.rol));
+            this.replaceWith(getFallbackAvatarElement(initials, usuario.username, usuario.rol));
         };
 
         return img.outerHTML;
     } else {
-        return getFallbackAvatar(initials, usuario.nombre, usuario.apellido, usuario.rol);
+        return getFallbackAvatar(initials, usuario.username, usuario.rol);
     }
 }
 
 
 
-function getFallbackAvatar(initials, nombre, apellido, rol) {
+function getFallbackAvatar(initials, username, rol) {
     return `
         <div class="avatar-fallback"
-             title="${nombre} ${apellido} (${rol})">
+            title="${username} (${rol})">
             ${initials}
         </div>
     `;
 }
 
-window.getFallbackAvatarElement = function(initials, nombre, apellido, rol) {
+window.getFallbackAvatarElement = function(initials, username, rol) {
     const div = document.createElement('div');
     div.className = 'avatar-fallback';
-    div.title = `${nombre} ${apellido} (${rol})`;
+    div.title = `${username} (${rol})`;
     div.textContent = initials;
     return div;
 };
@@ -797,10 +787,10 @@ window.getFallbackAvatarElement = function(initials, nombre, apellido, rol) {
 
 
 // Esta función devuelve un nodo real para el replaceWith
-function getFallbackAvatarElement(initials, nombre, apellido, rol) {
+function getFallbackAvatarElement(initials, username, rol) {
     const div = document.createElement('div');
     div.className = 'avatar-fallback';
-    div.title = `${nombre} ${apellido} (${rol})`;
+    div.title = `${username} (${rol})`;
     div.textContent = initials;
     return div;
 }
@@ -1129,12 +1119,12 @@ function getFallbackAvatarElement(initials, nombre, apellido, rol) {
                     let p = response.data.data;
 
                     $("#projectTitleDisplay").text(p.nombre || "Sin nombre");
-                    $("#ownerNameDisplay").text(p.usuario_nombre || "Desconocido");
+                    $("#ownerNameDisplay").text(p.usuario_username || "Desconocido");
                     $("#createdDateDisplay").text(formatDate(p.created_at) || "N/A");
 
-                    $("#userName").text(p.usuario_nombre || "Desconocido");
+                    $("#userName").text(p.usuario_username || "Desconocido");
                     $("#userEmail").text(p.usuario_email || "Sin email");
-                    $("#userInitial").text((p.usuario_nombre || "U").charAt(0).toUpperCase());
+                    $("#userInitial").text((p.usuario_username || "U").charAt(0).toUpperCase());
 
                     $("#progressValue").text(getProgressText(p.progreso));
                     $("#visibilityValue").text(getVisibilityText(p.visibilidad));
