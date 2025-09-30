@@ -362,14 +362,14 @@
 <style>
     .project-card {
         transition: all 0.3s ease;
-        border: 1px solid rgba(109, 109, 109, 1);
+        border: 1px solid var(--bs-primary);
         border-radius: 12px;
         height: 100%;
     }
 
     .project-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(61, 61, 61, 1);
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.10);
         border-color: var(--bs-primary);
     }
 
@@ -490,7 +490,7 @@
     }
     
 
- .avatar-img {
+    .avatar-img {
         width: 40px;
         height: 40px;
         border-radius: 50%;
@@ -664,7 +664,7 @@
                             <div class="project-header">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <!-- Título -->
-                                    <h5 class="project-title mb-2 project-link" data-id="${project.uid}">
+                                    <h5 class="project-title text-white mb-2 project-link" data-id="${project.uid}">
                                         ${highlightedTitle}
                                     </h5>
 
@@ -679,7 +679,7 @@
 
                                 <!-- Descripción dentro del header -->
                                 <p class="project-description mb-0">
-                                    ${project.descripcion || 'Sin descripción disponible'}
+                                    ${project.descripcion || ''}
                                 </p>
                             </div>
 
