@@ -4,7 +4,8 @@ FROM php:8.2-apache
 # Instalar dependencias necesarias y extensiones de PHP
 RUN apt-get update && apt-get install -y \
     libzip-dev unzip git curl && \
-    docker-php-ext-install pdo_mysql zip
+    docker-php-ext-install pdo_mysql zip && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Activar mod_rewrite de Apache
 RUN a2enmod rewrite
@@ -18,18 +19,32 @@ COPY . /var/www/html
 # Instalar Composer desde imagen oficial
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Dar permisos correctos a storage y bootstrap/cache
-RUN chown -R www-data:www-data storage bootstrap/cache && \
-    chmod -R 775 storage bootstrap/cache
+# Dar permisos correctos
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
+    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Exponer el puerto que Render asigna dinámicamente
+# Configurar Apache para DocumentRoot correcto
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /etc/apache2/sites-available/000-default.conf && \
+    echo '<Directory /var/www/html/public>\n    AllowOverride All\n    Require all granted\n</Directory>' >> /etc/apache2/sites-available/000-default.conf
+
+# Exponer puerto por defecto
 EXPOSE 8080
+ENV PORT=8080
 
-# Script de inicio usando la variable $PORT
-CMD php artisan migrate --force && \
-    php artisan db:seed --force && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    apache2-foreground -DFOREGROUND -DPORT=$PORT
+# Script inline de inicio
+RUN echo '#!/bin/bash\n\
+set -e\n\
+export PORT=${PORT:-8080}\n\
+echo "Starting on port $PORT"\n\
+sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf\n\
+sed -i "s/:80>/:${PORT}>/" /etc/apache2/sites-available/000-default.conf\n\
+php artisan config:clear\n\
+php artisan migrate --force || true\n\
+php artisan db:seed --force || true\n\
+php artisan config:cache\n\
+php artisan route:cache\n\
+apache2-foreground' > /start.sh && chmod +x /start.sh
+
+CMD ["/start.sh"]
