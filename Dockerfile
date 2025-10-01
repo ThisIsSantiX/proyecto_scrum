@@ -18,9 +18,9 @@ WORKDIR /var/www/html
 # Instalar Composer (copiado desde la imagen oficial de Composer)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 👇 Permitir composer como root y correr instalación
+# 👇 Permitir composer como root y correr instalación (sin scripts de artisan)
 ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Dar permisos a storage y bootstrap/cache
 RUN chown -R www-data:www-data storage bootstrap/cache && \
@@ -30,10 +30,13 @@ RUN chown -R www-data:www-data storage bootstrap/cache && \
 EXPOSE 80
 
 # 👇 Al arrancar el contenedor:
-# 1. Ejecuta migraciones con --force
-# 2. Cachea config y rutas
-# 3. Arranca Apache
-CMD php artisan migrate --force && \
+# 1. Descubre paquetes de Laravel
+# 2. Ejecuta migraciones con --force
+# 3. Cachea config y rutas
+# 4. Inicia Apache
+CMD php artisan package:discover --ansi && \
+    php artisan migrate --force && \
+    php artisan db:seed --force && \
     php artisan config:cache && \
     php artisan route:cache && \
     apache2-foreground
