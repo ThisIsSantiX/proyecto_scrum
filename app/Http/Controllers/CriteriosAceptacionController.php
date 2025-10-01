@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CriteriosAceptacion;
-use App\Models\product_backlog;
+use App\Models\ProductBacklog;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,7 +34,7 @@ class CriteriosAceptacionController extends Controller
     public function store(Request $request, $historiaUid)
     {
         try {
-            $historia = product_backlog::where('uid', $historiaUid)->first();
+            $historia = ProductBacklog::where('uid', $historiaUid)->first();
 
             if (!$historia) {
                 return response()->json([

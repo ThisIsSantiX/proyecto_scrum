@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\miembros_equipo;
-use App\Models\proyecto;
+use App\Models\Proyecto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

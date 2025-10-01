@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\product_backlog;
+use App\Models\ProductBacklog;
 use Illuminate\Http\Request;
 use App\Models\Proyecto;
 use Illuminate\Support\Facades\DB;
@@ -69,7 +69,7 @@ class ProductBacklogController extends Controller
             }
 
             // Crear la historia de usuario directamente con datos del request
-            $historia = product_backlog::create([
+            $historia = ProductBacklog::create([
                 'id_proyecto' => $proyecto->id,
                 'creado_por' => Auth::id(),
                 'titulo' => $request->titulo,
@@ -215,7 +215,7 @@ class ProductBacklogController extends Controller
             }
 
             // Buscar la historia
-            $historia = product_backlog::where('uid', $historiaUid)
+            $historia = ProductBacklog::where('uid', $historiaUid)
                 ->where('id_proyecto', $proyecto->id)
                 ->first();
 
