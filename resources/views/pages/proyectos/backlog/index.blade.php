@@ -242,13 +242,13 @@
 
                         <div class="mb-3">
                             <label for="edit_descripcion" class="form-label">Descripción</label>
-                            <textarea class="form-control" id="edit_descripcion" rows="3" maxlength="255" required></textarea>
+                            <textarea class="form-control" id="edit_descripcion" rows="3" maxlength="255"></textarea>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="edit_prioridad" class="form-label">Prioridad</label>
-                                <select class="form-select" id="edit_prioridad" required>
+                                <select class="form-select" id="edit_prioridad">
                                     <option value="Alta">Alta</option>
                                     <option value="Media">Media</option>
                                     <option value="Baja">Baja</option>
@@ -256,7 +256,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_valor_historia" class="form-label">Valor de Historia</label>
-                                <input type="number" class="form-control" id="edit_valor_historia" min="1" max="100" required>
+                                <input type="number" class="form-control" id="edit_valor_historia" min="1" max="100">
                             </div>
                         </div>
 
@@ -1049,7 +1049,7 @@
                 let estadoValorHTML = '';
                 if (historia.progreso || historia.valor_historia) {
                     estadoValorHTML = `
-                        <div class="d-flex justify-content-between align-items-center text-muted">
+                        <div class="d-flex justify-content-between align-items-center small text-muted">
                             ${historia.progreso ? `<span>Estado: ${historia.progreso}</span>` : ''}
                             ${historia.valor_historia ? `<span>Valor: ${historia.valor_historia}</span>` : ''}
                         </div>
@@ -1107,9 +1107,7 @@
                                     <span class="badge ${badgeClass}">${historia.prioridad || ''}</span>
                                 </div>
                                 <p class="card-text text-muted small mb-2">${historia.descripcion || ''} </p>
-                                <div class="d-flex justify-content-between align-items-center small text-muted">
-                                    ${estadoValorHTML}
-                                </div>
+                                    ${estadoValorHTML}     
                                 <div class="d-flex justify-content-between align-items-center mt-1 small text-muted">
                                     <span class="position-relative d-inline-block" data-bs-toggle="tooltip" title="${historia.creador_nombre || 'Desconocido'}">
                                         <img src="${historia.foto_url}" alt="${historia.creador_nombre || 'Usuario'}" class="rounded-circle" style="width: 24px; height: 24px; object-fit: cover;">

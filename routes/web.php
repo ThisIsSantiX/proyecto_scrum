@@ -18,6 +18,7 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
 use App\Http\Controllers\DailyScrumController;
+use App\Http\Controllers\GitHubController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,6 +95,10 @@ Route::get('/auth/google/callback', function () {
 
     return redirect('/dashboard');
 });
+
+
+Route::get('auth/github', [GitHubController::class, 'redirectToProvider']);
+Route::get('auth/github/callback', [GitHubController::class, 'handleProviderCallback']);
 
 //-----------------------------------------------------------------------
 
