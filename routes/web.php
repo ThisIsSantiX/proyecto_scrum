@@ -94,9 +94,6 @@ Route::fallback(function () {
     return response()->view('errors.404', [], 404);
 });
 
-// usuarios ---------------------------------------------------------------------------------------------------------------------------------------------------
-Route::get('/register', [AuthController::class, 'register'])->name('register');
-Route::post('/storeCuenta', [AuthController::class, 'store'])->name('storeCuenta');
 
 // perfil ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/perfil/{username}', [UserController::class, 'profile'])
@@ -170,10 +167,11 @@ Route::get('/roles/{id}/delete', [RolesController::class, 'destroy'])->name('rol
     Route::post('/auth/register', [AuthController::class, 'authRegister'])->name('auth.register');
     Route::post('/auth/login', [AuthController::class, 'authLogin'])->name('authLogin');
     Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
+
     Route::middleware(['web'])->group(function () {
-    Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
-    Route::post('/auth/recovery', [AuthController::class, 'sendRecoveryEmail'])->name('recoverypw.send');
-    Route::get('/auth/mail-sent', [AuthController::class, 'showMailSent'])->name('mail.sent');
+        Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
+        Route::post('/auth/recovery', [AuthController::class, 'sendRecoveryEmail'])->name('recoverypw.send');
+        Route::get('/auth/mail-sent', [AuthController::class, 'showMailSent'])->name('mail.sent');
     });
 
 
