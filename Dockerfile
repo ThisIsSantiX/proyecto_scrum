@@ -7,10 +7,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN a2enmod rewrite
 
-# CRÍTICO: Desactivar OPcache que causa el problema
-RUN echo "opcache.enable=0" >> /usr/local/etc/php/conf.d/opcache.ini && \
-    echo "opcache.enable_cli=0" >> /usr/local/etc/php/conf.d/opcache.ini
-
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
@@ -18,14 +14,36 @@ WORKDIR /var/www/html
 
 COPY . /var/www/html
 
-RUN rm -rf bootstrap/cache/*.php \
-    storage/framework/cache/* \
-    storage/framework/views/* \
-    storage/framework/sessions/*
+# DEBUGGING: Verificar que el archivo existe
+RUN echo "========================================" && \
+    echo "VERIFICANDO PROYECTO.PHP" && \
+    echo "========================================" && \
+    ls -la app/Models/Proyecto.php && \
+    echo "--- Contenido del archivo ---" && \
+    cat app/Models/Proyecto.php && \
+    echo "========================================" || \
+    (echo "ERROR: Proyecto.php NO EXISTE" && exit 1)
+
+RUN rm -rf bootstrap/cache/*.php storage/framework/cache/* storage/framework/views/* storage/framework/sessions/*
 
 RUN composer install --no-dev --no-scripts --optimize-autoloader --no-interaction
 
 RUN composer dump-autoload --optimize --classmap-authoritative
+
+# DEBUGGING: Verificar que la clase está en el autoload
+RUN echo "========================================" && \
+    echo "VERIFICANDO AUTOLOAD" && \
+    echo "========================================" && \
+    php -r "require 'vendor/autoload.php'; \
+            if (class_exists('App\\Models\\Proyecto')) { \
+                echo '✓ Proyecto class FOUND\n'; \
+                exit(0); \
+            } else { \
+                echo '✗ Proyecto class NOT FOUND\n'; \
+                echo 'Contenido de vendor/composer/autoload_classmap.php:\n'; \
+                system('grep -i proyecto vendor/composer/autoload_classmap.php'); \
+                exit(1); \
+            }"
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache && \
