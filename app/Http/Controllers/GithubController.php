@@ -33,6 +33,7 @@ class GithubController extends Controller
             ]
         );
 
+        // Si existo
         // Iniciar sesión en Laravel
         Auth::login($user);
 
