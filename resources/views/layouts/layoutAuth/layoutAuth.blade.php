@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-        <title>@yield('title', 'Scrum')</title>
+        <title>@yield('title', 'WorkScrum')</title>
 
         <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}" />
 
@@ -20,6 +20,20 @@
         
 
         @yield('css')
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Source+Sans+Pro:wght@600&display=swap');
+
+            h1, h2, h3, h4, h5 {
+                font-family: 'Source Sans Pro', sans-serif;
+                font-weight: 600;
+            }
+
+            body, p, span, li {
+                font-family: 'Roboto', sans-serif;
+                font-weight: 400;
+            }
+
+        </style>
     </head>
     <body class=" " data-bs-spy="scroll" data-bs-target="#elements-section" data-bs-offset="0" tabindex="0">
 

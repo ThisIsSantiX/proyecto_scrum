@@ -1,7 +1,5 @@
 @extends('layouts.layoutAuth.layoutAuth')   
 
-@section('title', 'Scrum')
-
 @section('css')
 
 @endsection
@@ -11,34 +9,16 @@
         <div class="col-md-6 p-0">    
             <div class="card card-transparent auth-card shadow-none d-flex justify-content-center mb-0">
                 <div class="card-body">
-                    <a href="../../dashboard/index.html" class="navbar-brand d-flex align-items-center mb-3">
-                        <!--Logo start-->
-                        <!--logo End-->
-                        
-                        <!--Logo start-->
-                        <div class="logo-main">
-                            <div class="logo-normal">
-                                <svg class="text-primary icon-30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="-0.757324" y="19.2427" width="28" height="4" rx="2" transform="rotate(-45 -0.757324 19.2427)" fill="currentColor"/>
-                                    <rect x="7.72803" y="27.728" width="28" height="4" rx="2" transform="rotate(-45 7.72803 27.728)" fill="currentColor"/>
-                                    <rect x="10.5366" y="16.3945" width="16" height="4" rx="2" transform="rotate(45 10.5366 16.3945)" fill="currentColor"/>
-                                    <rect x="10.5562" y="-0.556152" width="28" height="4" rx="2" transform="rotate(45 10.5562 -0.556152)" fill="currentColor"/>
-                                </svg>
-                            </div>
-                            <div class="logo-mini">
-                                <svg class="text-primary icon-30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="-0.757324" y="19.2427" width="28" height="4" rx="2" transform="rotate(-45 -0.757324 19.2427)" fill="currentColor"/>
-                                    <rect x="7.72803" y="27.728" width="28" height="4" rx="2" transform="rotate(-45 7.72803 27.728)" fill="currentColor"/>
-                                    <rect x="10.5366" y="16.3945" width="16" height="4" rx="2" transform="rotate(45 10.5366 16.3945)" fill="currentColor"/>
-                                    <rect x="10.5562" y="-0.556152" width="28" height="4" rx="2" transform="rotate(45 10.5562 -0.556152)" fill="currentColor"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <!--logo End-->
-                        
-                        
+                    <div class="logo-main d-flex align-items-start justify-content-start mb-3">
+                            <img src="../../assets/images/logos/workscrum.png" 
+                                alt="WorkScrum Logo" 
+                                class="me-2" 
+                                width="40" 
+                                height="40">
 
-                        <h4 class="logo-title ms-3">Scrum</h4>
+                            <!-- Nombre -->
+                            <h2 class="mb-0 fw-bold">WorkScrum</h2>
+                        </div>
                     </a>
                     <img src="../../assets/images/auth/mail.png" class="img-fluid" width="80" alt="">
                     <h2 class="mt-3 mb-0">Enviado!</h2>

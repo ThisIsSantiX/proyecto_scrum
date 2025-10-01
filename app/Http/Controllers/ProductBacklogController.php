@@ -226,17 +226,13 @@ class ProductBacklogController extends Controller
                 ], 404);
             }
 
-            // Validación
-            $validatedData = $request->validate([
-                'titulo' => 'required|string|max:50',
-                'descripcion' => 'required|string|max:255',
-                'prioridad' => 'required|in:Alta,Media,Baja',
-                'valor_historia' => 'required|integer|min:1|max:100',
-                'progreso' => 'required|in:Por hacer,En progreso,Completado'
+            $historia->update([
+                'titulo' => $request->titulo,
+                'descripcion' => $request->descripcion,
+                'prioridad' => $request->prioridad,
+                'valor_historia' => $request->valor_historia,
+                'progreso' => $request->progreso
             ]);
-
-            // Actualizar
-            $historia->update($validatedData);
 
             return response()->json([
                 'success' => true,
