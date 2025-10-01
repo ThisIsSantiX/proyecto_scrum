@@ -31,5 +31,8 @@ RUN chown -R www-data:www-data storage bootstrap/cache && \
 # Exponer el puerto
 EXPOSE 80
 
+# Correr migraciones automáticamente en cada deploy
+RUN php artisan migrate --force || true
+
 # Comando para iniciar Apache en primer plano
 CMD ["apache2-foreground"]
