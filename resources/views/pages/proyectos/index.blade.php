@@ -606,13 +606,13 @@
                             allProjects = response.data.data;
                             renderProjects(allProjects, search);
                         } else {
-                            showError('Error al cargar los proyectos');
+                            notyf.error('Error al cargar los proyectos');
                             showEmptyState();
                         }
                     })
                     .catch(function(error) {
                         console.error('Error:', error);
-                        showError('Error al cargar los proyectos: ' + (error.response?.data?.message || error.message));
+                        notyf.error('Error al cargar los proyectos: ' + (error.response?.data?.message || error.message));
                         showEmptyState();
                     });
             }
@@ -935,41 +935,6 @@ function getFallbackAvatarElement(initials, username, rol) {
             $('#emptyState').show();
         }
 
-        function showError(message) {
-            $.notify({
-                title: 'Error',
-                message: message
-            }, {
-                type: 'danger',
-                placement: {
-                    from: "top",
-                    align: "right"
-                },
-                delay: 5000,
-                animate: {
-                    enter: 'animated fadeInRight',
-                    exit: 'animated fadeOutRight'
-                }
-            });
-        }
-
-        function showSuccess(message) {
-            $.notify({
-                title: 'Éxito',
-                message: message
-            }, {
-                type: 'success',
-                placement: {
-                    from: "top",
-                    align: "right"
-                },
-                delay: 3000,
-                animate: {
-                    enter: 'animated fadeInRight',
-                    exit: 'animated fadeOutRight'
-                }
-            });
-        }
 
         $(document).on("click", "#deleteProjectBtn", function() {
             const uid = $(this).data('uid'); // Obtenemos el UID que asignamos antes

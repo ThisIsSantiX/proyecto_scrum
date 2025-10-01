@@ -13,12 +13,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
 use App\Http\Controllers\DailyScrumController;
-use App\Http\Controllers\GitHubController;
+use App\Http\Controllers\GithubController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -39,49 +41,25 @@ Route::get('/auth/google/callback', function () {
     try {
         $googleUser = Socialite::driver('google')->user();
     } catch (\Exception $e) {
-        return redirect('/auth/login')->withErrors(['google_login' => 'Error al iniciar sesión con Google: ' . $e->getMessage()]);
+        Log::error('Google OAuth Error: ' . $e->getMessage());
+        return redirect('/auth/login')->withErrors(['google_login' => 'Error al iniciar sesión con Google']);
     }
 
-    $nombre   = explode(' ', $googleUser->getName())[0] ?? '';
-    $apellido = explode(' ', $googleUser->getName())[1] ?? '';
+    $username   = explode(' ', $googleUser->getName()) ?? '';
 
     $user = User::where('email', $googleUser->getEmail())->first();
     $uid = $user ? $user->uid : (string) Str::uuid();
 
-    $foto = null;
-
-    // 🔹 Intentar descargar la foto de Google con headers
-    if ($googleUser->getAvatar()) {
-        try {
-            $response = Http::withHeaders([
-                'User-Agent' => 'Mozilla/5.0',
-                'Accept'     => 'image/webp,image/apng,image/*,*/*;q=0.8',
-            ])->get($googleUser->getAvatar());
-
-            if ($response->successful()) {
-                $extension = "jpg";
-                $fileName = "usuarios/" . $uid . "." . $extension;
-
-                Storage::disk('public')->put($fileName, $response->body());
-
-                $foto = "storage/" . $fileName;
-            }
-        } catch (\Exception $e) {
-            // Si falla, se deja null y pasa al fallback
-        }
-    }
-
-    // 🔹 Fallback a ui-avatars si no se descargó nada
-    if (!$foto) {
-        $foto = "https://ui-avatars.com/api/?name=" . urlencode("{$nombre} {$apellido}") . "&background=random&color=fff";
-    }
+    // 🔹 Usar URL directa de Google (sin descargar)
+    $foto = $googleUser->getAvatar() 
+        ? $googleUser->getAvatar() 
+        : "https://ui-avatars.com/api/?name=" . urlencode("{$username}") . "&background=random&color=fff";
 
     // 🔹 Guardar usuario
     $user = User::updateOrCreate(
         ['email' => $googleUser->getEmail()],
         [
-            'nombre'   => $nombre,
-            'apellido' => $apellido,
+            'username'   => $username,
             'email'    => $googleUser->getEmail(),
             'google_id'=> $googleUser->getId(),
             'foto_url' => $foto,
@@ -97,8 +75,8 @@ Route::get('/auth/google/callback', function () {
 });
 
 
-Route::get('auth/github', [GitHubController::class, 'redirectToProvider']);
-Route::get('auth/github/callback', [GitHubController::class, 'handleProviderCallback']);
+Route::get('/auth/github', [GithubController::class, 'redirectToProvider']);
+Route::get('/auth/github/callback', [GithubController::class, 'handleProviderCallback']);
 
 //-----------------------------------------------------------------------
 

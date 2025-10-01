@@ -1,38 +1,80 @@
-# Imagen base con PHP 8.2 + Apache
+# Imagen base PHP 8.2 + Apache
 FROM php:8.2-apache
 
-# Instalar dependencias del sistema y extensiones necesarias
+# Instalar dependencias necesarias y extensiones de PHP
 RUN apt-get update && apt-get install -y \
-    libzip-dev unzip git curl && \
-    docker-php-ext-install pdo_mysql zip
+    libzip-dev unzip git curl libpq-dev && \
+    docker-php-ext-install pdo_mysql pdo_pgsql zip && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Configuración de Apache (activar mod_rewrite y cambiar DocumentRoot a /public)
+# Activar mod_rewrite de Apache
 RUN a2enmod rewrite
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
-    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Copiar los archivos de Laravel al contenedor
-COPY . /var/www/html
-
-# Establecer directorio de trabajo
+# Directorio de trabajo
 WORKDIR /var/www/html
 
-# Instalar Composer (copiado desde la imagen oficial de Composer)
+# Copiar archivos de Laravel
+COPY . /var/www/html
+
+# Instalar Composer desde imagen oficial
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Instalar dependencias de Laravel
-RUN composer install --no-dev --optimize-autoloader
+# Dar permisos correctos y crear directorios de sesiones
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
+    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache && \
+    mkdir -p /var/www/html/storage/framework/sessions \
+             /var/www/html/storage/framework/views \
+             /var/www/html/storage/framework/cache \
+             /var/www/html/storage/logs && \
+    chmod -R 775 /var/www/html/storage/framework && \
+    chown -R www-data:www-data /var/www/html/storage
 
-# Dar permisos a storage y bootstrap/cache
-RUN chown -R www-data:www-data storage bootstrap/cache && \
-    chmod -R 775 storage bootstrap/cache
+# Configurar Apache para DocumentRoot correcto y eliminar warnings
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /etc/apache2/sites-available/000-default.conf && \
+    echo '<Directory /var/www/html/public>\n    AllowOverride All\n    Require all granted\n</Directory>' >> /etc/apache2/sites-available/000-default.conf && \
+    echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Exponer el puerto
-EXPOSE 80
+# Exponer puerto por defecto
+EXPOSE 8080
+ENV PORT=8080
 
-# Correr migraciones automáticamente en cada deploy
-RUN php artisan migrate --force || true
+# Script de inicio optimizado
+RUN echo '#!/bin/bash\n\
+set -e\n\
+export PORT=${PORT:-8080}\n\
+echo "Starting Laravel application on port $PORT"\n\
+\n\
+# Configurar Apache para el puerto dinámico\n\
+sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf\n\
+sed -i "s/:80>/:${PORT}>/" /etc/apache2/sites-available/000-default.conf\n\
+\n\
+echo "Configuring Laravel..."\n\
+\n\
+# Limpiar cachés\n\
+php artisan config:clear\n\
+php artisan cache:clear\n\
+php artisan view:clear\n\
+\n\
+# Ejecutar migraciones y seeders\n\
+echo "Running migrations..."\n\
+php artisan migrate --force || echo "WARNING: Migrations failed"\n\
+\n\
+echo "Running seeders..."\n\
+php artisan db:seed --force || echo "WARNING: Seeders failed"\n\
+\n\
+# Optimizar Laravel\n\
+php artisan config:cache\n\
+php artisan view:cache\n\
+\n\
+# Asegurar permisos finales\n\
+chown -R www-data:www-data /var/www/html/storage\n\
+chmod -R 775 /var/www/html/storage\n\
+\n\
+echo "Starting Apache on port $PORT..."\n\
+\n\
+# Iniciar Apache en foreground\n\
+exec apache2-foreground' > /start.sh && chmod +x /start.sh
 
-# Comando para iniciar Apache en primer plano
-CMD ["apache2-foreground"]
+CMD ["/start.sh"]
