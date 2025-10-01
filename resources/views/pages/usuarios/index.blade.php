@@ -300,7 +300,7 @@ function verFoto(url, uid) {
         showConfirmButton: false,
         background: '#000000cc',
         width: 'auto',
-        padding: 0
+        padding: 1
     });
 }
 
