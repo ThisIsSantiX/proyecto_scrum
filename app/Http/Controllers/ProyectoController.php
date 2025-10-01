@@ -1,16 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Proyecto;
 use App\Models\proyecto_invitaciones;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ProyectoReciente;
-use App\Models\miembros_equipo;
 
 class ProyectoController extends Controller
 {
@@ -469,6 +468,6 @@ class ProyectoController extends Controller
                 'message' => 'Error al obtener proyectos recientes: ' . $e->getMessage()
             ], 500);
         }  
-  }
+    }
 
 }

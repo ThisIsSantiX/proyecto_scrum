@@ -21,13 +21,16 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+# 🔧 CORRECCIÓN: Regenerar autoload después de copiar archivos
+RUN composer dump-autoload --optimize
+
 # Dar permisos correctos y crear directorios de sesiones
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache && \
     mkdir -p /var/www/html/storage/framework/sessions \
-             /var/www/html/storage/framework/views \
-             /var/www/html/storage/framework/cache \
-             /var/www/html/storage/logs && \
+            /var/www/html/storage/framework/views \
+            /var/www/html/storage/framework/cache \
+            /var/www/html/storage/logs && \
     chmod -R 775 /var/www/html/storage/framework && \
     chown -R www-data:www-data /var/www/html/storage
 
@@ -56,6 +59,10 @@ echo "Configuring Laravel..."\n\
 php artisan config:clear\n\
 php artisan cache:clear\n\
 php artisan view:clear\n\
+\n\
+# 🔧 CORRECCIÓN: Regenerar autoload en tiempo de ejecución\n\
+php artisan optimize:clear\n\
+composer dump-autoload --optimize\n\
 \n\
 # Ejecutar migraciones y seeders\n\
 echo "Running migrations..."\n\

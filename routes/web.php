@@ -42,37 +42,43 @@ Route::get('/auth/google/callback', function () {
         $googleUser = Socialite::driver('google')->user();
     } catch (\Exception $e) {
         Log::error('Google OAuth Error: ' . $e->getMessage());
-        return redirect('/auth/login')->withErrors(['google_login' => 'Error al iniciar sesión con Google']);
+        return redirect('/auth/login')
+            ->withErrors(['google_login' => 'Error al iniciar sesión con Google']);
     }
 
-    $username   = explode(' ', $googleUser->getName()) ?? '';
+    // 🔹 Generar un username como string (primer nombre o todo concatenado)
+    $usernameArray = explode(' ', $googleUser->getName() ?? '');
+    $username = $usernameArray[0] ?? $googleUser->getName() ?? 'Usuario';
 
+    // 🔹 Revisar si el usuario ya existe
     $user = User::where('email', $googleUser->getEmail())->first();
     $uid = $user ? $user->uid : (string) Str::uuid();
 
-    // 🔹 Usar URL directa de Google (sin descargar)
+    // 🔹 URL de la foto (usar Google si existe, sino avatar por nombre)
     $foto = $googleUser->getAvatar() 
         ? $googleUser->getAvatar() 
-        : "https://ui-avatars.com/api/?name=" . urlencode("{$username}") . "&background=random&color=fff";
+        : "https://ui-avatars.com/api/?name=" . urlencode($username) . "&background=random&color=fff";
 
-    // 🔹 Guardar usuario
+    // 🔹 Crear o actualizar usuario
     $user = User::updateOrCreate(
         ['email' => $googleUser->getEmail()],
         [
             'username'   => $username,
-            'email'    => $googleUser->getEmail(),
-            'google_id'=> $googleUser->getId(),
-            'foto_url' => $foto,
-            'uid'      => $uid,
-            'estado'   => 1,
-            'password' => bcrypt(Str::random(16)),
+            'email'      => $googleUser->getEmail(),
+            'google_id'  => $googleUser->getId(),
+            'foto_url'   => $foto,
+            'uid'        => $uid,
+            'estado'     => 1,
+            'password'   => bcrypt(Str::random(16)), // contraseña dummy
         ]
     );
 
+    // 🔹 Loguear usuario
     Auth::login($user);
 
     return redirect('/dashboard');
 });
+
 
 
 Route::get('/auth/github', [GithubController::class, 'redirectToProvider']);
