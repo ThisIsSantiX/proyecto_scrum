@@ -1,16 +1,16 @@
 <aside class="sidebar sidebar-default sidebar-white sidebar-base navs-rounded-all" id="sidebar">
     <div class="sidebar-header d-flex align-items-center justify-content-start">
-        <a href="{{ route ('dashboard') }}" class="navbar-brand">
+        <a href="{{ route ('dashboard') }}" class="navbar-brand p-2">
             <!--Logo start-->
             <!--logo End-->
             
             <!--Logo start-->
             <div class="logo-main">
-                <div class="logo-normal">
-                    <img src="../../assets/images/logos/workscrum.png" alt="" width="40" height="40">
+                <div class="logo-normal ps-1">
+                    <img src="../../assets/images/logos/workscrum.png" alt="" width="41" height="41">
                 </div>
-                <div class="logo-mini">
-                    <img src="../../assets/images/logos/workscrum.png" alt="" width="40" height="40">
+                <div class="logo-mini ps-1">
+                    <img src="../../assets/images/logos/workscrum.png" alt="" width="41" height="41">
                 </div>
             </div>
             <!--logo End-->

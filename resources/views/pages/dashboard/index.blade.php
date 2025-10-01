@@ -81,9 +81,6 @@
                     <i class="bi bi-check-circle me-2">
                     </i> Tareas</h6>
                     <div class="text-center p-4">
-                        <img src="https://img.icons8.com/ios/150/000000/todo-list--v1.png" 
-                            alt="Sin tareas" 
-                            class="mb-3 opacity-50" width="75">
                         <p class="text-muted mb-1">No hay tareas asignadas a usted</p>
                         <small class="text-muted">También puedes fijar tareas para verlas aquí</small>
                     </div>
