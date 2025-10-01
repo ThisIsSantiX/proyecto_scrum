@@ -28,11 +28,12 @@ class ProyectoController extends Controller
     {
         $userId = auth()->id();
 
-        $query = Proyecto::select(
-            'proyectos.*',
-            'users.username as usuario_username',
-            'users.email as usuario_email'
-        )
+        $query = DB::table('proyectos')
+            ->select(
+                'proyectos.*',
+                'users.username as usuario_username',
+                'users.email as usuario_email'
+            )
             ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
             ->leftJoin('miembros_equipos', 'proyectos.id', '=', 'miembros_equipos.id_proyecto')
             ->where('proyectos.estado', 1)
@@ -41,21 +42,21 @@ class ProyectoController extends Controller
                 ->orWhere('miembros_equipos.id_usuario', $userId);
             });
 
-        if ($request->has('search') && !empty($request->search)) {
+        if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('proyectos.nombre', 'LIKE', '%' . $request->search . '%')
-                    ->orWhere('users.username', 'LIKE', '%' . $request->search . '%');
+                ->orWhere('users.username', 'LIKE', '%' . $request->search . '%');
             });
         }
 
-
         $proyectos = $query->distinct()->get();
-        
+
         return response()->json([
             'success' => true,
             'data' => $proyectos
         ]);
     }
+
 
 
     // Función store
