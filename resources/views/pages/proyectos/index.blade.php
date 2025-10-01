@@ -935,42 +935,6 @@ function getFallbackAvatarElement(initials, username, rol) {
             $('#emptyState').show();
         }
 
-        function showError(message) {
-            $.notify({
-                title: 'Error',
-                message: message
-            }, {
-                type: 'danger',
-                placement: {
-                    from: "top",
-                    align: "right"
-                },
-                delay: 5000,
-                animate: {
-                    enter: 'animated fadeInRight',
-                    exit: 'animated fadeOutRight'
-                }
-            });
-        }
-
-        function showSuccess(message) {
-            $.notify({
-                title: 'Éxito',
-                message: message
-            }, {
-                type: 'success',
-                placement: {
-                    from: "top",
-                    align: "right"
-                },
-                delay: 3000,
-                animate: {
-                    enter: 'animated fadeInRight',
-                    exit: 'animated fadeOutRight'
-                }
-            });
-        }
-
         $(document).on("click", "#deleteProjectBtn", function() {
             const uid = $(this).data('uid'); // Obtenemos el UID que asignamos antes
             const isDark = document.body.classList.contains('dark'); // Etiqueta de modo oscuro
