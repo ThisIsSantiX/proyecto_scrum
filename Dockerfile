@@ -33,18 +33,30 @@ RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /et
 EXPOSE 8080
 ENV PORT=8080
 
-# Script inline de inicio
+# Script inline de inicio - CORREGIDO
 RUN echo '#!/bin/bash\n\
 set -e\n\
 export PORT=${PORT:-8080}\n\
 echo "Starting on port $PORT"\n\
+\n\
+# Configurar Apache para el puerto dinámico\n\
 sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf\n\
 sed -i "s/:80>/:${PORT}>/" /etc/apache2/sites-available/000-default.conf\n\
-php artisan config:clear\n\
-php artisan migrate --force || true\n\
-php artisan db:seed --force || true\n\
-php artisan config:cache\n\
-php artisan route:cache\n\
-apache2-foreground' > /start.sh && chmod +x /start.sh
+\n\
+# Iniciar Apache en background primero\n\
+apache2-ctl start\n\
+echo "Apache started on port $PORT"\n\
+\n\
+# Ahora ejecutar comandos de Laravel (no bloquean)\n\
+php artisan config:clear || true\n\
+php artisan migrate --force 2>&1 || echo "Migration warning (check DB connection)"\n\
+php artisan db:seed --force 2>&1 || echo "Seeding warning"\n\
+\n\
+# NO cachear rutas si hay conflictos\n\
+php artisan config:cache || true\n\
+# php artisan route:cache || true  # Comentado por conflicto de rutas\n\
+\n\
+# Mantener Apache en foreground\n\
+apache2-ctl -D FOREGROUND' > /start.sh && chmod +x /start.sh
 
 CMD ["/start.sh"]
