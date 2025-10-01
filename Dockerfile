@@ -44,7 +44,7 @@ sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf\n\
 sed -i "s/:80>/:${PORT}>/" /etc/apache2/sites-available/000-default.conf\n\
 \n\
 # Iniciar Apache en background primero\n\
-apache2-ctl start\n\
+apache2ctl start\n\
 echo "Apache started on port $PORT"\n\
 \n\
 # Ahora ejecutar comandos de Laravel (no bloquean)\n\
@@ -57,6 +57,6 @@ php artisan config:cache || true\n\
 # php artisan route:cache || true  # Comentado por conflicto de rutas\n\
 \n\
 # Mantener Apache en foreground\n\
-apache2-ctl -D FOREGROUND' > /start.sh && chmod +x /start.sh
+apache2ctl -D FOREGROUND' > /start.sh && chmod +x /start.sh
 
 CMD ["/start.sh"]
