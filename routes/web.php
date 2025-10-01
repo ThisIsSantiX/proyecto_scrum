@@ -77,8 +77,8 @@ Route::get('/auth/google/callback', function () {
 });
 
 
-Route::get('auth/github', [GithubController::class, 'redirectToProvider']);
-Route::get('auth/github/callback', [GithubController::class, 'handleProviderCallback']);
+Route::get('/auth/github', [GithubController::class, 'redirectToProvider']);
+Route::get('/auth/github/callback', [GithubController::class, 'handleProviderCallback']);
 
 //-----------------------------------------------------------------------
 
