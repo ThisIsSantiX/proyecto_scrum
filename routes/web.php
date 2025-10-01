@@ -163,7 +163,6 @@ Route::get('/roles/{id}/delete', [RolesController::class, 'destroy'])->name('rol
 
 
     // Authentication Routes
-    Auth::routes(['reset' => true]);
 
     Route::get('/auth/login', [AuthController::class, 'index'])->name('login');
     Route::redirect('/', '/auth/login');
