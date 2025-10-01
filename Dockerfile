@@ -26,9 +26,6 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Regenerar autoload después de copiar archivos
 RUN composer dump-autoload --optimize
 
-# Verificar que el modelo existe (debugging)
-RUN ls -la app/Models/Proyecto.php || echo "WARNING: Proyecto.php not found"
-
 # Dar permisos correctos y crear directorios de sesiones
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache && \
@@ -48,7 +45,7 @@ RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /et
 EXPOSE 8080
 ENV PORT=8080
 
-# Script de inicio optimizado
+# Script de inicio optimizado - ORDEN CORRECTO
 RUN echo '#!/bin/bash\n\
 set -e\n\
 export PORT=${PORT:-8080}\n\
@@ -60,30 +57,35 @@ sed -i "s/:80>/:${PORT}>/" /etc/apache2/sites-available/000-default.conf\n\
 \n\
 echo "Configuring Laravel..."\n\
 \n\
-# Limpiar cachés\n\
-php artisan config:clear\n\
-php artisan cache:clear\n\
-php artisan view:clear\n\
-php artisan optimize:clear\n\
+# PASO 1: Limpiar TODO el cache PRIMERO\n\
+php artisan optimize:clear || true\n\
+php artisan config:clear || true\n\
+php artisan cache:clear || true\n\
+php artisan view:clear || true\n\
+php artisan route:clear || true\n\
 \n\
-# Regenerar autoload en tiempo de ejecución\n\
+# PASO 2: Regenerar autoload de Composer\n\
+echo "Regenerating autoload..."\n\
 composer dump-autoload --optimize\n\
 \n\
-# Ejecutar migraciones y seeders\n\
+# PASO 3: Ejecutar migraciones y seeders\n\
 echo "Running migrations..."\n\
 php artisan migrate --force || echo "WARNING: Migrations failed"\n\
 \n\
 echo "Running seeders..."\n\
 php artisan db:seed --force || echo "WARNING: Seeders failed"\n\
 \n\
-# Optimizar Laravel\n\
+# PASO 4: AHORA SÍ cachear (después de regenerar autoload)\n\
+echo "Caching configuration..."\n\
 php artisan config:cache\n\
+php artisan route:cache\n\
 php artisan view:cache\n\
 \n\
 # Asegurar permisos finales\n\
 chown -R www-data:www-data /var/www/html/storage\n\
 chmod -R 775 /var/www/html/storage\n\
 \n\
+echo "✓ Laravel configured successfully"\n\
 echo "Starting Apache on port $PORT..."\n\
 \n\
 # Iniciar Apache en foreground\n\
