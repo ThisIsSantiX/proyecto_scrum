@@ -46,34 +46,45 @@ Route::get('/auth/google/callback', function () {
             ->withErrors(['google_login' => 'Error al iniciar sesión con Google']);
     }
 
-    // 🔹 Generar un username como string (primer nombre o todo concatenado)
-    $usernameArray = explode(' ', $googleUser->getName() ?? '');
-    $username = $usernameArray[0] ?? $googleUser->getName() ?? 'Usuario';
+    // Obtener nombre completo y eliminar espacios
+    $fullName = $googleUser->getName() ?? 'Usuario';
+    $baseUsername = str_replace(' ', '', $fullName); // "Santiago Torres" -> "SantiagoTorres"
 
-    // 🔹 Revisar si el usuario ya existe
-    $user = User::where('email', $googleUser->getEmail())->first();
-    $uid = $user ? $user->uid : (string) Str::uuid();
-
-    // 🔹 URL de la foto (usar Google si existe, sino avatar por nombre)
     $foto = $googleUser->getAvatar() 
         ? $googleUser->getAvatar() 
-        : "https://ui-avatars.com/api/?name=" . urlencode($username) . "&background=random&color=fff";
+        : "https://ui-avatars.com/api/?name=" . urlencode($fullName) . "&background=random&color=fff";
 
-    // 🔹 Crear o actualizar usuario
-    $user = User::updateOrCreate(
-        ['email' => $googleUser->getEmail()],
-        [
-            'username'   => $username,
-            'email'      => $googleUser->getEmail(),
-            'google_id'  => $googleUser->getId(),
-            'foto_url'   => $foto,
-            'uid'        => $uid,
-            'estado'     => 1,
-            'password'   => bcrypt(Str::random(16)), // contraseña dummy
-        ]
-    );
+    // Buscar si el usuario ya existe por email
+    $user = User::where('email', $googleUser->getEmail())->first();
 
-    // 🔹 Loguear usuario
+    if ($user) {
+        // Usuario existe: SOLO actualizar datos de Google, NO el username
+        $user->update([
+            'google_id' => $googleUser->getId(),
+            'foto_url' => $foto,
+            'estado' => 1,
+        ]);
+    } else {
+        // Usuario nuevo: generar username único si es necesario
+        $username = $baseUsername;
+        $counter = 1;
+        
+        while (User::where('username', $username)->exists()) {
+            $username = $baseUsername . $counter;
+            $counter++;
+        }
+
+        $user = User::create([
+            'username' => $username,
+            'email' => $googleUser->getEmail(),
+            'google_id' => $googleUser->getId(),
+            'foto_url' => $foto,
+            'uid' => (string) Str::uuid(),
+            'estado' => 1,
+            'password' => bcrypt(Str::random(16)),
+        ]);
+    }
+
     Auth::login($user);
 
     return redirect('/dashboard');
