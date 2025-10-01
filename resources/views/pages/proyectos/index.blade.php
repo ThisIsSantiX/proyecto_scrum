@@ -606,13 +606,13 @@
                             allProjects = response.data.data;
                             renderProjects(allProjects, search);
                         } else {
-                            showError('Error al cargar los proyectos');
+                            notyf.error('Error al cargar los proyectos');
                             showEmptyState();
                         }
                     })
                     .catch(function(error) {
                         console.error('Error:', error);
-                        showError('Error al cargar los proyectos: ' + (error.response?.data?.message || error.message));
+                        notyf.error('Error al cargar los proyectos: ' + (error.response?.data?.message || error.message));
                         showEmptyState();
                     });
             }
@@ -934,6 +934,7 @@ function getFallbackAvatarElement(initials, username, rol) {
             $('#projectsContainer').hide();
             $('#emptyState').show();
         }
+
 
         $(document).on("click", "#deleteProjectBtn", function() {
             const uid = $(this).data('uid'); // Obtenemos el UID que asignamos antes
