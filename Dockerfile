@@ -20,14 +20,17 @@ WORKDIR /var/www/html
 # Copiar archivos de Laravel
 COPY . /var/www/html
 
-# Eliminar caches viejos que puedan venir del repo
-RUN rm -rf bootstrap/cache/*.php storage/framework/cache/data/* storage/framework/views/*
+# CRÍTICO: Eliminar cualquier cache que venga del repo
+RUN rm -rf bootstrap/cache/*.php \
+    storage/framework/cache/data/* \
+    storage/framework/views/*.php \
+    storage/framework/sessions/*
 
 # Instalar dependencias
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --no-dev --no-scripts --optimize-autoloader --no-interaction
 
-# Regenerar autoload después de copiar archivos
-RUN composer dump-autoload --optimize
+# Regenerar autoload COMPLETAMENTE
+RUN composer dump-autoload --optimize --classmap-authoritative
 
 # Dar permisos correctos y crear directorios de sesiones
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
@@ -39,50 +42,28 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
     chmod -R 775 /var/www/html/storage/framework && \
     chown -R www-data:www-data /var/www/html/storage
 
-# Configurar Apache para DocumentRoot correcto y eliminar warnings
+# Configurar Apache para DocumentRoot correcto
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /etc/apache2/sites-available/000-default.conf && \
     echo '<Directory /var/www/html/public>\n    AllowOverride All\n    Require all granted\n</Directory>' >> /etc/apache2/sites-available/000-default.conf && \
     echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Exponer puerto por defecto
+# Exponer puerto
 EXPOSE 8080
 ENV PORT=8080
 
-# Script de inicio - SIN route:cache
+# Script de inicio MÍNIMO
 RUN echo '#!/bin/bash\n\
 set -e\n\
 export PORT=${PORT:-8080}\n\
-echo "Starting Laravel application on port $PORT"\n\
 \n\
 sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf\n\
 sed -i "s/:80>/:${PORT}>/" /etc/apache2/sites-available/000-default.conf\n\
 \n\
-echo "Configuring Laravel..."\n\
-\n\
-php artisan optimize:clear || true\n\
-php artisan config:clear || true\n\
-php artisan cache:clear || true\n\
-php artisan view:clear || true\n\
-php artisan route:clear || true\n\
-\n\
-echo "Regenerating autoload..."\n\
-composer dump-autoload --optimize\n\
-\n\
-echo "Running migrations..."\n\
-php artisan migrate --force || echo "WARNING: Migrations failed"\n\
-\n\
-echo "Running seeders..."\n\
-php artisan db:seed --force || echo "WARNING: Seeders failed"\n\
-\n\
-echo "Caching (without routes)..."\n\
-php artisan config:cache || true\n\
-php artisan view:cache || true\n\
+php artisan migrate --force 2>&1 || true\n\
+php artisan db:seed --force 2>&1 || true\n\
 \n\
 chown -R www-data:www-data /var/www/html/storage\n\
 chmod -R 775 /var/www/html/storage\n\
-\n\
-echo "✓ Laravel configured successfully"\n\
-echo "Starting Apache on port $PORT..."\n\
 \n\
 exec apache2-foreground' > /start.sh && chmod +x /start.sh
 

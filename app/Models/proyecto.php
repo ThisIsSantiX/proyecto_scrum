@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\miembros_equipo;
+use App\Models\Miembros_Equipo;
 
 class Proyecto extends Model
 {
