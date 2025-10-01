@@ -79,8 +79,6 @@ Route::get('/auth/google/callback', function () {
     return redirect('/dashboard');
 });
 
-
-
 Route::get('/auth/github', [GithubController::class, 'redirectToProvider']);
 Route::get('/auth/github/callback', [GithubController::class, 'handleProviderCallback']);
 
@@ -93,7 +91,6 @@ Route::get('/', function () {
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
 });
-
 
 // perfil ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/perfil/{username}', [UserController::class, 'profile'])
