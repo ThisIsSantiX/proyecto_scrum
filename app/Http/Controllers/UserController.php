@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\roles;
+use App\Models\Roles;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -154,7 +154,7 @@ class UserController extends Controller
     
     public function destroy($uid)
     {
-        $usuario = user::where('uid', $uid)->first();
+        $usuario = User::where('uid', $uid)->first();
 
         if (!$usuario) {
             return response()->json(['success' => false, 'error' => 'Usuario no encontrada.']);
@@ -168,7 +168,7 @@ class UserController extends Controller
 
     public function showRoles()
     {
-        $roles = roles::where('estado', 1)->get(); 
+        $roles = Roles::where('estado', 1)->get(); 
         return response()->json($roles);
     }
 
