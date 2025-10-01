@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Proyecto;
-use App\Models\proyecto_invitaciones;
 use Illuminate\Http\Request;
+use App\Models\ProyectoInvitaciones;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\User;
@@ -315,7 +315,7 @@ class ProyectoController extends Controller
                 ], 400);
             }
 
-            $invitacionPendiente = proyecto_invitaciones::where('proyecto_id', $idProyecto)
+            $invitacionPendiente = ProyectoInvitaciones::where('proyecto_id', $idProyecto)
                 ->where('usuario_invitado', $usuarioInvitado->id)
                 ->where('estadoInvitacion', 'pendiente')
                 ->where(function ($q) {
@@ -330,7 +330,7 @@ class ProyectoController extends Controller
                 ], 400);
             }
 
-            $invitacion = proyecto_invitaciones::create([
+            $invitacion = ProyectoInvitaciones::create([
                 'proyecto_id' => $idProyecto,
                 'invitado_por' => $usuarioActual->id,
                 'usuario_invitado' => $usuarioInvitado->id,
@@ -364,7 +364,7 @@ class ProyectoController extends Controller
         try {
             $user = Auth::user();
 
-            $invitaciones = proyecto_invitaciones::with(['proyecto', 'invitadoPor'])
+            $invitaciones = ProyectoInvitaciones::with(['proyecto', 'invitadoPor'])
                 ->where('usuario_invitado', $user->id)
                 ->pendientes()
                 ->orderBy('created_at', 'desc')
@@ -397,7 +397,7 @@ class ProyectoController extends Controller
         try {
             $user = Auth::user();
 
-            $invitacion = proyecto_invitaciones::where('uid', $uid)
+            $invitacion = ProyectoInvitaciones::where('uid', $uid)
                 ->where('usuario_invitado', $user->id)
                 ->where('estadoInvitacion', 'pendiente')
                 ->first();
