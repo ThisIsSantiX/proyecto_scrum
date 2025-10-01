@@ -46,6 +46,7 @@ class DailyScrumController extends Controller
             ], 500);
         }
     }
+
     public function create()
     {
         //
@@ -180,7 +181,6 @@ class DailyScrumController extends Controller
                 'acuerdos' => $request->acuerdos
             ]);
 
-            // Recargar el modelo con las relaciones
             $daily->load(['proyecto', 'sprint']);
 
             return response()->json([
@@ -207,7 +207,7 @@ class DailyScrumController extends Controller
             if (!$daily) {
                 return response()->json([
                     "success" => false,
-                    "message" => "No se encontró la reunión"
+                    "message" => "No se pudo encontrar la reunión"
                 ], 404);
             }
 

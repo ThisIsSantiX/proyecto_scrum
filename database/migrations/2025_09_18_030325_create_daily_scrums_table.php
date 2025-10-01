@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('observaciones')->nullable();
             $table->text('bloqueos_detectados')->nullable();
             $table->text('acuerdos')->nullable();
-            $table->integer('estado');
+            $table->integer('estado'); // 1 activo, 0 inactivo
             $table->text('uid');
             $table->timestamps();
         });

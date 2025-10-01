@@ -19,7 +19,7 @@ class Daily_scrum extends Model
         'bloqueos_detectados',
         'acuerdos',
         'estado',
-        'uid'
+        'uid',
     ];
 
     protected $primaryKey = 'id';
