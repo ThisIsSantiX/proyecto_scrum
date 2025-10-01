@@ -45,8 +45,7 @@ Route::get('/auth/google/callback', function () {
         return redirect('/auth/login')->withErrors(['google_login' => 'Error al iniciar sesión con Google']);
     }
 
-    $nombre   = explode(' ', $googleUser->getName())[0] ?? '';
-    $apellido = explode(' ', $googleUser->getName())[1] ?? '';
+    $username   = explode(' ', $googleUser->getName()) ?? '';
 
     $user = User::where('email', $googleUser->getEmail())->first();
     $uid = $user ? $user->uid : (string) Str::uuid();
@@ -54,14 +53,13 @@ Route::get('/auth/google/callback', function () {
     // 🔹 Usar URL directa de Google (sin descargar)
     $foto = $googleUser->getAvatar() 
         ? $googleUser->getAvatar() 
-        : "https://ui-avatars.com/api/?name=" . urlencode("{$nombre} {$apellido}") . "&background=random&color=fff";
+        : "https://ui-avatars.com/api/?name=" . urlencode("{$username}") . "&background=random&color=fff";
 
     // 🔹 Guardar usuario
     $user = User::updateOrCreate(
         ['email' => $googleUser->getEmail()],
         [
-            'nombre'   => $nombre,
-            'apellido' => $apellido,
+            'username'   => $username,
             'email'    => $googleUser->getEmail(),
             'google_id'=> $googleUser->getId(),
             'foto_url' => $foto,

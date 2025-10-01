@@ -39,7 +39,7 @@
 @endsection
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid py-4">
 
     <!-- Saludo -->
     <div class="text-center mb-4">
