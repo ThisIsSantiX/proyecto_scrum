@@ -38,6 +38,7 @@ class UserController extends Controller
         $request->validate([
             'nombre'    => 'required|string|max:50',
             'apellido'    => 'required|string|max:50',
+            'username'    => 'required|string|max:50',
             'email'     => 'required|email|unique:users,email',
             'password'  => 'required|min:6|confirmed',
             'estado'    => 'required|in:1,0',
