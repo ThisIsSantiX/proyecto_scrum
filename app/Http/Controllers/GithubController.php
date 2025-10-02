@@ -23,33 +23,44 @@ class GithubController extends Controller
     {
         $githubUser = Socialite::driver('github')->user();
 
+        // Separar nombre completo en nombre y apellido (si existe)
+        $fullName   = $githubUser->getName() ?? '';
+        $nameParts  = $fullName ? explode(' ', $fullName, 2) : [];
+
+        $nombre   = $nameParts[0] ?? '';
+        $apellido = $nameParts[1] ?? '';
+
         // Buscar si el usuario ya existe por email
         $user = User::where('email', $githubUser->getEmail())->first();
 
         if ($user) {
-            // Usuario existe: SOLO actualizar datos de GitHub
+            // Usuario existe: actualizar datos de GitHub (sin cambiar username)
             $user->update([
                 'foto_url' => $githubUser->getAvatar(),
-                'estado' => 1,
+                'estado'   => 1,
+                'nombre'   => $nombre ?: $user->nombre,
+                'apellido' => $apellido ?: $user->apellido,
             ]);
         } else {
             // Usuario nuevo: generar username único
             $baseUsername = $githubUser->getNickname() ?? 'user' . $githubUser->getId();
             $username = $baseUsername;
             $counter = 1;
-            
+
             while (User::where('username', $username)->exists()) {
                 $username = $baseUsername . $counter;
                 $counter++;
             }
 
             $user = User::create([
-                'username' => $username,
-                'email' => $githubUser->getEmail(),
-                'password' => bcrypt(Str::random(16)),
-                'estado' => 1,
-                'foto_url' => $githubUser->getAvatar(),
-                'uid' => (string) Str::uuid(),
+                'username'  => $username,
+                'nombre'    => $nombre,
+                'apellido'  => $apellido,
+                'email'     => $githubUser->getEmail(),
+                'password'  => bcrypt(Str::random(16)),
+                'estado'    => 1,
+                'foto_url'  => $githubUser->getAvatar(),
+                'uid'       => (string) Str::uuid(),
             ]);
         }
 

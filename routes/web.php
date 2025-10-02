@@ -46,45 +46,56 @@ Route::get('/auth/google/callback', function () {
             ->withErrors(['google_login' => 'Error al iniciar sesión con Google']);
     }
 
-    // Obtener nombre completo y eliminar espacios
-    $fullName = $googleUser->getName() ?? 'Usuario';
-    $baseUsername = str_replace(' ', '', $fullName); // "Santiago Torres" -> "SantiagoTorres"
+    // --- Procesar datos del usuario de Google ---
+    $fullName    = $googleUser->getName() ?? 'Usuario';
+    $givenName   = $googleUser->user['given_name'] ?? '';  // nombre
+    $familyName  = $googleUser->user['family_name'] ?? ''; // apellido
 
-    $foto = $googleUser->getAvatar() 
-        ? $googleUser->getAvatar() 
+    // Username base sin espacios
+    $baseUsername = preg_replace('/\s+/', '', $fullName);
+
+    // Foto de perfil
+    $foto = $googleUser->getAvatar()
+        ? $googleUser->getAvatar()
         : "https://ui-avatars.com/api/?name=" . urlencode($fullName) . "&background=random&color=fff";
 
-    // Buscar si el usuario ya existe por email
+    // --- Buscar usuario existente por correo ---
     $user = User::where('email', $googleUser->getEmail())->first();
 
     if ($user) {
-        // Usuario existe: SOLO actualizar datos de Google, NO el username
+        // Si ya existe, actualizar datos de Google (sin cambiar username)
         $user->update([
             'google_id' => $googleUser->getId(),
-            'foto_url' => $foto,
-            'estado' => 1,
+            'foto_url'  => $foto,
+            'estado'    => 1,
+            'nombre'    => $givenName ?: $user->nombre,
+            'apellido'  => $familyName ?: $user->apellido,
         ]);
     } else {
-        // Usuario nuevo: generar username único si es necesario
+        // Si es nuevo, crear username único
         $username = $baseUsername;
         $counter = 1;
-        
+
         while (User::where('username', $username)->exists()) {
             $username = $baseUsername . $counter;
             $counter++;
         }
 
         $user = User::create([
-            'username' => $username,
-            'email' => $googleUser->getEmail(),
+            'username'  => $username,
+            'nombre'    => $givenName,
+            'apellido'  => $familyName,
+            'email'     => $googleUser->getEmail(),
+            'telefono'  => null, // lo completas después si es obligatorio
             'google_id' => $googleUser->getId(),
-            'foto_url' => $foto,
-            'uid' => (string) Str::uuid(),
-            'estado' => 1,
-            'password' => bcrypt(Str::random(16)),
+            'foto_url'  => $foto,
+            'uid'       => (string) Str::uuid(),
+            'estado'    => 1,
+            'password'  => bcrypt(Str::random(16)), // contraseña aleatoria
         ]);
     }
 
+    // Iniciar sesión
     Auth::login($user);
 
     return redirect('/dashboard');
