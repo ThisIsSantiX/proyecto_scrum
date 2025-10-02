@@ -6,50 +6,51 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex align-items-center">
                     <div class="header-title">
                         <h4 class="card-title">Lista de Usuarios</h4>
                     </div>
 
-                    <div>
-                        <input type="text" class="form-control form-control-sm" name="buscarUsuario" id="buscarUsuario" 
+                    <div class="d-flex ms-auto align-items-center gap-2 flex-grow-1" style="max-width: 400px;">
+                        <input type="text" class="form-control form-control-sm flex-grow-1" 
+                            name="buscarUsuario" id="buscarUsuario" 
                             placeholder="Buscar usuario..." onkeyup="showUsuarios()">
-                    </div>
 
-                    <div>
-                        <a href="{{ route('usuarios.create') }}" class="btn btn-sm btn-primary">+ Agregar Usuario</a>
+                        <a href="{{ route('usuarios.create') }}" class="btn btn-sm btn-primary" style="white-space: nowrap;">
+                            + Agregar Usuario
+                        </a>
                     </div>
                 </div>
-            <div class="card-body px-0">
-                <div class="table-responsive">
-                    <table id="user-list-table" class="table table-striped" role="grid" data-bs-toggle="data-table">
-                        <thead>
-                            <tr class="ligth">
-                                <th>Foto</th>
-                                <th>Nombre</th>
-                                <th>apellido</th>
-                                <th>Email</th>
-                                <th>Rol</th>
-                                <th>Estado</th>
-                                <th style="min-width: 120px">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usuarios-tbody">
-                            <tr>
-                                <td colspan="6" class="text-center">
-                                    <div class="mb-0">Cargando usuarios...</div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="card-body px-0">
+                    <div class="table-responsive">
+                        <table id="user-list-table" class="table table-striped" role="grid" data-bs-toggle="data-table">
+                            <thead>
+                                <tr class="ligth">
+                                    <th>Foto</th>
+                                    <th>Nombre completo</th>
+                                    <th>Nombre de usuario</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Estado</th>
+                                    <th style="min-width: 120px">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usuarios-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        <div class="mb-0">Cargando usuarios...</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                    <nav class="ms-4 mt-2" aria-label="Page navigation example">
-                        <ul id="paginacionUsuarios" class="pagination pagination-sm">
-                            {{-- Paginación generada dinámicamente --}}
-                        </ul>
-                    </nav>
+                        <nav class="ms-4 mt-2" aria-label="Page navigation example">
+                            <ul id="paginacionUsuarios" class="pagination pagination-sm">
+                                {{-- Paginación generada dinámicamente --}}
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
     </div>
@@ -59,7 +60,18 @@
 
 
 @endsection
+    <style>
+        @media (max-width: 576px) {
+            .card-header .btn-sm {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
 
+            #buscarUsuario {
+                min-width: 80px; /* el input no se achique demasiado */
+            }
+        }
+    </style>
 @section('js')
     <script>
 
@@ -95,6 +107,8 @@
 
 
                             <!-- Nombre -->
+                            <td>${user.nombre} ${user.apellido}</td>
+
                             <td>${user.username}</td>
 
                             <!--- apellido -->

@@ -1,16 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Proyecto;
-use App\Models\proyecto_invitaciones;
 use Illuminate\Http\Request;
+use App\Models\ProyectoInvitaciones;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ProyectoReciente;
-use App\Models\miembros_equipo;
 
 class ProyectoController extends Controller
 {
@@ -29,34 +28,36 @@ class ProyectoController extends Controller
     {
         $userId = auth()->id();
 
-        $query = Proyecto::select(
+        $query = DB::table('proyectos')
+            ->select(
             'proyectos.*',
-            'users.username as usuario_username',
-            'users.email as usuario_email'
-        )
+            DB::raw("CONCAT(users.nombre, ' ', users.apellido) as usuario_nombre_completo"),
+            'users.email as usuario_email',
+            'users.foto_url as usuario_foto'
+            )
             ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
             ->leftJoin('miembros_equipos', 'proyectos.id', '=', 'miembros_equipos.id_proyecto')
             ->where('proyectos.estado', 1)
             ->where(function($q) use ($userId) {
-                $q->where('proyectos.id_owner', $userId)
-                ->orWhere('miembros_equipos.id_usuario', $userId);
+            $q->where('proyectos.id_owner', $userId)
+            ->orWhere('miembros_equipos.id_usuario', $userId);
             });
 
-        if ($request->has('search') && !empty($request->search)) {
+        if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('proyectos.nombre', 'LIKE', '%' . $request->search . '%')
-                    ->orWhere('users.username', 'LIKE', '%' . $request->search . '%');
+            $q->where('proyectos.nombre', 'LIKE', '%' . $request->search . '%')
+            ->orWhere(DB::raw("CONCAT(users.nombre, ' ', users.apellido)"), 'LIKE', '%' . $request->search . '%');
             });
         }
 
-
         $proyectos = $query->distinct()->get();
-        
+
         return response()->json([
             'success' => true,
             'data' => $proyectos
         ]);
     }
+
 
 
     // Función store
@@ -118,8 +119,9 @@ class ProyectoController extends Controller
                 })
                 ->select(
                     'proyectos.*',
-                    'users.username as usuario_username',
+                    DB::raw("CONCAT(users.nombre, ' ', users.apellido) as usuario_nombre_completo"),
                     'users.email as usuario_email',
+                    'users.foto_url as usuario_foto', // 👈 sin procesar
                     DB::raw('COUNT(DISTINCT product_backlog.id) as total_elementos'),
                     DB::raw('COUNT(DISTINCT sprints.id) as total_sprints')
                 )
@@ -137,8 +139,11 @@ class ProyectoController extends Controller
                     'proyectos.fecha_fin',
                     'proyectos.created_at',
                     'proyectos.updated_at',
+                    'users.nombre',
+                    'users.apellido',
                     'users.username',
-                    'users.email'
+                    'users.email',
+                    'users.foto_url'
                 )
                 ->first();
 
@@ -160,7 +165,6 @@ class ProyectoController extends Controller
             ], 500);
         }
     }
-
 
     // Función edit
     public function edit($uid)
@@ -315,7 +319,7 @@ class ProyectoController extends Controller
                 ], 400);
             }
 
-            $invitacionPendiente = proyecto_invitaciones::where('proyecto_id', $idProyecto)
+            $invitacionPendiente = ProyectoInvitaciones::where('proyecto_id', $idProyecto)
                 ->where('usuario_invitado', $usuarioInvitado->id)
                 ->where('estadoInvitacion', 'pendiente')
                 ->where(function ($q) {
@@ -330,7 +334,7 @@ class ProyectoController extends Controller
                 ], 400);
             }
 
-            $invitacion = proyecto_invitaciones::create([
+            $invitacion = ProyectoInvitaciones::create([
                 'proyecto_id' => $idProyecto,
                 'invitado_por' => $usuarioActual->id,
                 'usuario_invitado' => $usuarioInvitado->id,
@@ -345,7 +349,7 @@ class ProyectoController extends Controller
             return response()->json([
                 'message' => 'Invitacion enviada exitosamente',
                 'invitacion' => [
-                    'usuario' => $usuarioInvitado->username,
+                    'usuario' => $usuarioInvitado->nombre . ' ' . $usuarioInvitado->apellido,
                     'email' => $usuarioInvitado->email,
                     'proyecto' => $proyecto->nombre
                 ]
@@ -364,7 +368,7 @@ class ProyectoController extends Controller
         try {
             $user = Auth::user();
 
-            $invitaciones = proyecto_invitaciones::with(['proyecto', 'invitadoPor'])
+            $invitaciones = ProyectoInvitaciones::with(['proyecto', 'invitadoPor'])
                 ->where('usuario_invitado', $user->id)
                 ->pendientes()
                 ->orderBy('created_at', 'desc')
@@ -397,7 +401,7 @@ class ProyectoController extends Controller
         try {
             $user = Auth::user();
 
-            $invitacion = proyecto_invitaciones::where('uid', $uid)
+            $invitacion = ProyectoInvitaciones::where('uid', $uid)
                 ->where('usuario_invitado', $user->id)
                 ->where('estadoInvitacion', 'pendiente')
                 ->first();
@@ -469,6 +473,6 @@ class ProyectoController extends Controller
                 'message' => 'Error al obtener proyectos recientes: ' . $e->getMessage()
             ], 500);
         }  
-  }
+    }
 
 }

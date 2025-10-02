@@ -66,22 +66,50 @@
                             class="img-fluid rounded-circle"
                             style="width: 35px; height: 35px;">
                     </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li>
-                                <a class="dropdown-item" href="{{ route('user.profile', Auth::user()->username) }}">
+                        <ul class="dropdown-menu dropdown-menu-end p-3 shadow-lg rounded-4" 
+                            aria-labelledby="navbarDropdown" 
+                            style="min-width: 300px; max-width: 350px; transition: all 0.3s ease;">
+
+                            <!-- Título Cuenta -->
+                            <li class="ps-1">
+                                <span class="text-uppercase text-muted small">Cuenta</span>
+                            </li>
+
+                            <!-- Header del usuario -->
+                            <li class="px-3 py-3 d-flex align-items-center border-bottom">
+                                @php
+                                    $foto = Auth::user()->foto_url;
+                                    $esExterno = Str::startsWith($foto, ['http://', 'https://']);
+                                @endphp
+                                <img src="{{ $esExterno ? $foto : asset('storage/' . $foto) }}"
+                                    alt="User-Profile"
+                                    class="img-fluid rounded-circle me-3"
+                                    style="width: 50px; height: 50px;">
+                                <div class="d-flex flex-column">
+                                    <span class="fs-6">{{ Auth::user()->nombre}} {{ Auth::user()->apellido}}</span>
+                                    <small class="text-muted">{{ Auth::user()->email }}</small>
+                                </div>
+                            </li>
+
+                            <!-- Opciones -->
+                            <li class="mt-2">
+                                <a class="dropdown-item d-flex align-items-center py-2 px-3 rounded-2" 
+                                href="{{ route('user.profile', Auth::user()->username) }}">
                                     <i class="fas fa-user-circle me-2"></i> Perfil
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="../dashboard/app/user-privacy-setting.html">
-                                    <i class="fas fa-lock me-2"></i>Ajustes Provacidad
+                                <a class="dropdown-item d-flex align-items-center py-2 px-3 rounded-2" 
+                                href="../dashboard/app/user-privacy-setting.html">
+                                    <i class="fas fa-lock me-2"></i> Ajustes Privacidad
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item" href="#" 
+                                <a class="dropdown-item d-flex align-items-center py-2 px-3 rounded-2 text-danger" 
+                                href="#" 
                                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesion
+                                    <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
                                 </a>
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                     @csrf

@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\miembros_equipo;
+use App\Models\Miembros_Equipo;
 
-class proyecto extends Model
+class Proyecto extends Model
 {
     use HasFactory;
+
+    protected $table = 'proyectos';
 
     protected $fillable = [
         'nombre',

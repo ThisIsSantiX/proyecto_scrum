@@ -52,6 +52,13 @@
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="form-group">
+                                        <label for="full-name" class="form-label">Apellido</label>
+                                        <input type="text" class="form-control" id="last-name" placeholder="Yepes" required>
+                                        <div class="invalid-feedback">El apellido es obligatorio</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
                                         <label for="email" class="form-label">Correo</label>
                                         <input type="email" class="form-control" id="email" name="email" placeholder="example@gmail.com" required>
                                         <div class="invalid-feedback">Debes ingresar un correo válido</div>
@@ -105,7 +112,8 @@
                 $(".form-control").removeClass("is-invalid");
 
                 let data = {
-                    username: $("#full-name").val(),
+                    nombre: $("#full-name").val(),
+                    apellido: $("#last-name").val(),
                     email: $("#email").val(),
                     password: $("#password").val(),
                     password_confirmation: $("#confirm-password").val(),

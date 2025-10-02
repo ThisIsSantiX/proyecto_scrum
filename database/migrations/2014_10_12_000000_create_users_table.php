@@ -16,7 +16,8 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('username')->unique();
-            $table->string('apellido')->unique();
+            $table->string('nombre');
+            $table->string('apellido')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
@@ -31,8 +32,9 @@ return new class extends Migration
         });
 
         DB::table('users')->insert([
-            'username' => 'Santiago',
-            'apellido' => 'torres',
+            'username' => 'santiagotorres431',
+            'nombre' => 'Santiago',
+            'apellido' => 'Torres',
             'email' => 'santi@gmail.com',
             'password' => bcrypt('12345678'),
             'estado' => 1,

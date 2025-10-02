@@ -7,38 +7,36 @@ edit
         {{-- Columna izquierda: Foto y rol --}}
         <div class="col-xl-3 col-lg-4">
             <div class="card">
-                <div class="card-header d-flex justify-content-between">
+                <div class="card-header d-flex justify-content-between mb-3">
                     <div class="header-title">
                         <h4 class="card-title">Editar Usuario</h4>
                     </div>
                 </div>
-               <div class="form-group">
-                <div class="d-flex justify-content-center"> <!-- centramos solo la foto -->
-                    <div class="position-relative" style="display: inline-block;">
-                        <img id="preview"
-                            src="{{ $user->foto_url 
-                                    ? (Str::startsWith($user->foto_url, 'http') 
-                                        ? $user->foto_url 
-                                        : asset('storage/'.$user->foto_url)) 
-                                    : 'https://ui-avatars.com/api/?name=' . urlencode($user->username . ' ' . $user->apellido) . '&background=random&color=fff' }}"
-                            alt="Foto de perfil"
-                            class="rounded-circle img-fluid"
-                            style="width: 200px; height:200px; object-fit: cover;"
-                            onclick="verFoto(document.getElementById('preview').src, '{{ $user->uid }}')"
-                            onerror="this.onerror=null;this.src='/images/avatar/01.jpg';">
-
-
-                        <!-- Botón flotante -->
-                        <label for="foto_url"
-                            class="btn btn-primary d-flex align-items-center justify-content-center position-absolute shadow"
-                            style="bottom: 5px; right: 5px; 
-                                width: 45px; height: 45px; border-radius: 50%; cursor: pointer;">
-                            <i class="bi bi-pencil-square"></i>
-                        </label>
-                        <input id="foto_url" class="d-none" type="file" name="foto_url" accept="image/*">
+                <div class="form-group">
+                    <div class="d-flex justify-content-center"> <!-- centramos solo la foto -->
+                        <div class="position-relative" style="display: inline-block;">
+                            <img id="preview"
+                                src="{{ $user->foto_url 
+                                        ? (Str::startsWith($user->foto_url, 'http') 
+                                            ? $user->foto_url 
+                                            : asset('storage/'.$user->foto_url)) 
+                                        : 'https://ui-avatars.com/api/?name=' . urlencode($user->nombre . ' ' . $user->apellido) . '&background=random&color=fff' }}"
+                                alt="Foto de perfil"
+                                class="rounded-circle img-fluid"
+                                style="width: 200px; height:200px; object-fit: cover;"
+                                onclick="verFoto(document.getElementById('preview').src, '{{ $user->uid }}')"
+                                onerror="this.onerror=null;this.src='/images/avatar/01.jpg';">
+                            <!-- Botón flotante -->
+                            <label for="foto_url"
+                                class="btn btn-primary d-flex align-items-center justify-content-center position-absolute shadow"
+                                style="bottom: 5px; right: 5px; 
+                                    width: 45px; height: 45px; border-radius: 50%; cursor: pointer;">
+                                <i class="bi bi-pencil-square"></i>
+                            </label>
+                            <input id="foto_url" class="d-none" type="file" name="foto_url" accept="image/*">
+                        </div>
                     </div>
                 </div>
-            </div>
                 <div class="img-extension mt-2 text-center">    
                     <span>Formatos permitidos: <b>.jpg .png .jpeg</b></span>
                 </div>
@@ -81,6 +79,14 @@ edit
                             <div class="row">
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Nombre</label>
+                                    <input type="text" name="nombre" id="nombre" class="form-control" value="{{ $user->nombre }}" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="form-label">Apellido</label>
+                                    <input type="text" name="apellido" id="apellido" class="form-control" value="{{ $user->apellido }}" required>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label class="form-label">Nombre de usuario</label>
                                     <input type="text" name="username" id="username" class="form-control" value="{{ $user->username }}" required>
                                 </div>
                                 <div class="form-group col-md-6">
@@ -113,14 +119,14 @@ edit
 @endsection
 
 @section('css')
-@media (max-width: 576px) {
-    #id_rol {
-        font-size: 14px;
-        padding: 8px;
+<style>
+    @media (max-width: 576px) {
+        #id_rol {
+            font-size: 14px;
+            padding: 8px;
+        }
     }
-}
-
-
+</style>
 @endsection
 
 @section('js')

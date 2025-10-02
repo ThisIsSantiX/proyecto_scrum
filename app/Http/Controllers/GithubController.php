@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+
 
 class GithubController extends Controller
 {
@@ -21,22 +23,38 @@ class GithubController extends Controller
     {
         $githubUser = Socialite::driver('github')->user();
 
-        // Buscar o crear usuario en la BD
-        $user = User::firstOrCreate(
-            ['email' => $githubUser->getEmail()],
-            [
-                'username' => $githubUser->getNickname() ?? $githubUser->getId(),
-                'password' => bcrypt(str()->random(16)), // random porque no inicia con clave
+        // Buscar si el usuario ya existe por email
+        $user = User::where('email', $githubUser->getEmail())->first();
+
+        if ($user) {
+            // Usuario existe: SOLO actualizar datos de GitHub
+            $user->update([
+                'foto_url' => $githubUser->getAvatar(),
+                'estado' => 1,
+            ]);
+        } else {
+            // Usuario nuevo: generar username único
+            $baseUsername = $githubUser->getNickname() ?? 'user' . $githubUser->getId();
+            $username = $baseUsername;
+            $counter = 1;
+            
+            while (User::where('username', $username)->exists()) {
+                $username = $baseUsername . $counter;
+                $counter++;
+            }
+
+            $user = User::create([
+                'username' => $username,
+                'email' => $githubUser->getEmail(),
+                'password' => bcrypt(Str::random(16)),
                 'estado' => 1,
                 'foto_url' => $githubUser->getAvatar(),
-                'uid' => (string) \Illuminate\Support\Str::uuid(),
-            ]
-        );
+                'uid' => (string) Str::uuid(),
+            ]);
+        }
 
-        // Si existo
-        // Iniciar sesión en Laravel
         Auth::login($user);
 
-        return redirect('/dashboard'); // Redirige donde quieras
+        return redirect('/dashboard');
     }
 }

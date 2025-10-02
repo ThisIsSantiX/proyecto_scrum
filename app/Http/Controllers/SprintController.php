@@ -309,7 +309,8 @@ class SprintController extends Controller
                 'me.id_proyecto',
                 'me.id_usuario',
                 'me.estado',
-                DB::raw("CONCAT(u.username) as nombre_completo")
+                'u.foto_url',
+                DB::raw("CONCAT(u.nombre, ' ', u.apellido) as nombre_completo")
             )
             ->where('me.id_proyecto', $id)
             ->where('me.estado', 1)

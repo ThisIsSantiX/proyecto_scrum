@@ -5,20 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class product_backlog extends Model
+class Equipo extends Model
 {
     use HasFactory;
-    
-    protected $table = 'product_backlog';
 
     protected $fillable = [
-        'id_proyecto',
-        'creado_por',
-        'titulo',
+        'nombre',
         'descripcion',
-        'prioridad',
-        'valor_historia',
-        'progreso',
+        'id_proyecto',
         'estado',
         'uid',
     ];

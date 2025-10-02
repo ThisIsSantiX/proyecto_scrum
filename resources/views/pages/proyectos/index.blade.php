@@ -218,11 +218,13 @@
                                     <div class="card">
                                         <div class="card-body">
                                             <div class="d-flex align-items-center">
-                                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3" style="width: 48px; height: 48px;">
-                                                    <span id="userInitial">S</span>
+                                                <!-- Avatar -->
+                                                <div id="userAvatarContainer" class="me-3">
+                                                    <!-- aquí JS inserta la imagen o inicial -->
                                                 </div>
+
+                                                <!-- Info -->
                                                 <div>
-                                                    <!-- Updated to use dynamic user data from backend -->
                                                     <h6 class="fw-bold mb-1" id="userName">Santiago Torres</h6>
                                                     <p class="text-muted small mb-2" id="userEmail">santiago@example.com</p>
                                                     <span class="badge bg-primary">Propietario</span>
@@ -422,19 +424,6 @@
         margin-bottom: 1rem;
     }
 
-    .owner-avatar {
-        width: 35px;
-        height: 35px;
-        background: var(--bs-primary);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
     .project-meta {
         font-size: 0.85rem;
         color: var(--bs-secondary);
@@ -534,26 +523,32 @@
 
                         response.data.miembros.forEach(miembro => {
                             html += `
-                                <div class="card mb-2">
+                                <div class="card">
                                     <div class="card-body">
                                         <div class="d-flex align-items-center">
-                                            ${miembro.foto_url ? `
-                                        <img src="${miembro.foto_url ? miembro.foto_url + '?v=' + new Date().getTime() : ''}" 
-                                                class="rounded-circle me-3"
-                                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-
-                                        ` : `
-                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3"
-                                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                                                ${getInitials(miembro.username)}
+                                            <!-- Avatar -->
+                                            <div class="me-3" style="width: 40px; height: 40px;">
+                                                ${miembro.foto_url ? `
+                                                    <img src="${miembro.foto_url}" 
+                                                        alt="Avatar usuario"
+                                                        class="rounded-circle"
+                                                        style="width: 40px; height: 40px; object-fit: cover;"
+                                                        onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(miembro.nombre + ' ' + miembro.apellido)}&background=random&color=fff';">
+                                                ` : `
+                                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                                        style="width: 40px; height: 40px; font-size: 14px;">
+                                                        ${getInitials(miembro.nombre)}
+                                                    </div>
+                                                `}
                                             </div>
-                                        `}
-                                        <div>
-                                            <h6 class="fw-bold mb-1">${miembro.username}</h6>
-                                            <p class="text-muted small mb-2">${miembro.email}</p>
+
+                                            <!-- Info -->
+                                            <div>
+                                                <h6 class="fw-bold mb-1">${miembro.nombre} ${miembro.apellido}</h6>
+                                                <p class="text-muted small mb-2">${miembro.email}</p>
                                                 ${miembro.rol === 'propietario' ? `
-                                                <span class="badge bg-primary">Propietario</span>
-                                        ` : ''}
+                                                    <span class="badge bg-primary">Propietario</span>
+                                                ` : ''}
                                             </div>
                                         </div>
                                     </div>
@@ -647,11 +642,11 @@
 
             function createProjectCard(project, searchTerm = '') {
                 // Generar iniciales para el avatar
-                const initials = getInitials(project.usuario_username || 'Usuario');
+                const initials = getInitials(project.usuario_nombre || 'Usuario');
 
                 // Destacar términos de búsqueda
                 const highlightedTitle = highlightSearchTerm(project.nombre || 'Sin título', searchTerm);
-                const highlightedOwner = highlightSearchTerm(project.usuario_username || 'Usuario desconocido', searchTerm);
+                const highlightedOwner = highlightSearchTerm(project.usuario_nombre_completo || 'Usuario desconocido', searchTerm);
 
                 // Determinar el progreso/estado
                 const progress = project.progreso;
@@ -695,11 +690,24 @@
                                 <div class="owner-info d-flex mb-0 align-items-center">
                                     <!-- Avatar con iniciales (tooltip con nombre del propietario) -->
                                     <div class="owner-avatar rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
-                                        style="width: 40px; height: 40px; background-color: #0d6efd; color: white; font-weight: bold; margin-right: -10px; z-index: 1;"
+                                        style="width: 40px; height: 40px; margin-right: -10px; z-index: 1; overflow: hidden;"
                                         data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                        title="Propietario del proyecto: ${highlightedOwner}"> ${initials }
+                                        title="Propietario del proyecto: ${highlightedOwner}">
                                         
+                                        <img src="${
+                                            project.usuario_foto
+                                                ? (project.usuario_foto.startsWith('http')
+                                                    ? project.usuario_foto                       // URL externa
+                                                    : `/storage/${project.usuario_foto}`)       // foto local en storage
+                                                : `https://ui-avatars.com/api/?name=${encodeURIComponent(highlightedOwner)}&background=random&color=fff` // fallback
+                                        }" 
+                                            alt="Owner-Avatar" 
+                                            class="img-fluid" 
+                                            style="width: 100%; height: 100%; object-fit: cover;"
+                                            onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(highlightedOwner)}&background=random&color=fff';">
                                     </div>
+
+
 
                                     <!-- miembros -->
                                     <div class="d-flex align-items-center" id="membersContainer_${project.uid}"></div>
@@ -744,56 +752,56 @@
 }
 
 
-// 🔹 Función que genera avatar según si hay foto o no
-function renderAvatar(usuario) {
-    const initials = getInitials(usuario.username);
+        // 🔹 Función que genera avatar según si hay foto o no
+        function renderAvatar(usuario) {
+            const initials = getInitials(usuario.nombre);
 
-    if (usuario.foto_url) {
-        const img = document.createElement("img");
-        img.src = usuario.foto_url;
-        img.className = "avatar-img";
-        img.title = `${usuario.username} (${usuario.rol})`;
+            if (usuario.foto_url) {
+                const img = document.createElement("img");
+                img.src = usuario.foto_url;
+                img.className = "avatar-img";
+                img.title = `${usuario.nombre} (${usuario.rol})`;
 
-        img.onerror = function () {
-            this.replaceWith(getFallbackAvatarElement(initials, usuario.username, usuario.rol));
+                img.onerror = function () {
+                    this.replaceWith(getFallbackAvatarElement(initials, usuario.nombre, usuario.rol));
+                };
+
+                return img.outerHTML;
+            } else {
+                return getFallbackAvatar(initials, usuario.nombre, usuario.rol);
+            }
+        }
+
+
+
+        function getFallbackAvatar(initials, nombre, rol) {
+            return `
+                <div class="avatar-fallback"
+                    title="${nombre} (${rol})">
+                    ${initials}
+                </div>
+            `;
+        }
+
+        window.getFallbackAvatarElement = function(initials, nombre, rol) {
+            const div = document.createElement('div');
+            div.className = 'avatar-fallback';
+            div.title = `${nombre} (${rol})`;
+            div.textContent = initials;
+            return div;
         };
 
-        return img.outerHTML;
-    } else {
-        return getFallbackAvatar(initials, usuario.username, usuario.rol);
-    }
-}
 
 
 
-function getFallbackAvatar(initials, username, rol) {
-    return `
-        <div class="avatar-fallback"
-            title="${username} (${rol})">
-            ${initials}
-        </div>
-    `;
-}
-
-window.getFallbackAvatarElement = function(initials, username, rol) {
-    const div = document.createElement('div');
-    div.className = 'avatar-fallback';
-    div.title = `${username} (${rol})`;
-    div.textContent = initials;
-    return div;
-};
-
-
-
-
-// Esta función devuelve un nodo real para el replaceWith
-function getFallbackAvatarElement(initials, username, rol) {
-    const div = document.createElement('div');
-    div.className = 'avatar-fallback';
-    div.title = `${username} (${rol})`;
-    div.textContent = initials;
-    return div;
-}
+        // Esta función devuelve un nodo real para el replaceWith
+        function getFallbackAvatarElement(initials, nombre, rol) {
+            const div = document.createElement('div');
+            div.className = 'avatar-fallback';
+            div.title = `${nombre} (${rol})`;
+            div.textContent = initials;
+            return div;
+        }
 
             //------------
 
@@ -1084,12 +1092,42 @@ function getFallbackAvatarElement(initials, username, rol) {
                     let p = response.data.data;
 
                     $("#projectTitleDisplay").text(p.nombre || "Sin nombre");
-                    $("#ownerNameDisplay").text(p.usuario_username || "Desconocido");
+                    $("#ownerNameDisplay").text(p.usuario_nombre_completo || "Desconocido");
                     $("#createdDateDisplay").text(formatDate(p.created_at) || "N/A");
 
-                    $("#userName").text(p.usuario_username || "Desconocido");
+                    $("#userName").text(p.usuario_nombre_completo || "Desconocido");
                     $("#userEmail").text(p.usuario_email || "Sin email");
-                    $("#userInitial").text((p.usuario_username || "U").charAt(0).toUpperCase());
+
+                    let avatarHtml = "";
+
+                    if (p.usuario_foto) {
+                        // Si es URL completa (http), la uso tal cual
+                        let fotoUrl = p.usuario_foto.startsWith('http')
+                            ? p.usuario_foto
+                            : `/storage/${p.usuario_foto}`;
+
+                        avatarHtml = `
+                            <img src="${fotoUrl}" 
+                                alt="Foto usuario"
+                                class="rounded-circle"
+                                style="width: 48px; height: 48px; object-fit: cover;"
+                                onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.usuario_nombre_completo || 'U')}&background=random&color=fff';">
+                        `;
+                    } else {
+                        // Si no hay foto en BD → inicial
+                        let initial = (p.usuario_nombre_completo || "U").charAt(0).toUpperCase();
+                        avatarHtml = `
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3"
+                                style="width: 48px; height: 48px;">
+                                <span>${initial}</span>
+                            </div>
+                        `;
+                    }
+
+                    // Insertar en el contenedor
+                    $("#userAvatarContainer").html(avatarHtml);
+
+
 
                     $("#progressValue").text(getProgressText(p.progreso));
                     $("#visibilityValue").text(getVisibilityText(p.visibilidad));

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\roles;
+use App\Models\Roles;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -36,8 +36,9 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'nombre'    => 'required|string|max:50',
+            'apellido'    => 'required|string|max:50',
             'username'    => 'required|string|max:50',
-            'apellido'  => 'required|string|max:50',
             'email'     => 'required|email|unique:users,email',
             'password'  => 'required|min:6|confirmed',
             'estado'    => 'required|in:1,0',
@@ -54,13 +55,14 @@ class UserController extends Controller
                     $fotoPath = $filename;
                     $fotoPath = $request->file('foto_url')->store('usuarios', 'public');
                 } else {
-                    $fotoPath = "https://ui-avatars.com/api/?name=" . urlencode("{$request->username} {$request->apellido}") . "&background=random&color=fff";
+                    $fotoPath = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
                 }
 
 
                 User::create([
-                    'username'  => $request->username,
-                    'apellido'  => $request -> apellido,
+                    'nombre'      => $request->nombre,
+                    'apellido'    => $request->apellido,
+                    'username'    => Str::slug($request->nombre . '.' . $request->apellido) . rand(100, 999),
                     'email'     => $request->email,
                     'password'  => Hash::make($request->password),
                     'estado'    => $request->estado,
@@ -119,8 +121,9 @@ class UserController extends Controller
         $user = User::where('uid', $uid)->firstOrFail();
 
         $request->validate([
-            'username'  => 'required|string|max:50',
-            'apellido'  => 'required|string|max:50',
+            'nombre'    => 'required|string|max:50',
+            'apellido'    => 'required|string|max:50',
+            'username'    => 'required|string|max:50',
             'email'     => 'required|email|unique:users,email,' . $user->id,
             'password'  => 'nullable|min:6|confirmed',
             'estado'    => 'required|in:1,0',
@@ -129,7 +132,7 @@ class UserController extends Controller
 
         ]);
 
-        $data = $request->only(['username','apellido','email', 'estado']);
+        $data = $request->only(['nombre', 'apellido', 'username', 'email', 'estado']);
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
@@ -157,7 +160,7 @@ class UserController extends Controller
     
     public function destroy($uid)
     {
-        $usuario = user::where('uid', $uid)->first();
+        $usuario = User::where('uid', $uid)->first();
 
         if (!$usuario) {
             return response()->json(['success' => false, 'error' => 'Usuario no encontrada.']);
@@ -171,7 +174,7 @@ class UserController extends Controller
 
     public function showRoles()
     {
-        $roles = roles::where('estado', 1)->get(); 
+        $roles = Roles::where('estado', 1)->get(); 
         return response()->json($roles);
     }
 
@@ -201,18 +204,20 @@ class UserController extends Controller
     $user = User::findOrFail(auth()->id());
 
     $request->validate([
+        'nombre'    => 'required|string|max:50',
+        'apellido'    => 'required|string|max:50',
         'username'    => 'required|string|max:50',
         'apellido'  => 'required|string|max:50',
         'email'     => 'required|email|max:255|unique:users,email,' . $user->id,
         'foto_url'  => 'nullable|file|image|max:2048',
     ]);
 
-    $data = $request->only(['username', 'apellido', 'email']);
+    $data = $request->only(['nombre', 'apellido','username', 'apellido', 'email']);
 
     if ($request->hasFile('foto_url')) {
         $data['foto_url'] = $request->file('foto_url')->store('usuarios', 'public');
     } elseif (!$user->foto_url) {
-        $data['foto_url'] = "https://ui-avatars.com/api/?name=" . urlencode("{$request->username} {$request->apellido}") . "&background=random&color=fff";
+        $data['foto_url'] = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
     }
 
     $user->update($data);
