@@ -19,7 +19,7 @@
 
     @keyframes pulse {
         0% {
-            transform: scale(1);
+            transform: scale(2);
         }
 
         50% {

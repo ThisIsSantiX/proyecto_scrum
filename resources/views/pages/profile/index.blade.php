@@ -39,7 +39,7 @@
                             <div id="displayMode">
                                 <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                                     <div>
-                                        <h2 class="profile-username mb-2" id="displayUsername">{{ $user->username }}</h2>
+                                        <h2 class="profile-username mb-2" id="displayUsername">{{ $user->username }} {{ $user->apellido }}</h2>
                                         <div class="profile-meta">
                                             <div class="meta-item">
                                                 <i class="bi bi-envelope"></i>
@@ -88,6 +88,20 @@
                                                    name="username" 
                                                    value="{{ old('username', $user->username) }}"
                                                    placeholder="Ingresa tu nombre de usuario"
+                                                   required>
+                                        </div>
+
+                                         <div class="col-12">
+                                            <label for="apellido" class="form-label fw-semibold">
+                                                <i class="bi bi-person-badge me-1"></i>
+                                                Apellido de usuario
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   id="apellido" 
+                                                   name="apellido" 
+                                                   value="{{ old('apellido', $user->apellido) }}"
+                                                   placeholder="Ingresa tu apellido de usuario"
                                                    required>
                                         </div>
 
@@ -324,75 +338,23 @@ function handlePhotoChange(event) {
 function verFoto(url, uid) {
     const isOwner = {{ auth()->check() && auth()->user()->uid === $user->uid ? 'true' : 'false' }};
     
-    const deleteButton = isOwner ? `
-        <button onclick="deleteFotoPerfil('${uid}')" 
-                class="btn btn-danger position-absolute"
-                style="top: 20px; right: 20px; z-index: 10; border-radius: 50%; width: 48px; height: 48px; padding: 0;"
-                title="Eliminar foto">
-            <i class="bi bi-trash"></i>
-        </button>
-    ` : '';
-    
-    Swal.fire({
+   Swal.fire({
         html: `
-            <div style="position: relative; max-width: 600px; margin: auto;">
+            <div style="width:400px;height:400px;margin:auto;display:flex;align-items:center;justify-content:center;position:relative;">
                 <img src="${url}" 
                      alt="Foto de perfil" 
-                     style="width: 100%; height: auto; border-radius: 12px;">
-                ${deleteButton}
+                     style="width:100%;height:100%;object-fit:cover;border-radius:50%;"> 
+                
             </div>
         `,
         showCloseButton: true,
         showConfirmButton: false,
-        background: '#ffffff',
+        background: '#000000cc',
         width: 'auto',
-        padding: '2rem',
-        customClass: {
-            popup: 'rounded-3'
-        }
+        padding: 0
     });
+
 }
 
-function deleteFotoPerfil(uid) {
-    Swal.fire({
-        title: '¿Eliminar foto de perfil?',
-        text: "Esta acción no se puede deshacer.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            axios.delete(`/usuarios/${uid}/foto`, {
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            })
-            .then(response => {
-                if (response.data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Eliminada!',
-                        text: 'La foto de perfil ha sido eliminada correctamente.'
-                    }).then(() => location.reload());
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'No se pudo eliminar la foto.'
-                    });
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error del servidor',
-                    text: 'Ocurrió un error al procesar la solicitud.'
-                });
-            });
-        }
-    });
-}
 </script>
 @endsection

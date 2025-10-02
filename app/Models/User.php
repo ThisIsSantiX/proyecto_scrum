@@ -21,6 +21,7 @@ class User extends Authenticatable
         'nombre',
         'apellido',
         'username',
+        'apellido',
         'email',
         'password',
         'estado',
@@ -54,9 +55,9 @@ class User extends Authenticatable
             return $value;
         }
 
-        $nombre = $this->nombre ?? 'Usuario';
+        $username = $this->username ?? 'Usuario';
         $apellido = $this->apellido ?? '';
-        $fullName = trim("{$nombre} {$apellido}");
+        $fullName = trim("{$username} {$apellido}");
 
         return "https://ui-avatars.com/api/?name=" . urlencode($fullName) . "&background=random&color=fff";
     }

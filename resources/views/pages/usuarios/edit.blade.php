@@ -1,3 +1,4 @@
+edit
 @extends('layouts.layout.layout')
 
 @section('content')
@@ -25,8 +26,6 @@
                                 style="width: 200px; height:200px; object-fit: cover;"
                                 onclick="verFoto(document.getElementById('preview').src, '{{ $user->uid }}')"
                                 onerror="this.onerror=null;this.src='/images/avatar/01.jpg';">
-
-
                             <!-- Botón flotante -->
                             <label for="foto_url"
                                 class="btn btn-primary d-flex align-items-center justify-content-center position-absolute shadow"
@@ -91,6 +90,10 @@
                                     <input type="text" name="username" id="username" class="form-control" value="{{ $user->username }}" required>
                                 </div>
                                 <div class="form-group col-md-6">
+                                    <label class="form-label">Apellido</label>
+                                    <input type="text" name="apellido" id="apellido" class="form-control" value="{{ $user->apellido }}" required>
+                                </div>
+                                <div class="form-group col-md-6">
                                     <label class="form-label">Email</label>
                                     <input type="email" name="email" id="email" class="form-control" value="{{ $user->email }}" required>
                                 </div>
@@ -144,7 +147,7 @@
 
             formData.set('estado', $('#estado').val());
             formData.set('id_rol', $('#id_rol').val());
-            formData.set('nombre', $('#nombre').val());
+            formData.set('username', $('#username').val());
             formData.set('apellido', $('#apellido').val());
             formData.set('email', $('#email').val());
 
@@ -224,61 +227,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // este diseño es para que la imagen ocupe todo el espacio del modal 
 // el border hace que la imagen sea circular
-function verFoto(url, uid ) {
-    const esAvatar = url.includes('/images/avatar/'); // avatar por defecto
+function verFoto(url, uid) {
+    const esAvatarPorDefecto = url.includes('ui-avatars.com') || url.includes('/images/avatar/01.jpg');
+    let deleteBtn = '';
+
+    if (!esAvatarPorDefecto && uid !== 'nuevo') {
+        deleteBtn = `
+            <button onclick="deleteFotoPerfil('${uid}')" 
+                    style="
+                        position:absolute;
+                        top:18px;
+                        left:18px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        width:40px;
+                        height:40px;
+                        background: linear-gradient(135deg, #ff4b5c, #c9184a);
+                        border:none;
+                        border-radius:50%;
+                        color:white;
+                        cursor:pointer;
+                        box-shadow:0 4px 12px rgba(0,0,0,0.25);
+                        transition: all 0.25s ease;
+                    "
+                    onmouseover="this.style.transform='scale(1.1)'; this.style.background='linear-gradient(135deg,#ff6b75,#e63956)';"
+                    onmouseout="this.style.transform='scale(1)'; this.style.background='linear-gradient(135deg,#ff4b5c,#c9184a)';"
+                    title="Eliminar foto">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" 
+                     viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5.5a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                    <path fill-rule="evenodd" 
+                          d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1 0-2h3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1h3a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118z"/>
+                </svg>
+            </button>
+        `;
+    }
+
     Swal.fire({
         html: `
-            <div style="
-                width: 80vw;                /* ocupa el 80% del ancho de la pantalla */
-                max-width: 350px;           /* límite en pantallas grandes */
-                aspect-ratio: 1 / 1;        /* cuadrado perfecto */
-                margin: auto;
-                position: relative;
-                border-radius: 50%;
-                overflow: hidden;           /* recorta sobrante */
-                box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            ">
+            <div style="width:400px;height:400px;margin:auto;display:flex;align-items:center;justify-content:center;position:relative;">
                 <img src="${url}" 
                      alt="Foto de perfil" 
-                     style="
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;   /* ajusta sin deformar */
-                    "> 
-            </div>
-
-            <!-- Botón de eliminar -->
-                 <button onclick="deleteFotoPerfil('${uid}')" 
-                        style="
-                            position:absolute;
-                            top:18px;
-                            left:18px;
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            width:40px;
-                            height:40px;
-                            background: linear-gradient(135deg, #ff4b5c, #c9184a);
-                            border:none;
-                            border-radius:50%;
-                            color:white;
-                            cursor:pointer;
-                            box-shadow:0 4px 12px rgba(0,0,0,0.25);
-                            transition: all 0.25s ease;
-                        "
-                        onmouseover="this.style.transform='scale(1.1)'; this.style.background='linear-gradient(135deg,#ff6b75,#e63956)';"
-                        onmouseout="this.style.transform='scale(1)'; this.style.background='linear-gradient(135deg,#ff4b5c,#c9184a)';"
-                        title="Eliminar foto">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" 
-                         viewBox="0 0 16 16">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5.5a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                        <path fill-rule="evenodd" 
-                              d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1 0-2h3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1h3a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118z"/>
-                    </svg>
-                </button>
+                     style="width:100%;height:100%;object-fit:cover;border-radius:50%;"> 
+                ${deleteBtn}
             </div>
         `,
         showCloseButton: true,
@@ -288,6 +280,31 @@ function verFoto(url, uid ) {
         padding: 0
     });
 }
+
+function activarPreview(inputId, previewId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+
+    if (input && preview) {
+        input.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    preview.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+}
+
+// Llamar a la función en DOMContentLoaded
+document.addEventListener("DOMContentLoaded", () => {
+    activarPreview("foto_url", "previewForm");
+});
+
+
 function deleteFotoPerfil(uid) {
     Swal.fire({
         title: '¿Eliminar foto de perfil?',
@@ -305,8 +322,17 @@ function deleteFotoPerfil(uid) {
             })
             .then(response => {
                 if (response.data.success) {
-                    Swal.fire('Eliminada!', 'La foto de perfil ha sido eliminada.', 'success')
-                          .then(() => location.reload()); 
+                    Swal.fire('Eliminada!', 'La foto de perfil ha sido eliminada.', 'success');
+
+                    // Avatar por defecto (puedes cambiar por ui-avatars si quieres)
+                   const defaultAvatar = "https://ui-avatars.com/api/?name={{ urlencode($user->username . ' ' . $user->apellido) }}&background=random&color=fff";
+                    // Cambiar header
+                    const previewHeader = document.getElementById('preview');
+                    if (previewHeader) previewHeader.src = defaultAvatar;
+
+                    // Cambiar formulario
+                    const previewForm = document.getElementById('previewForm');
+                    if (previewForm) previewForm.src = defaultAvatar;
                 } else {
                     Swal.fire('Error', 'No se pudo eliminar la foto.', 'error');
                 }

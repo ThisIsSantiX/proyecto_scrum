@@ -250,3 +250,10 @@ Route::post('/proyectos/backlog/{uid}/reuniones/store', [DailyScrumController::c
 Route::put('/proyectos/backlog/{uid}/reuniones/update', [DailyScrumController::class, 'update'])->name('updateDailyScrum');
 Route::post('/proyectos/backlog/{uid}/reuniones/destroy', [DailyScrumController::class, 'destroy'])->name('destroyDailyScrum');
 //_____________________________________
+
+
+//RUTAS PARA PODER ASIGNAR USUARIOS DESDE EL TABLERO
+Route::get('/proyectos/{proyectoUID}/miembros',[SprintController::class, 'miembrosProyecto']);
+Route::post('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}/asignar-miembros', [SprintController::class, 'asignarMiembrosASprintItem'])->name('sprint.item.asignarMiembros');
+Route::get('/proyectos/{proyectoUID}/sprints/{sprintUID}/items/{itemUID}/miembros', [SprintController::class, 'getMiembrosAsignados']);
+//______________________________
