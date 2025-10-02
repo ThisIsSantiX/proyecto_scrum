@@ -493,14 +493,14 @@ class SprintController extends Controller
                 ->where('uid', $sprintUID)
                 ->where('id_proyecto', $proyecto->id)
                 ->first();
-                
+
             if (!$sprint) {
                 return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
             }
 
             // Obtener item desde product_backlog usando su UID
             $item = DB::table('product_backlog as pb')
-                ->leftJoin('sprint_backlog as sb', function($join) use ($sprint) {
+                ->leftJoin('sprint_backlog as sb', function ($join) use ($sprint) {
                     $join->on('pb.id', '=', 'sb.id_item_backlog')
                         ->where('sb.id_sprint', '=', $sprint->id);
                 })
@@ -525,7 +525,6 @@ class SprintController extends Controller
                 'success' => true,
                 'item' => $item
             ]);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -560,7 +559,7 @@ class SprintController extends Controller
                 ->where('uid', $sprintUID)
                 ->where('id_proyecto', $proyecto->id)
                 ->first();
-                
+
             if (!$sprint) {
                 return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
             }
@@ -599,7 +598,6 @@ class SprintController extends Controller
                 'success' => true,
                 'message' => 'Historia actualizada correctamente.'
             ]);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -645,7 +643,6 @@ class SprintController extends Controller
                 'success' => false,
                 'message' => 'Item no encontrado.'
             ], 404);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -672,7 +669,7 @@ class SprintController extends Controller
                 ->where('uid', $sprintUID)
                 ->where('id_proyecto', $proyecto->id)
                 ->first();
-                
+
             if (!$sprint) {
                 return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
             }
@@ -704,7 +701,6 @@ class SprintController extends Controller
                 'success' => false,
                 'message' => 'El item no está en este sprint.'
             ], 404);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -770,7 +766,6 @@ class SprintController extends Controller
                 'success' => false,
                 'message' => 'El item no está en este sprint.'
             ], 404);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -805,7 +800,7 @@ class SprintController extends Controller
                 ->where('uid', $sprintUID)
                 ->where('id_proyecto', $proyecto->id)
                 ->first();
-                
+
             if (!$sprint) {
                 return response()->json(['success' => false, 'message' => 'Sprint no encontrado.'], 404);
             }
@@ -823,7 +818,7 @@ class SprintController extends Controller
                 'prioridad' => $request->prioridad,
                 'valor_historia' => $request->valor_historia,
                 'progreso' => 'Por hacer', // Progreso por defecto en product_backlog
-                'estado' => 0, 
+                'estado' => 0,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
@@ -840,7 +835,7 @@ class SprintController extends Controller
 
             // Obtener el item creado con toda su información
             $item = DB::table('product_backlog as pb')
-                ->leftJoin('sprint_backlog as sb', function($join) use ($sprint) {
+                ->leftJoin('sprint_backlog as sb', function ($join) use ($sprint) {
                     $join->on('pb.id', '=', 'sb.id_item_backlog')
                         ->where('sb.id_sprint', '=', $sprint->id);
                 })
@@ -862,7 +857,6 @@ class SprintController extends Controller
                 'message' => 'Historia creada correctamente.',
                 'item' => $item
             ], 201);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -916,6 +910,161 @@ class SprintController extends Controller
         }
     }
 
-    
+    public function miembrosProyecto($proyectoUID)
+    {
+        $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+        if (!$proyecto) {
+            return response()->json(['success' => false, 'message' => 'Proyecto no encontrado.'], 404);
+        }
 
+        $miembros = DB::table('miembros_equipos as me')
+            ->join('users as u', 'u.id', '=', 'me.id_usuario')
+            ->where('me.id_proyecto', $proyecto->id)
+            ->where('me.estado', 1)
+            ->select(
+                'me.id as me_id',
+                'u.id',
+                'u.uid',
+                'u.username',
+                'u.email',
+                'u.foto_url'
+            )
+            ->get();
+
+        // // Agregar el usuario autenticado si no está en la lista
+        // $usuarioActual = Auth::user();
+        // if ($usuarioActual && !$miembros->contains('id', $usuarioActual->id)) {
+        //     $miembros->push([
+        //         'id'        => $usuarioActual->id,
+        //         'uid'       => $usuarioActual->uid,
+        //         'username'  => $usuarioActual->username,
+        //         'nombre'    => $usuarioActual->nombre,
+        //         'apellido'  => $usuarioActual->apellido,
+        //         'email'     => $usuarioActual->email,
+        //         'foto_url'  => $usuarioActual->foto_url,
+        //     ]);
+        // }
+
+        return response()->json([
+            'success' => true,
+            'miembros' => $miembros
+        ]);
+    }
+
+    public function asignarMiembrosASprintItem(Request $request, $proyectoUID, $sprintUID, $itemUID)
+    {
+
+        $request->validate([
+            'miembros' => 'array',
+            'miembros.*' => 'integer|exists:miembros_equipos,id'
+        ]);
+
+        //buscar el proyecto
+        $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+        if (!$proyecto) {
+            return response()->json([
+                "success" => false,
+                "message" => "Proyecto no encontrado"
+            ], 404);
+        }
+
+        //buscar el sprint 
+        $sprint = DB::table('sprints')
+            ->where('uid', $sprintUID)
+            ->where('id_proyecto', $proyecto->id)
+            ->first();
+        if (!$sprint) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sprint no encontrado'
+            ], 404);
+        }
+
+        //buscar el item del sprint backlog
+        $sprintItem = DB::table('sprint_backlog as sb')
+            ->join('product_backlog as pb', 'sb.id_item_backlog', '=', 'pb.id')
+            ->where('sb.id_sprint', $sprint->id)
+            ->where('pb.uid', $itemUID)
+            ->select('sb.id')
+            ->first();
+        if (!$sprintItem) {
+            return response()->json([
+                "success" => false,
+                "message" => "Item no encontrado en el sprint backlog."
+            ], 404);
+        }
+
+        // Eliminar asignaciones anteriores
+        DB::table('sprint_backlog_miembros')
+            ->where('id_sprint_backlog', $sprintItem->id)
+            ->delete();
+
+        // Asignar los nuevos miembros
+        if (!empty($request->miembros)) {
+            foreach ($request->miembros as $miembroId) {
+                DB::table('sprint_backlog_miembros')->insert([
+                    'id_sprint_backlog' => $sprintItem->id,
+                    'id_miembro_equipo' => $miembroId,
+                    'uid'               => Str::uuid(),
+                    'estado'            => 1,
+                    'created_at'        => now(),
+                    'updated_at'        => now(),
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Miembros asignados correctamente al ítem.'
+        ]);
+    }
+
+    public function getMiembrosAsignados($proyectoUID, $sprintUID, $itemUID)
+    {
+        //buscar el proyecto
+        $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+        if (!$proyecto) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Proyecto no encontrado'
+            ], 404);
+        }
+
+        //buscar el sprint 
+        $sprint = DB::table('sprints')
+            ->where('uid', $sprintUID)
+            ->where('id_proyecto', $proyecto->id)
+            ->first();
+        if (!$sprint) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sprint no encontrado'
+            ], 404);
+        }
+
+        //buscar el item del sprint backlog
+        $sprintItem = DB::table('sprint_backlog as sb')
+            ->join('product_backlog as pb', 'sb.id_item_backlog', '=', 'pb.id')
+            ->where('sb.id_sprint', $sprint->id)
+            ->where('pb.uid', $itemUID)
+            ->select('sb.id')
+            ->first();
+        if (!$sprintItem) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Historia no encontrada'
+            ]);
+        }
+
+        //obtener miembros asignados
+        $miembros = DB::table('sprint_backlog_miembros')
+            ->where('id_sprint_backlog', $sprintItem->id)
+            ->select('id_miembro_equipo')
+            ->get();
+
+        return response()->json([
+            'success' => false,
+            'miembros' => $miembros
+        ]);
+    }
 }

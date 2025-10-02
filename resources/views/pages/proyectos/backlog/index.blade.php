@@ -296,7 +296,7 @@
                     <form id="formHistoriaEditTablero">
                         <!-- UID del proyecto -->
                         <input type="hidden" id="edit_proyecto_uid_tablero" value="{{ $proyecto->uid }}">
-                        
+
                         <!-- UID de la historia -->
                         <input type="hidden" id="edit_historia_uid_tablero" value="">
 
@@ -602,6 +602,54 @@
         </div>
     </div>
     <!--Fin del modal para agregar un product al sprint -->
+
+    <!-- Modal para asignar miembros a un ítem del Sprint Backlog -->
+    <div class="modal fade" id="modalAsignarMiembros" tabindex="-1" aria-labelledby="modalAsignarMiembrosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Encabezado -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAsignarMiembrosLabel">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Asignar miembros al ítem
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <!-- Cuerpo -->
+                <div class="modal-body">
+                    <form id="formAsignarMiembros">
+                        <input type="hidden" id="asignar_proyecto_uid">
+                        <input type="hidden" id="asignar_sprint_uid">
+                        <input type="hidden" id="asignar_item_uid">
+
+                        <div class="mb-3">
+                            <label class="form-label">Miembros del equipo</label>
+                            <div class="custom-dropdown border rounded-2">
+                                <div class="workspace-header">
+                                    <i class="fas fa-users me-2"></i>
+                                    Participantes del proyecto
+                                </div>
+                                <div class="dropdown-content modal-body">
+                                    <input type="text" class="search-box form-control" placeholder="Buscar usuario..." id="searchMiembros">
+                                    <div id="miembrosList">
+                                        <!-- Los usuarios se cargarán aquí -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btnAsignarMiembros" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Asignar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Iniciar Sprint -->
     <div class="modal fade" id="modalIniciarSprint" tabindex="-1" aria-labelledby="modalIniciarSprintLabel" aria-hidden="true">
@@ -978,6 +1026,7 @@
         outline: none;
         box-shadow: none;
     }
+
     .kanban-item .dropdown-menu.show {
         z-index: 1050 !important;
     }
@@ -986,7 +1035,6 @@
         z-index: 100;
         position: relative;
     }
-
 </style>
 @endsection
 
@@ -996,17 +1044,27 @@
         // Inicializar Notyf
         const notyf = new Notyf({
             duration: 4000,
-            position: { x: 'right', y: 'top' },
-            types: [
-                {
+            position: {
+                x: 'right',
+                y: 'top'
+            },
+            types: [{
                     type: 'warning',
                     background: 'orange',
-                    icon: { className: 'material-icons', tagName: 'i', text: 'warning' }
+                    icon: {
+                        className: 'material-icons',
+                        tagName: 'i',
+                        text: 'warning'
+                    }
                 },
                 {
                     type: 'info',
                     background: 'blue',
-                    icon: { className: 'material-icons', tagName: 'i', text: 'info' }
+                    icon: {
+                        className: 'material-icons',
+                        tagName: 'i',
+                        text: 'info'
+                    }
                 }
             ]
         });
@@ -1018,7 +1076,7 @@
             const formText = $(this).siblings('.form-text');
             formText.text(`${currentLength}/${maxLength} caracteres`);
             formText.toggleClass('text-danger', currentLength >= maxLength)
-                    .toggleClass('text-muted', currentLength < maxLength);
+                .toggleClass('text-muted', currentLength < maxLength);
         });
 
         // Función para cargar historias
@@ -1353,7 +1411,9 @@
             const historiaUid = $('#criterio_historia_uid').val();
             const descripcion = $('#criterio_descripcion').val().trim();
             if (!descripcion) return notyf.error('La descripción no puede estar vacía');
-            axios.post(`/criterios/${historiaUid}/store`, { descripcion })
+            axios.post(`/criterios/${historiaUid}/store`, {
+                    descripcion
+                })
                 .then(function(response) {
                     if (response.data.success) {
                         notyf.success('Criterio agregado con éxito');
@@ -1363,7 +1423,9 @@
                         notyf.error(response.data.message || 'Error al guardar el criterio');
                     }
                 })
-                .catch(function() { notyf.error('Error interno del servidor'); });
+                .catch(function() {
+                    notyf.error('Error interno del servidor');
+                });
         });
 
         // Editar criterio
@@ -1384,7 +1446,10 @@
                 url: `/criterios/${uid}/update`,
                 type: 'PUT',
                 dataType: 'json',
-                data: { descripcion, _token: "{{ csrf_token() }}" },
+                data: {
+                    descripcion,
+                    _token: "{{ csrf_token() }}"
+                },
                 success: function(response) {
                     if (response.success) {
                         notyf.success(response.message || 'Se edito correctamente');
@@ -1483,24 +1548,49 @@
 
         // Botón de refrescar historias (opcional)
         $(document).on('click', '.btn-refresh-historias', function() {
-            notyf.open({ type: 'info', message: 'Actualizando historias...' });
+            notyf.open({
+                type: 'info',
+                message: 'Actualizando historias...'
+            });
             cargarHistorias();
         });
     });
 
     // --- SPRINTS & CALENDARIO OPTIMIZADO ---
-    const notyf = new Notyf({ duration: 3000, position: { x: 'right', y: 'top' } });
-    let sprints = [], calendar;
+    const notyf = new Notyf({
+        duration: 3000,
+        position: {
+            x: 'right',
+            y: 'top'
+        }
+    });
+    let sprints = [],
+        calendar;
 
     // Utilidades
     const getStatusBadge = estado => {
         const estados = {
-            1: { text: 'Por hacer', class: 'bg-secondary' },
-            2: { text: 'En progreso', class: 'bg-warning' },
-            2: { text: 'En revision', class: 'bg-info' },
-            3: { text: 'Completado', class: 'bg-success' }
+            1: {
+                text: 'Por hacer',
+                class: 'bg-secondary'
+            },
+            2: {
+                text: 'En progreso',
+                class: 'bg-warning'
+            },
+            2: {
+                text: 'En revision',
+                class: 'bg-info'
+            },
+            3: {
+                text: 'Completado',
+                class: 'bg-success'
+            }
         };
-        const status = estados[estado] || { text: 'Desconocido', class: 'bg-dark' };
+        const status = estados[estado] || {
+            text: 'Desconocido',
+            class: 'bg-dark'
+        };
         return `<span class="badge ${status.class} status-badge">${status.text}</span>`;
     };
 
@@ -1562,7 +1652,12 @@
     function cargarSprints() {
         const proyectoUID = $('#uid_proyecto').val();
         axios.get(`/proyectos/backlog/${proyectoUID}/sprints/show`)
-            .then(res => { sprints = res.data; mostrarSprints(); window.refreshAllSprintBacklogs(); cargarTodosLosSprints(); })
+            .then(res => {
+                sprints = res.data;
+                mostrarSprints();
+                window.refreshAllSprintBacklogs();
+                cargarTodosLosSprints();
+            })
             .catch(err => notyf.error(err.response?.status === 404 ? 'Proyecto no encontrado' : 'Error al cargar los sprints'));
     }
 
@@ -1572,10 +1667,12 @@
             .then(res => {
                 sprints = res.data;
                 const lista = document.getElementById('lista-sprints');
-                lista.innerHTML = sprints.length === 0
-                    ? `<li class="list-group-item text-muted">No hay sprints creados</li>`
-                    : sprints.map(sprint => {
-                        const hoy = new Date(), fi = new Date(sprint.fecha_inicio), ff = new Date(sprint.fecha_fin);
+                lista.innerHTML = sprints.length === 0 ?
+                    `<li class="list-group-item text-muted">No hay sprints creados</li>` :
+                    sprints.map(sprint => {
+                        const hoy = new Date(),
+                            fi = new Date(sprint.fecha_inicio),
+                            ff = new Date(sprint.fecha_fin);
                         let estado = hoy < fi ? ["Por hacer", "badge bg-secondary"] : hoy <= ff ? ["En progreso", "badge bg-warning text-dark"] : ["Finalizado", "badge bg-success"];
                         return `<li class="list-group-item d-flex justify-content-between align-items-start"><div><div class="fw-bold">${sprint.nombre}</div><small class="text-muted">${fi.toLocaleDateString()} - ${ff.toLocaleDateString()}</small></div><span class="${estado[1]}">${estado[0]}</span></li>`;
                     }).join('');
@@ -1591,7 +1688,11 @@
             initialView: 'dayGridMonth',
             locale: 'es',
             selectable: false,
-            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
             events: []
         });
         calendar.render();
@@ -1616,22 +1717,36 @@
     }
 
     function mostrarSprints() {
-        const emptyState = $('#emptyState'), sprintsList = $('#sprintsList');
+        const emptyState = $('#emptyState'),
+            sprintsList = $('#sprintsList');
         if (!sprints.length) {
-            emptyState.removeClass('d-none'); sprintsList.addClass('d-none');
+            emptyState.removeClass('d-none');
+            sprintsList.addClass('d-none');
         } else {
-            emptyState.addClass('d-none'); sprintsList.removeClass('d-none');
+            emptyState.addClass('d-none');
+            sprintsList.removeClass('d-none');
             sprintsList.html(sprints.map(renderSprint).join(''));
             if (typeof $.fn.sortable === 'undefined') habilitarDragDropHTML5();
             else {
-                sprintsList.sortable({ handle: '.drag-handle', placeholder: 'sprint-placeholder', update: actualizarOrdenSprints });
+                sprintsList.sortable({
+                    handle: '.drag-handle',
+                    placeholder: 'sprint-placeholder',
+                    update: actualizarOrdenSprints
+                });
                 $('.sprint-backlog-area').sortable({
                     connectWith: '.sprint-backlog-area',
                     placeholder: 'backlog-placeholder',
                     tolerance: 'pointer',
-                    over: function () { $(this).addClass('drag-over'); },
-                    out: function () { $(this).removeClass('drag-over'); },
-                    drop: function () { $(this).removeClass('drag-over'); notyf.success('Elemento movido al sprint'); }
+                    over: function() {
+                        $(this).addClass('drag-over');
+                    },
+                    out: function() {
+                        $(this).removeClass('drag-over');
+                    },
+                    drop: function() {
+                        $(this).removeClass('drag-over');
+                        notyf.success('Elemento movido al sprint');
+                    }
                 });
             }
         }
@@ -1639,30 +1754,61 @@
 
     // Drag & Drop HTML5 para historias → sprint backlog
     function habilitarDragDropHTML5() {
-        $(document).on('mouseenter', '.historia-item', function () { $(this).attr('draggable', 'true'); });
-        $(document).on('dragstart', '.historia-item', function (e) {
+        $(document).on('mouseenter', '.historia-item', function() {
+            $(this).attr('draggable', 'true');
+        });
+        $(document).on('dragstart', '.historia-item', function(e) {
             e.originalEvent.dataTransfer.setData('historiaUid', $(this).data('uid'));
             $(this).addClass('dragging').css('opacity', '0.5');
         });
-        $(document).on('dragend', '.historia-item', function () { $(this).removeClass('dragging').css('opacity', '1'); });
-        $(document).on('dragover', '.sprint-backlog-area', function (e) { e.preventDefault(); $(this).addClass('drag-over'); });
-        $(document).on('dragleave', '.sprint-backlog-area', function () { $(this).removeClass('drag-over'); });
-        $(document).on('drop', '.sprint-backlog-area', function (e) {
-            e.preventDefault(); $(this).removeClass('drag-over');
+        $(document).on('dragend', '.historia-item', function() {
+            $(this).removeClass('dragging').css('opacity', '1');
+        });
+        $(document).on('dragover', '.sprint-backlog-area', function(e) {
+            e.preventDefault();
+            $(this).addClass('drag-over');
+        });
+        $(document).on('dragleave', '.sprint-backlog-area', function() {
+            $(this).removeClass('drag-over');
+        });
+        $(document).on('drop', '.sprint-backlog-area', function(e) {
+            e.preventDefault();
+            $(this).removeClass('drag-over');
             const historiaUid = e.originalEvent.dataTransfer.getData('historiaUid');
             const $historia = $(`.historia-item[data-uid="${historiaUid}"]`);
             $(this).find('.sprint-backlog-list').append($historia.closest('.col-12'));
             $(this).find('.text-center').remove();
-            const sprintId = $(this).data('sprint-id'), proyectoUID = $('#uid_proyecto').val(), progreso = $historia.data('progreso'), historiaId = $historia.closest('[data-historia-id]').data('historia-id');
-            axios.post(`/proyectos/backlog/${proyectoUID}/sprints/${sprintId}/sprbacklog/store`, { id_item_backlog: historiaId, progreso, asignado_a: [] })
-                .then(() => { notyf.success('Historia agregada al Sprint Backlog'); window.refreshAllSprintBacklogs(); mostrarSprints(); cargarSprints(); window.cargarHistorias(); })
-                .catch(err => { notyf.error('Error al mover historia al Sprint'); console.error(err.response?.data || err); });
+            const sprintId = $(this).data('sprint-id'),
+                proyectoUID = $('#uid_proyecto').val(),
+                progreso = $historia.data('progreso'),
+                historiaId = $historia.closest('[data-historia-id]').data('historia-id');
+            axios.post(`/proyectos/backlog/${proyectoUID}/sprints/${sprintId}/sprbacklog/store`, {
+                    id_item_backlog: historiaId,
+                    progreso,
+                    asignado_a: []
+                })
+                .then(() => {
+                    notyf.success('Historia agregada al Sprint Backlog');
+                    window.refreshAllSprintBacklogs();
+                    mostrarSprints();
+                    cargarSprints();
+                    window.cargarHistorias();
+                })
+                .catch(err => {
+                    notyf.error('Error al mover historia al Sprint');
+                    console.error(err.response?.data || err);
+                });
         });
     }
 
     function actualizarOrdenSprints() {
         const orden = [];
-        $('#sprintsList .sprint-item').each(function (i) { orden.push({ id: $(this).data('sprint-id'), orden: i + 1 }); });
+        $('#sprintsList .sprint-item').each(function(i) {
+            orden.push({
+                id: $(this).data('sprint-id'),
+                orden: i + 1
+            });
+        });
         notyf.success('Orden de sprints actualizado (visual)');
     }
 
@@ -1677,23 +1823,35 @@
         };
         if (new Date(formData.fecha_fin) <= new Date(formData.fecha_inicio)) return notyf.error('La fecha de fin debe ser posterior a la fecha de inicio');
         axios.post(`/proyectos/backlog/${proyectoUID}/sprints/store`, formData)
-            .then(res => { notyf.success(res.data.message || 'Sprint creado correctamente'); $('#modalSprint').modal('hide'); $('#formSprint')[0].reset(); cargarSprints(); })
+            .then(res => {
+                notyf.success(res.data.message || 'Sprint creado correctamente');
+                $('#modalSprint').modal('hide');
+                $('#formSprint')[0].reset();
+                cargarSprints();
+            })
             .catch(error => {
                 if (error.response?.status === 422) notyf.error(Object.values(error.response.data.errors).map(e => `- ${e[0]}`).join('\n'));
                 else notyf.error(error.response?.data?.error || 'Error al crear el sprint');
             });
     }
 
-    $(function () {
+    $(function() {
         cargarSprints();
-        $('#btnCrearSprint').click(function () {
+        $('#btnCrearSprint').click(function() {
             if ($('#formSprint')[0].checkValidity()) crearSprint();
-            else { notyf.error('Por favor completa todos los campos requeridos'); $('#formSprint')[0].reportValidity(); }
+            else {
+                notyf.error('Por favor completa todos los campos requeridos');
+                $('#formSprint')[0].reportValidity();
+            }
         });
-        $('#modalSprint').on('hidden.bs.modal', function () { $('#formSprint')[0].reset(); });
+        $('#modalSprint').on('hidden.bs.modal', function() {
+            $('#formSprint')[0].reset();
+        });
         const hoy = new Date().toISOString().split('T')[0];
         $('#fechaInicio').attr('min', hoy);
-        $('#fechaInicio').change(function () { $('#fechaFin').attr('min', $(this).val()); });
+        $('#fechaInicio').change(function() {
+            $('#fechaFin').attr('min', $(this).val());
+        });
     });
 
     function editarSprint(sprintUid) {
@@ -1719,7 +1877,12 @@
         };
         if (new Date(formData.fecha_fin) <= new Date(formData.fecha_inicio)) return notyf.error('La fecha de fin debe ser posterior a la fecha de inicio');
         axios.post(`/proyectos/backlog/${proyectoUID}/sprints/update`, formData)
-            .then(res => { notyf.success(res.data.message || 'Sprint actualizado correctamente'); $('#modalEditarSprint').modal('hide'); $('#formEditarSprint')[0].reset(); cargarSprints(); })
+            .then(res => {
+                notyf.success(res.data.message || 'Sprint actualizado correctamente');
+                $('#modalEditarSprint').modal('hide');
+                $('#formEditarSprint')[0].reset();
+                cargarSprints();
+            })
             .catch(error => {
                 if (error.response?.status === 422) notyf.error(Object.values(error.response.data.errors).map(e => `- ${e[0]}`).join('\n'));
                 else notyf.error(error.response?.data?.error || 'Error al actualizar el sprint');
@@ -1727,7 +1890,9 @@
     }
 
     function eliminarSprint(sprintUid) {
-        const sprint = sprints.find(s => s.uid === sprintUid), nombreSprint = sprint ? sprint.nombre : 'este sprint', isDark = $("body").hasClass("dark");
+        const sprint = sprints.find(s => s.uid === sprintUid),
+            nombreSprint = sprint ? sprint.nombre : 'este sprint',
+            isDark = $("body").hasClass("dark");
         Swal.fire({
             title: '¿Estás seguro?',
             text: `¿Deseas eliminar ${nombreSprint}? Esta acción no se puede deshacer.`,
@@ -1740,32 +1905,59 @@
             reverseButtons: true,
             background: isDark ? '#1e1e2d' : '#fff',
             color: isDark ? '#f1f1f1' : '#000'
-        }).then(result => { if (result.isConfirmed) ejecutarEliminacionSprint(sprintUid); });
+        }).then(result => {
+            if (result.isConfirmed) ejecutarEliminacionSprint(sprintUid);
+        });
     }
 
     function ejecutarEliminacionSprint(sprintUid) {
-        const proyectoUID = $('#uid_proyecto').val(), isDark = $("body").hasClass("dark");
-        axios.post(`/proyectos/backlog/${proyectoUID}/sprints/destroy`, { uid: sprintUid, _token: $('meta[name="csrf-token"]').attr('content') })
+        const proyectoUID = $('#uid_proyecto').val(),
+            isDark = $("body").hasClass("dark");
+        axios.post(`/proyectos/backlog/${proyectoUID}/sprints/destroy`, {
+                uid: sprintUid,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            })
             .then(res => {
-                Swal.fire({ title: '¡Eliminado!', text: res.data.message || 'Sprint eliminado correctamente', icon: 'success', timer: 2000, showConfirmButton: false, background: isDark ? '#1e1e2d' : '#fff', color: isDark ? '#f1f1f1' : '#000' });
+                Swal.fire({
+                    title: '¡Eliminado!',
+                    text: res.data.message || 'Sprint eliminado correctamente',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    background: isDark ? '#1e1e2d' : '#fff',
+                    color: isDark ? '#f1f1f1' : '#000'
+                });
                 cargarSprints();
             })
             .catch(error => {
-                Swal.fire({ title: 'Error', text: error.response?.data?.error || 'Error al eliminar el sprint', icon: 'error', background: isDark ? '#1e1e2d' : '#fff', color: isDark ? '#f1f1f1' : '#000' });
+                Swal.fire({
+                    title: 'Error',
+                    text: error.response?.data?.error || 'Error al eliminar el sprint',
+                    icon: 'error',
+                    background: isDark ? '#1e1e2d' : '#fff',
+                    color: isDark ? '#f1f1f1' : '#000'
+                });
             });
     }
 
-    $('#modalIniciarSprint').on('show.bs.modal', function (event) {
-        const button = $(event.relatedTarget), sprintUid = button.data('sprint-uid');
+    $('#modalIniciarSprint').on('show.bs.modal', function(event) {
+        const button = $(event.relatedTarget),
+            sprintUid = button.data('sprint-uid');
         $('#formIniciarSprint').data('sprint-uid', sprintUid);
         $('#formIniciarSprint input[name="fecha_inicio"]').val(button.data('fecha-inicio'));
         $('#formIniciarSprint input[name="fecha_fin"]').val(button.data('fecha-fin'));
     });
 
-    $('#formIniciarSprint').on('submit', function (e) {
+    $('#formIniciarSprint').on('submit', function(e) {
         e.preventDefault();
-        const proyectoUID = $('#uid_proyecto').val(), sprintUID = $(this).data('sprint-uid'), fechaInicio = $(this).find('input[name="fecha_inicio"]').val(), fechaFin = $(this).find('input[name="fecha_fin"]').val();
-        axios.post(`/proyectos/backlog/${proyectoUID}/sprints/${sprintUID}/items/start`, { fecha_inicio: fechaInicio, fecha_fin: fechaFin })
+        const proyectoUID = $('#uid_proyecto').val(),
+            sprintUID = $(this).data('sprint-uid'),
+            fechaInicio = $(this).find('input[name="fecha_inicio"]').val(),
+            fechaFin = $(this).find('input[name="fecha_fin"]').val();
+        axios.post(`/proyectos/backlog/${proyectoUID}/sprints/${sprintUID}/items/start`, {
+                fecha_inicio: fechaInicio,
+                fecha_fin: fechaFin
+            })
             .then(res => {
                 $('#modalIniciarSprint').modal('hide');
                 notyf.success(res.data.message || 'Sprint iniciado correctamente');
@@ -1780,12 +1972,12 @@
     // ============================================
     // EDITAR HISTORIA (TABLERO)
     // ============================================
-    $(document).on('click', '.editar-historia-tablero', function (e) {
+    $(document).on('click', '.editar-historia-tablero', function(e) {
         e.preventDefault();
         const historiaUID = $(this).data('product-uid');
         const proyectoUID = $('#tablero').data('proyecto');
         const sprintUID = $('#tablero').data('sprint');
-        
+
         axios.get(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${historiaUID}`)
             .then(res => {
                 if (res.data.success) {
@@ -1810,12 +2002,12 @@
     // ============================================
     // ACTUALIZAR HISTORIA (TABLERO)
     // ============================================
-    $('#formHistoriaEditTablero').on('submit', function (e) {
+    $('#formHistoriaEditTablero').on('submit', function(e) {
         e.preventDefault();
         const historiaUID = $('#edit_historia_uid_tablero').val();
         const proyectoUID = $('#tablero').data('proyecto');
         const sprintUID = $('#tablero').data('sprint');
-        
+
         const datos = {
             titulo: $('#edit_titulo_tablero').val(),
             descripcion: $('#edit_descripcion_tablero').val(),
@@ -1823,9 +2015,9 @@
             valor_historia: $('#edit_valor_historia_tablero').val(),
             progreso: $('#edit_progreso_tablero').val()
         };
-        
+
         $('#btnActualizarHistoriaTablero').prop('disabled', true).html('<i class="spinner-border spinner-border-sm me-2"></i>Guardando...');
-        
+
         axios.put(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${historiaUID}`, datos)
             .then(res => {
                 if (res.data.success) {
@@ -1833,7 +2025,7 @@
                     $('#modalHistoriaEditTablero').modal('hide');
                     cargarTablero(proyectoUID, sprintUID); // refresca tablero
                 } else {
-                    console.error('Error completo:', err.response); 
+                    console.error('Error completo:', err.response);
                     console.error('Datos enviados:', datos);
                     notyf.error(res.data.message || 'Error al actualizar la historia');
                 }
@@ -1851,12 +2043,12 @@
     // ============================================
     // ELIMINAR HISTORIA
     // ============================================
-    $(document).on('click', '.eliminar-historia-tablero', function (e) {
+    $(document).on('click', '.eliminar-historia-tablero', function(e) {
         e.preventDefault();
         const historiaUID = $(this).data('product-uid'); // ⬅️ consistencia
         const proyectoUID = $('#tablero').data('proyecto');
         const sprintUID = $('#tablero').data('sprint');
-        
+
         const isDark = document.body.classList.contains("dark");
 
         Swal.fire({
@@ -1893,7 +2085,7 @@
     // ============================================
     // EDICIÓN INLINE DEL TÍTULO
     // ============================================
-    $(document).on('click', '.kanban-title', function (e) {
+    $(document).on('click', '.kanban-title', function(e) {
         e.stopPropagation();
         const $title = $(this);
         const $card = $title.closest('.kanban-item');
@@ -1908,7 +2100,7 @@
             value: currentTitle,
             maxlength: 50
         });
-        
+
         $title.html($input);
         $input.focus().select();
 
@@ -1922,7 +2114,9 @@
             const proyectoUID = $('#tablero').data('proyecto');
             const sprintUID = $('#tablero').data('sprint');
 
-            axios.patch(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${historiaUID}/titulo`, { titulo: newTitle })
+            axios.patch(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${historiaUID}/titulo`, {
+                    titulo: newTitle
+                })
                 .then(res => {
                     if (res.data.success) {
                         $title.text(newTitle);
@@ -1939,12 +2133,18 @@
                 });
         };
 
-        $input.on('keydown', function (e) {
-            if (e.key === 'Enter') { e.preventDefault(); $(this).blur(); }
-            else if (e.key === 'Escape') { $title.text(currentTitle); }
+        $input.on('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                $(this).blur();
+            } else if (e.key === 'Escape') {
+                $title.text(currentTitle);
+            }
         });
 
-        $input.on('blur', function () { saveTitle(); });
+        $input.on('blur', function() {
+            saveTitle();
+        });
     });
 
     // ============================================
@@ -1952,14 +2152,14 @@
     // ============================================
     function agregarBotonesCreacionRapida() {
         const columnas = document.querySelectorAll('.kanban-column, [data-status]');
-        
+
         columnas.forEach(columna => {
             const itemsContainer = columna.querySelector('.kanban-items');
             if (!itemsContainer) return;
-            
+
             // Evita duplicar el botón si ya existe
             if (itemsContainer.querySelector('.btn-crear-rapido')) return;
-            
+
             // Crea el contenedor del botón
             const btnContainer = document.createElement('div');
             btnContainer.className = 'btn-crear-rapido-container';
@@ -1968,7 +2168,7 @@
                 opacity: 0;
                 transition: opacity 0.2s ease;
             `;
-            
+
             // Crea el botón
             const btnCrear = document.createElement('button');
             btnCrear.className = 'btn btn-crear-rapido w-100 btn-sm';
@@ -1976,24 +2176,24 @@
             btnCrear.style.cssText = `
                 text-align: left;
             `;
-            
+
             btnContainer.appendChild(btnCrear);
-            
+
             // Agrega el botón al final del contenedor de items
             itemsContainer.appendChild(btnContainer);
-            
+
             // Eventos hover en el contenedor de items para mostrar/ocultar el botón
             itemsContainer.addEventListener('mouseenter', () => {
                 btnContainer.style.opacity = '1';
             });
-            
+
             itemsContainer.addEventListener('mouseleave', () => {
                 // Solo oculta si no hay un formulario activo
                 if (!itemsContainer.querySelector('.form-creacion-rapida')) {
                     btnContainer.style.opacity = '0';
                 }
             });
-            
+
             // Evento click para crear tarjeta
             btnCrear.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -2009,17 +2209,17 @@
     function mostrarFormularioCreacionRapida(itemsContainer, status, btnContainer) {
         // Oculta el botón de crear
         if (btnContainer) btnContainer.style.display = 'none';
-        
+
         // Verifica si ya existe un formulario activo
         if (itemsContainer.querySelector('.form-creacion-rapida')) return;
-        
+
         // Determina el progreso según el status
-        let progreso = status === "por-hacer" ? "Por hacer"
-                    : status === "en-progreso" ? "En progreso"
-                    : status === "terminado" ? "Terminado"
-                    : status === "en-revision" ? "En revision"
-                    : "";
-        
+        let progreso = status === "por-hacer" ? "Por hacer" :
+            status === "en-progreso" ? "En progreso" :
+            status === "terminado" ? "Terminado" :
+            status === "en-revision" ? "En revision" :
+            "";
+
         // Crea el formulario inline
         const formContainer = document.createElement('div');
         formContainer.className = 'form-creacion-rapida rounded shadow-sm';
@@ -2073,16 +2273,19 @@
                 </div>
             </form>
         `;
-        
+
         // Inserta el formulario al final del contenedor (antes del botón)
         itemsContainer.appendChild(formContainer);
-        
+
         // Scroll al formulario
         setTimeout(() => {
-            formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            formContainer.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
             document.getElementById('titulo_rapido')?.focus();
         }, 100);
-        
+
         // Evento para cancelar
         formContainer.querySelector('.btn-cancelar-rapido').addEventListener('click', () => {
             formContainer.remove();
@@ -2091,13 +2294,13 @@
                 btnContainer.style.opacity = '0';
             }
         });
-        
+
         // Evento para enviar el formulario
         formContainer.querySelector('#formCreacionRapida').addEventListener('submit', (e) => {
             e.preventDefault();
             crearTarjetaRapida(formContainer, progreso, status, btnContainer);
         });
-        
+
         // Cerrar con ESC
         const handleEsc = (e) => {
             if (e.key === 'Escape') {
@@ -2120,23 +2323,23 @@
         const descripcion = document.getElementById('descripcion_rapido').value.trim();
         const prioridad = document.getElementById('prioridad_rapido').value;
         const valorHistoria = document.getElementById('valor_rapido').value;
-        
+
         if (!titulo) {
             notyf.error('El título es obligatorio');
             return;
         }
-        
+
         // Deshabilita el formulario
         const btnSubmit = formContainer.querySelector('button[type="submit"]');
         const btnCancel = formContainer.querySelector('.btn-cancelar-rapido');
         btnSubmit.disabled = true;
         btnCancel.disabled = true;
         btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Creando...';
-        
+
         const tablero = document.getElementById("tablero");
         const proyectoUID = tablero.getAttribute("data-proyecto");
         const sprintUID = tablero.getAttribute("data-sprint");
-        
+
         const datos = {
             titulo: titulo,
             descripcion: descripcion || null,
@@ -2144,43 +2347,43 @@
             valor_historia: parseInt(valorHistoria),
             progreso: progreso
         };
-        
+
         axios.post(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items`, datos)
             .then(res => {
                 if (res.data.success) {
                     notyf.success('Tarjeta creada correctamente');
-                    
+
                     // Remueve el formulario
                     formContainer.remove();
-                    
+
                     // Muestra el botón de crear nuevamente (oculto)
                     if (btnContainer) {
                         btnContainer.style.display = 'block';
                         btnContainer.style.opacity = '0';
                     }
-                    
+
                     // Agrega la nueva tarjeta al tablero
                     if (res.data.item) {
                         const columna = document.querySelector(`[data-status="${status}"]`);
                         const itemsContainer = columna?.querySelector('.kanban-items');
-                        
+
                         if (itemsContainer) {
                             // Remueve el mensaje de "No hay elementos" si existe
                             const mensajeVacio = itemsContainer.querySelector('.empty-column');
                             if (mensajeVacio) mensajeVacio.remove();
-                            
+
                             // Renderiza la nueva tarjeta antes del botón de crear
                             renderKanbanItem(res.data.item);
-                            
+
                             // Mueve el botón al final
                             const btnCrearContainer = itemsContainer.querySelector('.btn-crear-rapido-container');
                             if (btnCrearContainer) {
                                 itemsContainer.appendChild(btnCrearContainer);
                             }
-                            
+
                             // Actualiza contadores
                             actualizarContadores();
-                            
+
                             // Re-habilita drag and drop para la nueva tarjeta
                             enableDragAndDrop();
                         }
@@ -2207,10 +2410,10 @@
     // ============================================
     function renderKanbanItem(item) {
         let estado = item.progreso;
-        if (["Por hacer","to_do"].includes(estado)) estado = "por-hacer";
-        if (["En progreso","in_progress"].includes(estado)) estado = "en-progreso";
-        if (["Completado","done","Terminado"].includes(estado)) estado = "terminado";
-        if (["En revision","in_revision","en-revision"].includes(estado)) estado = "en-revision";
+        if (["Por hacer", "to_do"].includes(estado)) estado = "por-hacer";
+        if (["En progreso", "in_progress"].includes(estado)) estado = "en-progreso";
+        if (["Completado", "done", "Terminado"].includes(estado)) estado = "terminado";
+        if (["En revision", "in_revision", "en-revision"].includes(estado)) estado = "en-revision";
 
         const container = document.getElementById(`items-${estado}`);
         if (!container) return;
@@ -2219,7 +2422,7 @@
         if (emptyMsg) emptyMsg.remove();
 
         const card = document.createElement('div');
-        card.classList.add('kanban-item','card','mb-2','p-2', 'border');
+        card.classList.add('kanban-item', 'card', 'mb-2', 'p-2', 'border');
         card.setAttribute('data-id', item.id);
         card.setAttribute('data-product-uid', item.product_uid || item.uid); // ⬅️ product-uid
         card.setAttribute('data-sprint-uid', item.sprint_uid || ''); // ⬅️ sprint-uid extra
@@ -2252,6 +2455,54 @@
                 <small class="text-muted">${item.prioridad || ''}</small>
             </div>
         `;
+
+        //Evento para poder abrir la modal de asignar miembros
+        card.addEventListener('click', function(e){
+            //evitar que se abra la modal al darle click a las opciones
+            if(e.target.closest('.dropdown, .editar-historia-tablero, .eliminar-historia-tablero')) return;
+
+            const proyectoUID = $('#tablero').data('proyecto');
+            const sprintUID = $('#tablero').data('sprint');
+            const itemUID = item.product_uid || item.uid;
+
+            $('#asignar_proyecto_uid').val(proyectoUID);
+            $('#asignar_sprint_uid').val(sprintUID);
+            $('#asignar_item_uid').val(itemUID);
+
+            let miembrosSeleccinados = []; // limpiar seleccion previa
+
+            //cargar miembros del equipo
+            axios.get(`/proyectos/${proyectoUID}/miembros`)
+                .then(res => {
+                    const miembros = res.data.miembros || [];
+                    const $list = $('#miembrosList').empty();
+
+                    axios.get(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${itemUID}/miembros`)
+                        .then(resAsignados =>{
+                            const asignados = resAsignados.data.miembros || [];
+                            const asignadosIds = asignados.map(m=>m.id_miembro_equipo);
+                            miembros.forEach(m => {
+                                $list.append(`
+                                    <div class="user-option" data-user-id="${m.me_id}">
+                                        <input type="checkbox" ${asignadosIds.includes(m.me_id) ? 'checked' : ''}>
+                                        <div class="user-avatar">${(m.username || '').substring(0,2).toUpperCase()}</div>
+                                        <span>${m.username || m.email}</span>
+                                    </div>
+                                `);
+                            });
+                        })
+                });
+            $('#modalAsignarMiembros').modal('show');
+        });
+        //_______________
+
+        //funcion para poder asignar la tarea al usuario
+        $(document).on('click', '.user-option', function(e){
+            const $checkbox = $(this).find('input[type="checkbox"]');
+            if(e.target.type !== 'checkbox') $checkbox.prop('checked', i => !i);
+        });
+        //==========================
+
         const btnCrearContainer = container.querySelector('.btn-crear-rapido-container');
         if (btnCrearContainer) {
             container.insertBefore(card, btnCrearContainer);
@@ -2264,11 +2515,43 @@
         if (counter) counter.textContent = parseInt(counter.textContent || 0) + 1;
     }
 
+    $(document).on('click', '#btnAsignarMiembros', function(){
+        const proyectoUID = $('#asignar_proyecto_uid').val();
+        const sprintUID = $('#asignar_sprint_uid').val();
+        const itemUID = $('#asignar_item_uid').val();
+        const miembros = $('#miembrosList input:checked').map(function (){
+            const val = $(this).closest('.user-option').data('user-id');
+            return val ? parseInt(val): null;
+        }).get().filter(id => Number.isInteger(id));
+
+        if(miembros.length === 0){
+            // notyf.error('Selecciona al menos un miembro');
+            // return;
+        }
+
+        axios.post(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${itemUID}/asignar-miembros`,{
+            miembros:miembros
+        })
+        .then(res => {
+            if(res.data.success){
+                notyf.success('Miembros asignados correctamente');
+                $('#modalAsignarMiembros').modal('hide');
+                window.refreshAllSprintBacklogs && window.refreshAllSprintBacklogs();
+            }else{
+                notyf.error(res.data.message || 'Error al asignar miembros');
+            }
+        })
+        .catch(()=>notyf.error('Error al asignar miembros'))
+    });
+
     // ============================================
     // CARGAR TABLERO
     // ============================================
     function cargarTablero(proyectoUID, sprintUID) {
-        $("#tablero").attr({ "data-proyecto": proyectoUID, "data-sprint": sprintUID })
+        $("#tablero").attr({
+                "data-proyecto": proyectoUID,
+                "data-sprint": sprintUID
+            })
             .html('<div class="text-center p-3"><div class="spinner-border"></div><p class="mt-2">Cargando tablero...</p></div>');
 
         axios.get(`/proyectos/${proyectoUID}/sprints/${sprintUID}/board/view`)
@@ -2314,7 +2597,7 @@
         columns.forEach(column => {
             if (!column.hasAttribute('data-drop-initialized')) {
                 column.setAttribute('data-drop-initialized', 'true');
-                
+
                 column.addEventListener('dragover', handleDragOver);
                 column.addEventListener('dragleave', handleDragLeave);
                 column.addEventListener('drop', handleDrop);
@@ -2353,10 +2636,10 @@
         if (!item) return;
 
         const originalColumn = item.parentElement;
-        
+
         // Evitar drop en la misma columna
         if (originalColumn === this) return;
-        
+
         // ⬇️ CAMBIO AQUÍ: Insertar antes del botón de crear
         const btnCrearContainer = this.querySelector('.btn-crear-rapido-container');
         if (btnCrearContainer) {
@@ -2369,7 +2652,7 @@
         actualizarContadores();
 
         const statusKey = this.parentElement.getAttribute('data-status');
-        const newProgreso = 
+        const newProgreso =
             statusKey === "por-hacer" ? "Por hacer" :
             statusKey === "en-progreso" ? "En progreso" :
             statusKey === "terminado" ? "Terminado" :
@@ -2382,23 +2665,23 @@
         item.setAttribute('draggable', false);
         item.style.opacity = '0.6';
 
-        axios.post(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${productUID}/progreso`, { 
-            progreso: newProgreso 
-        })
-        .then(() => {
-            item.setAttribute('draggable', true);
-            item.style.opacity = '1';
-        })
-        .catch(err => {
-            console.error(err);
-            notyf.error('Error al actualizar el estado');
-            originalColumn.appendChild(item);
-            item.setAttribute('draggable', true);
-            item.style.opacity = '1';
-            actualizarMensajesVacios();
-            actualizarContadores();
-        });
-}
+        axios.post(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${productUID}/progreso`, {
+                progreso: newProgreso
+            })
+            .then(() => {
+                item.setAttribute('draggable', true);
+                item.style.opacity = '1';
+            })
+            .catch(err => {
+                console.error(err);
+                notyf.error('Error al actualizar el estado');
+                originalColumn.appendChild(item);
+                item.setAttribute('draggable', true);
+                item.style.opacity = '1';
+                actualizarMensajesVacios();
+                actualizarContadores();
+            });
+    }
 
     // Función para manejar los mensajes vacíos
     function actualizarMensajesVacios() {
@@ -2439,15 +2722,28 @@
     enableDragAndDrop();
 
 
-    $(document).on('click', '.editar-sprint', function (e) { e.preventDefault(); editarSprint($(this).data('sprint-uid')); });
-    $(document).on('click', '.eliminar-sprint', function (e) { e.preventDefault(); eliminarSprint($(this).data('sprint-uid')); });
-    $('#formEditarSprint').on('submit', function (e) { e.preventDefault(); actualizarSprint(); });
-    $(document).on('click', '#btnActualizarSprint', function (e) { e.preventDefault(); actualizarSprint(); });
+    $(document).on('click', '.editar-sprint', function(e) {
+        e.preventDefault();
+        editarSprint($(this).data('sprint-uid'));
+    });
+    $(document).on('click', '.eliminar-sprint', function(e) {
+        e.preventDefault();
+        eliminarSprint($(this).data('sprint-uid'));
+    });
+    $('#formEditarSprint').on('submit', function(e) {
+        e.preventDefault();
+        actualizarSprint();
+    });
+    $(document).on('click', '#btnActualizarSprint', function(e) {
+        e.preventDefault();
+        actualizarSprint();
+    });
 
     // --- ASIGNACIÓN DE USUARIOS SPRINT BACKLOG ---
-    $(function () {
+    $(function() {
         const uid = $("#id_proyecto").val();
-        let selectedUsers = [], allUsers = [];
+        let selectedUsers = [],
+            allUsers = [];
 
         // Renderizar lista de usuarios
         const renderUsersList = users => {
@@ -2471,30 +2767,38 @@
         };
 
         // Filtrar usuarios por búsqueda
-        $("#searchBox").on("input", function () {
+        $("#searchBox").on("input", function() {
             const term = $(this).val().toLowerCase();
             renderUsersList(allUsers.filter(u => u.nombre_completo.toLowerCase().includes(term)));
         });
 
         // Manejar selección de usuarios
-        $(document).on("click", ".user-option", function (e) {
+        $(document).on("click", ".user-option", function(e) {
             const $checkbox = $(this).find('input[type="checkbox"]');
             if (e.target.type !== 'checkbox') $checkbox.prop('checked', i => !i);
 
             const userId = parseInt($(this).data('user-id'));
-            $checkbox.prop('checked')
-                ? selectedUsers.includes(userId) || selectedUsers.push(userId)
-                : selectedUsers = selectedUsers.filter(id => id !== userId);
+            $checkbox.prop('checked') ?
+                selectedUsers.includes(userId) || selectedUsers.push(userId) :
+                selectedUsers = selectedUsers.filter(id => id !== userId);
 
             $('input[name="asignado_a[]"]').remove();
-            selectedUsers.forEach(id => $('<input>').attr({ type: 'hidden', name: 'asignado_a[]', value: id }).appendTo('form'));
+            selectedUsers.forEach(id => $('<input>').attr({
+                type: 'hidden',
+                name: 'asignado_a[]',
+                value: id
+            }).appendTo('form'));
         });
 
         // Cargar datos de backlog y sprint
         const loadUserData = (sprintId = null) => {
             axios.get(`/proyectos/backlog/${uid}/sprints/items`)
                 .then(res => {
-                    const { backlog, sprints, equipo } = res.data;
+                    const {
+                        backlog,
+                        sprints,
+                        equipo
+                    } = res.data;
                     const $itemBacklog = $("#id_item_backlog").empty().append('<option value="">Seleccionar elemento</option>');
                     backlog.forEach(item => $itemBacklog.append(`<option value="${item.id}">${item.titulo}</option>`));
 
@@ -2511,7 +2815,7 @@
         };
 
         // Abrir modal
-        $(document).on("show.bs.modal", "#modalRegSprBacklog", function (event) {
+        $(document).on("show.bs.modal", "#modalRegSprBacklog", function(event) {
             const sprintId = $(event.relatedTarget).data("sprint-id");
             $("#current_sprint_id").val(sprintId);
             loadUserData(sprintId);
