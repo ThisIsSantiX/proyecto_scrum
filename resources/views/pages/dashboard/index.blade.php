@@ -48,7 +48,7 @@
     <!-- Saludo -->
     <div class="text-center mb-4">
         <p class="text-muted mb-1">{{ $fecha }}</p>
-        <h2 class="fw-bold">{{ $saludo }}, {{ Auth::user()->nombre }}</h2>
+        <h2 class="fw-bold">{{ $saludo }}, {{ Auth::user()->nombre ?? Auth::user()->username }}</h2>
     </div>
 
     <!-- Barra de búsqueda -->
@@ -147,7 +147,7 @@
                             <div class="alert alert-light d-flex align-items-start border rounded-3">
                                 <span class="badge bg-danger me-2">2</span>
                                 <div>
-                                    <strong>Hola  {{ Auth::user()->nombre }}, ¡Bienvenido a Scrum!</strong><br>
+                                    <strong>Hola {{ Auth::user()->nombre ?? Auth::user()->username }}, ¡Bienvenido a Scrum!</strong><br>
                                     Estamos encantados de tenerte a bordo. Disfruta.
                                     <div class="mt-1"><small class="text-muted">21 de agosto</small></div>
                                 </div>

@@ -23,12 +23,8 @@ class GithubController extends Controller
     {
         $githubUser = Socialite::driver('github')->user();
 
-        // Separar nombre completo en nombre y apellido (si existe)
-        $fullName   = $githubUser->getName() ?? '';
-        $nameParts  = $fullName ? explode(' ', $fullName, 2) : [];
-
-        $nombre   = $nameParts[0] ?? '';
-        $apellido = $nameParts[1] ?? '';
+        // Tomar nickname como base
+        $baseUsername = $githubUser->getNickname() ?? 'user' . $githubUser->getId();
 
         // Buscar si el usuario ya existe por email
         $user = User::where('email', $githubUser->getEmail())->first();
@@ -38,12 +34,11 @@ class GithubController extends Controller
             $user->update([
                 'foto_url' => $githubUser->getAvatar(),
                 'estado'   => 1,
-                'nombre'   => $nombre ?: $user->nombre,
-                'apellido' => $apellido ?: $user->apellido,
+                'nombre'   => $user->nombre ?: $baseUsername, // si no tiene nombre, lo ponemos
+                'apellido' => $user->apellido ?: '',          // dejamos vacío
             ]);
         } else {
             // Usuario nuevo: generar username único
-            $baseUsername = $githubUser->getNickname() ?? 'user' . $githubUser->getId();
             $username = $baseUsername;
             $counter = 1;
 
@@ -54,8 +49,8 @@ class GithubController extends Controller
 
             $user = User::create([
                 'username'  => $username,
-                'nombre'    => $nombre,
-                'apellido'  => $apellido,
+                'nombre'    => $username, // 👈 nombre = username
+                'apellido'  => '',        // 👈 vacío
                 'email'     => $githubUser->getEmail(),
                 'password'  => bcrypt(Str::random(16)),
                 'estado'    => 1,
@@ -68,4 +63,5 @@ class GithubController extends Controller
 
         return redirect('/dashboard');
     }
+
 }

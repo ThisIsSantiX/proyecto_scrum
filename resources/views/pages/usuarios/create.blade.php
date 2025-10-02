@@ -1,4 +1,3 @@
-
 @extends('layouts.layout.layout')
 
 @section('content')
@@ -82,7 +81,7 @@
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Apellido</label>
-                                    <input type="text" name="apellido" id="apellido" class="form-control" required>
+                                    <input type="text" name="apellido" id="apellido" class="form-control">
                                 </div>
                                 <div class="form-group col-md-12">
                                     <label class="form-label">Email</label>
@@ -114,76 +113,76 @@
 
 @section('js')
 <script>
-$(document).ready(function () {
-    const notyf = new Notyf();
+    $(document).ready(function () {
+        const notyf = new Notyf();
 
-    // Interceptar submit
-    $('form').on('submit', function(e) {
-        e.preventDefault();
+        // Interceptar submit
+        $('form').on('submit', function(e) {
+            e.preventDefault();
 
-        const formData = new FormData(this);
+            const formData = new FormData(this);
 
-        const foto = $('#foto_url')[0].files[0];
-        if (foto) {
-            formData.append('foto_url', foto);
-        }
-
-        formData.append('estado', $('#estado').val());
-
-        axios.post("{{ route('usuarios.store') }}", formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
+            const foto = $('#foto_url')[0].files[0];
+            if (foto) {
+                formData.append('foto_url', foto);
             }
-        })
-        .then(response => {
-            notyf.success('Usuario guardado correctamente!');
-            window.location.href = "{{ route('usuarios.index') }}";
-        })
-        .catch(error => {
-            console.error(error);
-            if (error.response?.data?.errors) {
-                let message = '';
-                const errors = error.response.data.errors;
-                for (const key in errors) {
-                    message += errors[key].join('<br>') + '<br>';
+
+            formData.append('estado', $('#estado').val());
+
+            axios.post("{{ route('usuarios.store') }}", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
                 }
-                notyf.error({ message: message, duration: 5000 });
-            } else {
-                notyf.error('Error al guardar el usuario.');
+            })
+            .then(response => {
+                notyf.success('Usuario guardado correctamente!');
+                window.location.href = "{{ route('usuarios.index') }}";
+            })
+            .catch(error => {
+                console.error(error);
+                if (error.response?.data?.errors) {
+                    let message = '';
+                    const errors = error.response.data.errors;
+                    for (const key in errors) {
+                        message += errors[key].join('<br>') + '<br>';
+                    }
+                    notyf.error({ message: message, duration: 5000 });
+                } else {
+                    notyf.error('Error al guardar el usuario.');
+                }
+            });
+        });
+
+        // Previsualizar foto
+        $('#foto_url').on('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    $('#preview').attr('src', ev.target.result);
+                }
+                reader.readAsDataURL(file);
             }
         });
     });
 
-    // Previsualizar foto
-    $('#foto_url').on('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                $('#preview').attr('src', ev.target.result);
-            }
-            reader.readAsDataURL(file);
-        }
-    });
-});
-
-function verFoto(url, uid) {
-    const esAvatarPorDefecto = url.includes('ui-avatars.com') || url.includes('/images/avatar/01.jpg');
-    Swal.fire({
-        html: `
-            <div style="width:400px;height:400px;margin:auto;display:flex;align-items:center;justify-content:center;position:relative;">
-                <img src="${url}" 
-                     alt="Foto de perfil" 
-                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
-            </div>
-        `,
-        showCloseButton: true,
-        showConfirmButton: false,
-        background: '#000000cc',
-        width: 'auto',
-        padding: 0
-    });
-}
+    function verFoto(url, uid) {
+        const esAvatarPorDefecto = url.includes('ui-avatars.com') || url.includes('/images/avatar/01.jpg');
+        Swal.fire({
+            html: `
+                <div style="width:400px;height:400px;margin:auto;display:flex;align-items:center;justify-content:center;position:relative;">
+                    <img src="${url}" 
+                        alt="Foto de perfil" 
+                            style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                </div>
+            `,
+            showCloseButton: true,
+            showConfirmButton: false,
+            background: '#000000cc',
+            width: 'auto',
+            padding: 0
+        });
+    }
 
 </script>
 @endsection

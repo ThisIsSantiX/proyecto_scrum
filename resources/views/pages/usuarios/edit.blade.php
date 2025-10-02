@@ -1,4 +1,3 @@
-edit
 @extends('layouts.layout.layout')
 
 @section('content')
@@ -84,7 +83,7 @@ edit
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Apellido</label>
-                                    <input type="text" name="apellido" id="apellido" class="form-control" value="{{ $user->apellido }}" required>
+                                    <input type="text" name="apellido" id="apellido" class="form-control" value="{{ $user->apellido }}">
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Nombre de usuario</label>
