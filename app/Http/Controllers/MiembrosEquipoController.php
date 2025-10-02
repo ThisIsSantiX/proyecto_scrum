@@ -6,6 +6,8 @@ use App\Models\miembros_equipo;
 use App\Models\Proyecto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class MiembrosEquipoController extends Controller
 {
@@ -35,29 +37,40 @@ class MiembrosEquipoController extends Controller
             $proyecto = Proyecto::where('uid', $uid)->firstOrFail();
 
             // Traer miembros con la relación usuario
-            $miembros = Proyecto::with('usuario:id,username,email,foto_url')
+            $miembros = Proyecto::with('usuario:id,nombre,apellido,email,foto_url')
                 ->where('id_proyecto', $uid)
                 ->get()
                 ->map(function ($miembro) {
                     return [
                         'id'       => $miembro->usuario->id,
-                        'username'   => $miembro->usuario->username,
+                        'nombre'   => $miembro->usuario->nombre,
+                        'apellido' => $miembro->usuario->apellido,
                         'email'    => $miembro->usuario->email,
-                        'foto_url' => $miembro->usuario->foto_url
-                            ? asset('storage/' . $miembro->usuario->foto_url)   // ✅ URL pública
-                            : null,
+                        'foto_url' => ($miembro->usuario->foto_url && 
+                            !Str::startsWith($miembro->usuario->foto_url, ['http://', 'https://']) &&
+                                Storage::disk('public')->exists($miembro->usuario->foto_url))
+                                ? asset('storage/' . $miembro->usuario->foto_url) // archivo local existe
+                                : (Str::startsWith($miembro->usuario->foto_url, ['http://', 'https://'])
+                                    ? $miembro->usuario->foto_url                  // URL externa
+                                    : "https://ui-avatars.com/api/?name=" 
+                                        . urlencode($miembro->usuario->nombre . ' ' . $miembro->usuario->apellido) 
+                                        . "&background=random&color=fff"),   // Generar avatar  
+
+
+
                     ];
                 });
 
             // Retornar también al propietario como objeto
             $propietario = [
                 'id'       => $proyecto->propietario->id,
-                'username'   => $proyecto->propietario->username,
+                'nombre'   => $proyecto->propietario->nombre,
+                'apellido' => $proyecto->propietario->apellido,
                 'email'    => $proyecto->propietario->email,
-                'foto_url' => $proyecto->propietario->foto_url 
-                    ? asset('storage/' . $proyecto->propietario->foto_url) 
-                    : null,
-                'rol'      => 'propietario',
+                'foto_url' => $proyecto->propietario->foto_url
+                    ? asset('storage/' . $proyecto->propietario->foto_url)  // NOTA: "storage/" aquí
+                    : "https://ui-avatars.com/api/?name=" . urlencode($proyecto->propietario->nombre . ' ' . $proyecto->propietario->apellido) . "&background=random&color=fff",
+
             ];
 
             return response()->json([
@@ -90,7 +103,8 @@ class MiembrosEquipoController extends Controller
                 ->where('proyectos.uid', $proyectoUid)
                 ->select(
                     'users.id',
-                    'users.username',
+                    'users.nombre',
+                    'users.apellido',
                     'users.email',
                     'users.foto_url',
                 )
@@ -98,13 +112,15 @@ class MiembrosEquipoController extends Controller
                 ->map(function ($u) {
                     return [
                         'id'       => $u->id,
-                        'username'   => $u->username,
+                        'nombre'   => $u->nombre,
+                        'apellido' => $u->apellido,
                         'email'    => $u->email,
-                        'foto_url' => $u->foto_url
-                            ? asset('storage/' . $u->foto_url) 
-                            : "https://ui-avatars.com/api/?name=" 
-                                . urlencode($u->nombre . ' ' . $u->apellido) 
-                                . "&background=random&color=fff",
+                       'foto_url' => ($u->foto_url && Storage::disk('public')->exists($u->foto_url))
+    ? asset('storage/' . $u->foto_url)  // genera la URL pública correcta
+    : "https://ui-avatars.com/api/?name=" 
+        . urlencode($u->nombre . ' ' . $u->apellido) 
+        . "&background=random&color=fff",
+
                     ];
                 });
 

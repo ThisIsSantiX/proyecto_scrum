@@ -109,8 +109,10 @@
             </div>
         </div>
         <!-- Vista: Tablero -->
-        <div id="tablero"></div>
-        <!-- Vista: Reuniones -->
+        <div id="tablero" style="display: none;">
+            <p>Aun no has iniciado un sprint, inicialo para visualizar el tablero!</p>
+        </div>
+            
         <div id="reuniones" style="display: none;">
             <p>Aquí estarán las reuniones del proyecto.</p>
         </div>
@@ -1042,6 +1044,29 @@
             if (!historias || !historias.length) return mostrarEstadoVacio();
             let historiasHtml = '<div class="row" id="historias-container">';
             historias.forEach(function(historia) {
+                let fotoSrc = "";
+
+                if (historia.foto_url) {
+                    fotoSrc = historia.foto_url.startsWith("http")
+                        ? historia.foto_url
+                        : `/storage/${historia.foto_url}`;
+                }
+
+                // Si ya es un ui-avatar guardado en la BD, no aplicamos random ni fallback
+                const isUiAvatar = historia.foto_url && historia.foto_url.includes("ui-avatars.com");
+
+                let avatarHtml = `
+                    <span class="position-relative d-inline-block" data-bs-toggle="tooltip" title="Creado por: ${historia.creador_nombre || 'Desconocido'}">
+                        <img src="${fotoSrc}${!isUiAvatar ? `?v=${new Date().getTime()}` : ''}" 
+                            alt="${historia.creador_nombre || 'Usuario'}"
+                            class="rounded-circle"
+                            style="width: 24px; height: 24px; object-fit: cover;"
+                            ${!isUiAvatar ? 
+                                `onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(historia.creador_nombre || 'U')}&background=0D8ABC&color=fff';"` 
+                                : ''}>
+                    </span>
+                `;
+
                 const prioridad = historia.prioridad?.toLowerCase() || '';
                 const prioridadClass = prioridad === 'alta' ? 'prioridad-alta' : prioridad === 'media' ? 'prioridad-media' : 'prioridad-baja';
                 const badgeClass = historia.prioridad === 'Alta' ? 'bg-danger' : historia.prioridad === 'Media' ? 'bg-warning' : 'bg-success';
@@ -1109,9 +1134,7 @@
                                 <p class="card-text text-muted small mb-2">${historia.descripcion || ''} </p>
                                     ${estadoValorHTML}     
                                 <div class="d-flex justify-content-between align-items-center mt-1 small text-muted">
-                                    <span class="position-relative d-inline-block" data-bs-toggle="tooltip" title="${historia.creador_nombre || 'Desconocido'}">
-                                        <img src="${historia.foto_url}" alt="${historia.creador_nombre || 'Usuario'}" class="rounded-circle" style="width: 24px; height: 24px; object-fit: cover;">
-                                    </span>
+                                    ${avatarHtml}
                                     <div class="d-flex align-items-center">
                                         <button class="btn btn-sm btn-primary me-1 p-0 px-1 agregar-criterio" title="Agregar criterio" data-historia-id="${historia.uid}">
                                             <i class="bi bi-check2-square"></i>
@@ -1827,9 +1850,73 @@
                 if (res.data.success) {
                     notyf.success(res.data.message || 'Historia actualizada correctamente');
                     $('#modalHistoriaEditTablero').modal('hide');
-                    cargarTablero(proyectoUID, sprintUID); // refresca tablero
+                    
+                    // Actualización dinámica sin recargar
+                    const tarjetaActual = document.querySelector(`[data-product-uid="${historiaUID}"]`);
+                    if (tarjetaActual) {
+                        // Normaliza el progreso actual y nuevo
+                        let progresoActual = tarjetaActual.closest('.kanban-items')?.id?.replace('items-', '') || '';
+                        let progresoNuevo = datos.progreso;
+                        
+                        // Normaliza progreso nuevo
+                        if (["Por hacer","to_do"].includes(progresoNuevo)) progresoNuevo = "por-hacer";
+                        if (["En progreso","in_progress"].includes(progresoNuevo)) progresoNuevo = "en-progreso";
+                        if (["Completado","done","Terminado"].includes(progresoNuevo)) progresoNuevo = "terminado";
+                        if (["En revision","in_revision","en-revision"].includes(progresoNuevo)) progresoNuevo = "en-revision";
+                        
+                        // Si cambió de columna
+                        if (progresoActual !== progresoNuevo) {
+                            // Obtiene la columna actual antes de eliminar
+                            const columnaActual = tarjetaActual.closest('.kanban-items');
+                            
+                            // Remueve de la columna actual
+                            tarjetaActual.remove();
+                            
+                            // Renderiza en la nueva columna
+                            if (res.data.item) {
+                                renderKanbanItem(res.data.item);
+                            }
+                            
+                            // Verifica si la columna anterior quedó vacía
+                            if (columnaActual) {
+                                const tarjetasRestantes = columnaActual.querySelectorAll('.kanban-item');
+                                const btnCrear = columnaActual.querySelector('.btn-crear-rapido-container');
+                                
+                                if (tarjetasRestantes.length === 0 && !columnaActual.querySelector('.empty-column')) {
+                                    const emptyDiv = document.createElement('div');
+                                    emptyDiv.className = 'empty-column';
+                                    emptyDiv.innerHTML = '<i class="bi bi-inbox"></i><p>No hay elementos</p>';
+                                    
+                                    if (btnCrear) {
+                                        columnaActual.insertBefore(emptyDiv, btnCrear);
+                                    } else {
+                                        columnaActual.appendChild(emptyDiv);
+                                    }
+                                }
+                            }
+                        } else {
+                            // Solo actualiza el contenido sin cambiar de columna
+                            // Actualiza título
+                            const tituloEl = tarjetaActual.querySelector('.kanban-title');
+                            if (tituloEl) tituloEl.textContent = datos.titulo;
+                            
+                            // Actualiza valor historia
+                            const valorEl = tarjetaActual.querySelector('.kanban-item-footer p');
+                            if (valorEl) valorEl.textContent = datos.valor_historia || '';
+                            
+                            // Actualiza prioridad
+                            const prioridadEl = tarjetaActual.querySelector('.kanban-item-footer small');
+                            if (prioridadEl) prioridadEl.textContent = datos.prioridad || '';
+                        }
+                        
+                        // Actualiza contadores
+                        actualizarContadores();
+                        
+                        // Re-habilita drag and drop
+                        enableDragAndDrop();
+                    }
                 } else {
-                    console.error('Error completo:', err.response); 
+                    console.error('Error completo:', res); 
                     console.error('Datos enviados:', datos);
                     notyf.error(res.data.message || 'Error al actualizar la historia');
                 }
@@ -1849,7 +1936,7 @@
     // ============================================
     $(document).on('click', '.eliminar-historia-tablero', function (e) {
         e.preventDefault();
-        const historiaUID = $(this).data('product-uid'); // ⬅️ consistencia
+        const historiaUID = $(this).data('product-uid');
         const proyectoUID = $('#tablero').data('proyecto');
         const sprintUID = $('#tablero').data('sprint');
         
@@ -1873,7 +1960,51 @@
                     .then(res => {
                         if (res.data.success) {
                             notyf.success(res.data.message || 'Historia eliminada correctamente');
-                            cargarTablero(proyectoUID, sprintUID);
+                            
+                            // Eliminación dinámica sin recargar
+                            const tarjeta = document.querySelector(`[data-product-uid="${historiaUID}"]`);
+                            if (tarjeta) {
+                                const itemsContainer = tarjeta.closest('.kanban-items');
+                                const containerId = itemsContainer?.id || '';
+                                
+                                // Animación de salida
+                                tarjeta.style.transition = 'opacity 0.3s, transform 0.3s';
+                                tarjeta.style.opacity = '0';
+                                tarjeta.style.transform = 'scale(0.9)';
+                                
+                                setTimeout(() => {
+                                    tarjeta.remove();
+                                    
+                                    // Verifica si la columna quedó vacía
+                                    if (itemsContainer) {
+                                        const tarjetasRestantes = itemsContainer.querySelectorAll('.kanban-item');
+                                        const btnCrear = itemsContainer.querySelector('.btn-crear-rapido-container');
+                                        
+                                        if (tarjetasRestantes.length === 0 && !itemsContainer.querySelector('.empty-column')) {
+                                            const emptyDiv = document.createElement('div');
+                                            
+                                            if (btnCrear) {
+                                                itemsContainer.insertBefore(emptyDiv, btnCrear);
+                                            } else {
+                                                itemsContainer.appendChild(emptyDiv);
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Actualiza el contador de la columna
+                                    if (containerId) {
+                                        const estado = containerId.replace('items-', '');
+                                        const counter = document.getElementById(`counter-${estado}`);
+                                        if (counter) {
+                                            const currentCount = parseInt(counter.textContent || 0);
+                                            counter.textContent = Math.max(0, currentCount - 1);
+                                        }
+                                    }
+                                    
+                                    // Actualiza contadores generales
+                                    actualizarContadores();
+                                }, 300);
+                            }
                         } else {
                             notyf.error(res.data.message || 'No se pudo eliminar la historia');
                         }
@@ -2144,7 +2275,7 @@
         axios.post(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items`, datos)
             .then(res => {
                 if (res.data.success) {
-                    notyf.success('Tarjeta creada correctamente');
+                    notyf.success('Creado correctamente');
                     
                     // Remueve el formulario
                     formContainer.remove();
@@ -2450,21 +2581,49 @@
             const $usersList = $("#usersList").empty();
             users.forEach(user => {
                 const isSelected = selectedUsers.includes(user.id);
+
+                // Iniciales (fallback si no hay foto)
                 const initials = user.nombre_completo
-                    .split(' ')
-                    .map(n => n[0])
-                    .join('')
-                    .toUpperCase()
-                    .substring(0, 2);
+                    ? user.nombre_completo.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+                    : "U";
+
+                // Avatar dinámico
+                let avatarHtml = "";
+                if (user.foto_url) {
+                    let fotoSrc = user.foto_url.startsWith("http")
+                        ? user.foto_url
+                        : `/storage/${user.foto_url}`;
+                    const isUiAvatar = user.foto_url.includes("ui-avatars.com");
+
+                    avatarHtml = `
+                        <img src="${fotoSrc}${!isUiAvatar ? `?v=${new Date().getTime()}` : ''}" 
+                            alt="${user.nombre_completo || 'Usuario'}"
+                            class="rounded-circle user-avatar"
+                            style="width: 32px; height: 32px; object-fit: cover;"
+                            ${!isUiAvatar 
+                                ? `onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=0D8ABC&color=fff';"` 
+                                : ''}>
+                    `;
+                } else {
+                    avatarHtml = `
+                        <div class="user-avatar bg-primary text-white d-flex align-items-center justify-content-center rounded-circle fw-bold"
+                            style="width: 32px; height: 32px;">
+                            ${initials}
+                        </div>
+                    `;
+                }
+
+
                 $usersList.append(`
-                    <div class="user-option" data-user-id="${user.id}">
-                        <input type="checkbox" ${isSelected ? 'checked' : ''}>
-                        <div class="user-avatar">${initials}</div>
-                        <span>${user.nombre_completo}</span>
+                    <div class="user-option d-flex align-items-center mb-2" data-user-id="${user.id}">
+                        <input type="checkbox" class="me-2" ${isSelected ? 'checked' : ''}>
+                        ${avatarHtml}
+                        <span class="ms-2">${user.nombre_completo}</span>
                     </div>
                 `);
             });
         };
+
 
         // Filtrar usuarios por búsqueda
         $("#searchBox").on("input", function () {
@@ -2632,7 +2791,7 @@
                                                         <p class="card-title mb-0 fw-semibold text-truncate" style="max-width: 70%;">
                                                             ${item.titulo || 'Sin título'}
                                                         </p>
-                                                        <span class="badge ${badgeClass}">${item.prioridad || 'Sin prioridad'}</span>
+                                                        <span class="badge ${badgeClass}">${item.prioridad || ''}</span>
                                                     </div>
                                                     
                                                     <!-- Descripción -->
@@ -2640,46 +2799,78 @@
 
                                                     <!-- Estado + Tipo -->
                                                     <div class="d-flex justify-content-between align-items-center small text-muted">
-                                                        <span> Estado: ${item.estado || 'Sin estado'}</span>
-                                                        <span> Valor: ${item.valor_historia}</span>
+                                                        <span> Estado: ${item.progreso || 'Sin estado'}</span>
+                                                        <span> Valor: ${item.valor_historia || ''}</span>
                                                     </div>
 
-                                                    <!-- Responsable -->
-                                                    ${item.responsables ? `
-                                                        <div class="d-flex justify-content-between align-items-center mt-1 small text-muted">
-                                                            <span>
-                                                                <i class="bi bi-person-circle me-1"></i> ${item.responsables}
-                                                            </span>
-                                                        
+                                                    <div class="d-flex justify-content-between align-items-center mt-1 small text-muted">
+                                                        <!-- Avatares de responsables -->
+                                                        ${item.responsables_detalle && item.responsables_detalle.length > 0 ? `
+                                                            <div class="d-flex align-items-center">
+                                                                ${item.responsables_detalle.map(r => {
+                                                                    let fotoSrc = "";
+                                                                    if (r.foto_url) {
+                                                                        fotoSrc = r.foto_url.startsWith("http") ? r.foto_url : "/storage/" + r.foto_url;
+                                                                    }
+                                                                    const isUiAvatar = r.foto_url && r.foto_url.includes("ui-avatars.com");
+
+                                                                    return `
+                                                                        <span class="position-relative d-inline-block me-1" data-bs-toggle="tooltip" title="${r.nombre}">
+                                                                            ${r.foto_url 
+                                                                                ? `
+                                                                                    <img src="${fotoSrc}${!isUiAvatar ? `?v=${new Date().getTime()}` : ''}" 
+                                                                                        alt="${r.nombre}" 
+                                                                                        class="rounded-circle" 
+                                                                                        style="width: 24px; height: 24px; object-fit: cover;"
+                                                                                        ${!isUiAvatar 
+                                                                                            ? `onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(r.nombre || 'U')}&background=0D8ABC&color=fff';"` 
+                                                                                            : ''}>
+                                                                                `
+                                                                                : `
+                                                                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                                                                        style="width: 24px; height: 24px;" 
+                                                                                        title="${r.nombre}">
+                                                                                        ${(r.nombre || 'U').charAt(0).toUpperCase()}
+                                                                                    </div>
+                                                                                `
+                                                                            }
+                                                                        </span>
+                                                                    `;
+                                                                }).join('')}
+                                                            </div>
+                                                        ` : `<div></div>` } <!-- Div vacío si no hay responsables -->
+
+
+                                                        <!-- Dropup a la derecha -->
+                                                        <div class="dropup">
+                                                            <button class="btn btn-sm btn-secondary p-0 px-1" 
+                                                                    type="button" 
+                                                                    data-bs-toggle="dropdown" 
+                                                                    aria-expanded="false" 
+                                                                    data-bs-display="static">
+                                                                <i class="bi bi-three-dots-vertical"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                                <li>
+                                                                    <a class="dropdown-item editar-item editar-historia" href="#" 
+                                                                    data-uid="${item.uid}"
+                                                                    data-titulo="${item.titulo || ''}"
+                                                                    data-descripcion="${item.descripcion || ''}"
+                                                                    data-prioridad="${item.prioridad || ''}"
+                                                                    data-valor="${item.valor_historia || ''}"
+                                                                    data-progreso="${item.progreso || ''}">
+                                                                        <i class="bi bi-pencil-square me-1"></i> Editar
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a class="dropdown-item eliminar-item text-danger" href="#" data-item-id="${item.sprint_uid}">
+                                                                        <i class="bi bi-box-arrow-left me-1"></i> Devolver
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
                                                         </div>
-                                                    ` : ''}
-                                                    <div class="dropup">
-                                                        <button class="btn btn-sm btn-secondary p-0 px-1" 
-                                                                type="button" 
-                                                                data-bs-toggle="dropdown" 
-                                                                aria-expanded="false" 
-                                                                data-bs-display="static">
-                                                            <i class="bi bi-three-dots-vertical"></i>
-                                                        </button>
-                                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                                            <li>
-                                                                <a class="dropdown-item editar-item editar-historia" href="#" 
-                                                                data-uid="${item.uid}"
-                                                                data-titulo="${item.titulo || ''}"
-                                                                data-descripcion="${item.descripcion || ''}"
-                                                                data-prioridad="${item.prioridad || ''}"
-                                                                data-valor="${item.valor_historia || ''}"
-                                                                data-progreso="${item.progreso || ''}">
-                                                                    <i class="bi bi-pencil-square me-1"></i> Editar
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <a class="dropdown-item eliminar-item text-danger" href="#" data-item-id="${item.sprint_uid}">
-                                                                    <i class="bi bi-box-arrow-left me-1"></i> Devolver
-                                                                </a>
-                                                            </li>
-                                                        </ul>
                                                     </div>
+
                                                 </div>
                                             </div>
                                         </div>

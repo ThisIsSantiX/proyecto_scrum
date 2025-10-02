@@ -30,22 +30,23 @@ class ProyectoController extends Controller
 
         $query = DB::table('proyectos')
             ->select(
-                'proyectos.*',
-                'users.username as usuario_username',
-                'users.email as usuario_email'
+            'proyectos.*',
+            DB::raw("CONCAT(users.nombre, ' ', users.apellido) as usuario_nombre_completo"),
+            'users.email as usuario_email',
+            'users.foto_url as usuario_foto'
             )
             ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
             ->leftJoin('miembros_equipos', 'proyectos.id', '=', 'miembros_equipos.id_proyecto')
             ->where('proyectos.estado', 1)
             ->where(function($q) use ($userId) {
-                $q->where('proyectos.id_owner', $userId)
-                ->orWhere('miembros_equipos.id_usuario', $userId);
+            $q->where('proyectos.id_owner', $userId)
+            ->orWhere('miembros_equipos.id_usuario', $userId);
             });
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('proyectos.nombre', 'LIKE', '%' . $request->search . '%')
-                ->orWhere('users.username', 'LIKE', '%' . $request->search . '%');
+            $q->where('proyectos.nombre', 'LIKE', '%' . $request->search . '%')
+            ->orWhere(DB::raw("CONCAT(users.nombre, ' ', users.apellido)"), 'LIKE', '%' . $request->search . '%');
             });
         }
 
@@ -118,8 +119,9 @@ class ProyectoController extends Controller
                 })
                 ->select(
                     'proyectos.*',
-                    'users.username as usuario_username',
+                    DB::raw("CONCAT(users.nombre, ' ', users.apellido) as usuario_nombre_completo"),
                     'users.email as usuario_email',
+                    'users.foto_url as usuario_foto', // 👈 sin procesar
                     DB::raw('COUNT(DISTINCT product_backlog.id) as total_elementos'),
                     DB::raw('COUNT(DISTINCT sprints.id) as total_sprints')
                 )
@@ -137,8 +139,11 @@ class ProyectoController extends Controller
                     'proyectos.fecha_fin',
                     'proyectos.created_at',
                     'proyectos.updated_at',
+                    'users.nombre',
+                    'users.apellido',
                     'users.username',
-                    'users.email'
+                    'users.email',
+                    'users.foto_url'
                 )
                 ->first();
 
@@ -160,7 +165,6 @@ class ProyectoController extends Controller
             ], 500);
         }
     }
-
 
     // Función edit
     public function edit($uid)
@@ -345,7 +349,7 @@ class ProyectoController extends Controller
             return response()->json([
                 'message' => 'Invitacion enviada exitosamente',
                 'invitacion' => [
-                    'usuario' => $usuarioInvitado->username,
+                    'usuario' => $usuarioInvitado->nombre . ' ' . $usuarioInvitado->apellido,
                     'email' => $usuarioInvitado->email,
                     'proyecto' => $proyecto->nombre
                 ]
