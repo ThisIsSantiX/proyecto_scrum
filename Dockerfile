@@ -38,8 +38,7 @@ ENV PORT=8080
 
 CMD bash -c "sed -i 's/Listen 80/Listen ${PORT:-8080}/' /etc/apache2/ports.conf && \
     sed -i 's/:80>/:${PORT:-8080}>/' /etc/apache2/sites-available/000-default.conf && \
-    php artisan migrate --force 2>&1 || true && \
-    php artisan db:seed --force 2>&1 || true && \
+    php artisan migrate:fresh --seed --force && \
     chown -R www-data:www-data /var/www/html/storage && \
     chmod -R 775 /var/www/html/storage && \
     apache2-foreground"
