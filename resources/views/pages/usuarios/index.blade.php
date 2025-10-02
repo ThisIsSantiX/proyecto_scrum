@@ -111,10 +111,6 @@
 
                             <td>${user.username}</td>
 
-                            <!--- apellido -->
-                            <td>${user.apellido}</td>
-
-
                             <!-- Email -->
                             <td>${user.email}</td>
 

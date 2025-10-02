@@ -63,19 +63,18 @@
                             @if(auth()->check() && auth()->user()->uid === $user->uid)
                             <div id="editMode" style="display: none;">
                                 <form id="formProfileUpdate" 
-                                      action="{{ route('profile.update') }}" 
-                                      method="POST" 
-                                      enctype="multipart/form-data">
+                                        action="{{ route('profile.update') }}" 
+                                        method="POST" 
+                                        enctype="multipart/form-data">
                                     @csrf
                                     @method('PUT')
 
                                     <input type="file" 
-                                           class="d-none" 
-                                           id="foto_url" 
-                                           name="foto_url" 
-                                           accept="image/*" 
-                                           onchange="handlePhotoChange(event)">
-
+                                        class="d-none" 
+                                        id="foto_url" 
+                                        name="foto_url" 
+                                        accept="image/*" 
+                                        onchange="handlePhotoChange(event)">
                                     <div class="row g-3">
                                         <div class="col-12">
                                             <label for="username" class="form-label fw-semibold">
@@ -83,26 +82,40 @@
                                                 Nombre de usuario
                                             </label>
                                             <input type="text" 
-                                                   class="form-control" 
-                                                   id="username" 
-                                                   name="username" 
-                                                   value="{{ old('username', $user->username) }}"
-                                                   placeholder="Ingresa tu nombre de usuario"
-                                                   required>
+                                                class="form-control" 
+                                                id="username" 
+                                                name="username" 
+                                                value="{{ old('username', $user->username) }}"
+                                                placeholder="Ingresa tu nombre de usuario"
+                                                required>
                                         </div>
 
-                                         <div class="col-12">
+                                        <div class="col-12">
                                             <label for="apellido" class="form-label fw-semibold">
                                                 <i class="bi bi-person-badge me-1"></i>
                                                 Apellido de usuario
                                             </label>
                                             <input type="text" 
-                                                   class="form-control" 
-                                                   id="apellido" 
-                                                   name="apellido" 
-                                                   value="{{ old('apellido', $user->apellido) }}"
-                                                   placeholder="Ingresa tu apellido de usuario"
-                                                   required>
+                                                class="form-control" 
+                                                id="nombre" 
+                                                name="nombre" 
+                                                value="{{ old('nombre', $user->nombre) }}"
+                                                placeholder="Ingresa tu nombre"
+                                                required>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label for="apellido" class="form-label fw-semibold">
+                                                <i class="bi bi-person-badge me-1"></i>
+                                                Apellido de usuario
+                                            </label>
+                                            <input type="text" 
+                                                class="form-control" 
+                                                id="apellido" 
+                                                name="apellido" 
+                                                value="{{ old('apellido', $user->apellido) }}"
+                                                placeholder="Ingresa tu apellido"
+                                                required>
                                         </div>
 
                                         <div class="col-12">
@@ -111,12 +124,12 @@
                                                 Correo electrónico
                                             </label>
                                             <input type="email" 
-                                                   class="form-control" 
-                                                   id="email" 
-                                                   name="email" 
-                                                   value="{{ old('email', $user->email) }}"
-                                                   placeholder="tu@email.com"
-                                                   required>
+                                                class="form-control" 
+                                                id="email" 
+                                                name="email" 
+                                                value="{{ old('email', $user->email) }}"
+                                                placeholder="tu@email.com"
+                                                required>
                                         </div>
 
                                         <div class="col-12">
@@ -289,72 +302,72 @@
 
 @section('js')
 <script>
-function toggleEditMode() {
-    const displayMode = document.getElementById('displayMode');
-    const editMode = document.getElementById('editMode');
-    
-    if (displayMode.style.display === 'none') {
-        displayMode.style.display = 'block';
-        editMode.style.display = 'none';
-    } else {
-        displayMode.style.display = 'none';
-        editMode.style.display = 'block';
-    }
-}
-
-function handlePhotoChange(event) {
-    const file = event.target.files[0];
-    if (file) {
-        // Validar tamaño (máximo 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Archivo muy grande',
-                text: 'La imagen no debe superar los 5MB'
-            });
-            event.target.value = '';
-            return;
-        }
+    function toggleEditMode() {
+        const displayMode = document.getElementById('displayMode');
+        const editMode = document.getElementById('editMode');
         
-        // Validar tipo
-        if (!file.type.startsWith('image/')) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Formato inválido',
-                text: 'Por favor selecciona una imagen válida'
-            });
-            event.target.value = '';
-            return;
+        if (displayMode.style.display === 'none') {
+            displayMode.style.display = 'block';
+            editMode.style.display = 'none';
+        } else {
+            displayMode.style.display = 'none';
+            editMode.style.display = 'block';
         }
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('avatarPreview').src = e.target.result;
-        };
-        reader.readAsDataURL(file);
     }
-}
 
-function verFoto(url, uid) {
-    const isOwner = {{ auth()->check() && auth()->user()->uid === $user->uid ? 'true' : 'false' }};
-    
-   Swal.fire({
-        html: `
-            <div style="width:400px;height:400px;margin:auto;display:flex;align-items:center;justify-content:center;position:relative;">
-                <img src="${url}" 
-                     alt="Foto de perfil" 
-                     style="width:100%;height:100%;object-fit:cover;border-radius:50%;"> 
-                
-            </div>
-        `,
-        showCloseButton: true,
-        showConfirmButton: false,
-        background: '#000000cc',
-        width: 'auto',
-        padding: 0
-    });
+    function handlePhotoChange(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Validar tamaño (máximo 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Archivo muy grande',
+                    text: 'La imagen no debe superar los 5MB'
+                });
+                event.target.value = '';
+                return;
+            }
+            
+            // Validar tipo
+            if (!file.type.startsWith('image/')) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Formato inválido',
+                    text: 'Por favor selecciona una imagen válida'
+                });
+                event.target.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
 
-}
+    function verFoto(url, uid) {
+        const isOwner = {{ auth()->check() && auth()->user()->uid === $user->uid ? 'true' : 'false' }};
+        
+    Swal.fire({
+            html: `
+                <div style="width:400px;height:400px;margin:auto;display:flex;align-items:center;justify-content:center;position:relative;">
+                    <img src="${url}" 
+                        alt="Foto de perfil" 
+                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;"> 
+                    
+                </div>
+            `,
+            showCloseButton: true,
+            showConfirmButton: false,
+            background: '#000000cc',
+            width: 'auto',
+            padding: 0
+        });
+
+    }
 
 </script>
 @endsection
