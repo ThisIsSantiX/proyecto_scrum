@@ -107,7 +107,7 @@
 
 
                             <!-- Nombre -->
-                            <td>${user.nombre} ${user.apellido}</td>
+                            <td>${user.nombre} ${user.apellido || ''}</td>
 
                             <td>${user.username}</td>
 

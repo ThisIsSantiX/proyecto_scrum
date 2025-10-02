@@ -24,7 +24,7 @@ class ProyectoInvitaciones extends Model
     ];
 
     public function proyecto(){
-        return $this->belongsTo(proyecto::class,'proyecto_id');
+        return $this->belongsTo(Proyecto::class,'proyecto_id');
     }
 
     public function invitadoPor(){
@@ -39,7 +39,7 @@ class ProyectoInvitaciones extends Model
         return $query->where('estadoInvitacion','pendiente')
                     ->where(function($q){
                         $q->whereNull('expira_en')
-                          ->orwhere('expira_en','>',now());
+                        ->orwhere('expira_en','>',now());
                     });
     }
 

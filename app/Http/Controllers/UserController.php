@@ -205,14 +205,13 @@ class UserController extends Controller
 
     $request->validate([
         'nombre'    => 'required|string|max:50',
-        'apellido'    => 'required|string|max:50',
         'username'    => 'required|string|max:50',
         'apellido'  => 'required|string|max:50',
         'email'     => 'required|email|max:255|unique:users,email,' . $user->id,
         'foto_url'  => 'nullable|file|image|max:2048',
     ]);
 
-    $data = $request->only(['nombre', 'apellido','username', 'apellido', 'email']);
+    $data = $request->only(['nombre','username', 'apellido', 'email']);
 
     if ($request->hasFile('foto_url')) {
         $data['foto_url'] = $request->file('foto_url')->store('usuarios', 'public');

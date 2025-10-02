@@ -114,8 +114,7 @@
                                                 id="apellido" 
                                                 name="apellido" 
                                                 value="{{ old('apellido', $user->apellido) }}"
-                                                placeholder="Ingresa tu apellido"
-                                                required>
+                                                placeholder="Ingresa tu apellido">
                                         </div>
 
                                         <div class="col-12">

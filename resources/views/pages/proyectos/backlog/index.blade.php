@@ -2110,11 +2110,7 @@
                         enableDragAndDrop();
                     }
                 } else {
-<<<<<<<<< Temporary merge branch 1
                     console.error('Error completo:', res); 
-=========
-                    console.error('Error completo:', err.response);
->>>>>>>>> Temporary merge branch 2
                     console.error('Datos enviados:', datos);
                     notyf.error(res.data.message || 'Error al actualizar la historia');
                 }
