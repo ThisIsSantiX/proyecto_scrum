@@ -30,15 +30,16 @@
                                 <div class="col-lg-12">
                                     <div class="form-group">
                                         <label for="email" class="form-label">Correo</label>
-                            
                                         <input type="email" class="form-control" name="email" id="email" aria-describedby="email" placeholder=" ">
-
+                                        <div class="invalid-feedback">El correo es obligatorio</div>
                                     </div>
                                 </div>
+
                                 <div class="col-lg-12">
                                     <div class="form-group">
                                         <label for="password" class="form-label">Contraseña</label>
                                         <input type="password" class="form-control" name="password" id="password" aria-describedby="password" placeholder=" ">
+                                        <div class="invalid-feedback">La contraseña es obligatoria</div>
                                     </div>
                                 </div>
                                 <div class="col-lg-12 d-flex justify-content-between">
@@ -50,8 +51,9 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-primary">Iniciar sesion</button>
+                                <button type="submit" id="btnLogin" class="btn btn-primary">Iniciar sesión</button>
                             </div>
+
                             <div class="d-flex flex-column align-items-center mt-3 mb-3">
                                 <p>O continúa con</p>
 
@@ -99,36 +101,76 @@
                 var password = $('#password').val().trim();
 
                 if (email === '' || password === '') {
-                    notyf.error('Completa todos los campos');
+                    $('#email').removeClass('is-invalid');
+                    $('#password').removeClass('is-invalid');
+
+                    if (email === '') {
+                        $('#email').addClass('is-invalid');
+                    }
+                    if (password === '') {
+                        $('#password').addClass('is-invalid');
+                    }
                     return;
+                } else {
+                    $('#email').removeClass('is-invalid');
+                    $('#password').removeClass('is-invalid');
                 }
 
-                const loading = notyf.open({
-                    type: 'info',
-                    message: 'Iniciando sesión...',
-                    background: '#3B82F6', 
-                    duration: 0 // ⏳ 
-                });
+
+                let $btn = $('#btnLogin');
+                let originalText = $btn.data('original-text');
+                if (!originalText) {
+                    originalText = $btn.text();
+                    $btn.data('original-text', originalText);
+                }
+
+                $btn.prop('disabled', true).html(`
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Iniciando sesión...
+                `);
 
                 $.ajax({
                     type: 'POST',
                     url: $(this).attr('action'),
                     data: $(this).serialize(),
                     success: function(response) {
-                        notyf.dismiss(loading);
-
                         if (response.status === 'success') {
                             notyf.success('Inicio de sesión exitoso');
                             setTimeout(function() {
-                                window.location.href = '/dashboard'; 
+                                window.location.href = '/dashboard';
                             }, 1700);
                         } else {
                             notyf.error(response.message || 'Error en el inicio de sesión');
+                            $btn.prop('disabled', false).html(originalText);
                         }
                     },
-                    error: function() {
-                        notyf.dismiss(loading);
-                        notyf.error('Error en el servidor');
+                    error: function(xhr) {
+                        let res = xhr.responseJSON;
+
+                        if (xhr.status === 429) {
+                            let seconds = res?.retry_after || 60;
+
+                            // Contador en el botón
+                            let countdown = setInterval(() => {
+                                if (seconds > 0) {
+                                    $btn.html(`Reintenta en ${seconds--}s`);
+                                } else {
+                                    clearInterval(countdown);
+                                    $btn.prop('disabled', false).html(originalText);
+                                }
+                            }, 1000);
+
+                            notyf.error(res?.message || `Demasiados intentos. Espera ${seconds}s`);
+                        } 
+                        else if (xhr.status === 422) {
+                            const errors = res.errors;
+                            Object.values(errors).forEach(err => notyf.error(err[0]));
+                            $btn.prop('disabled', false).html(originalText);
+                        } 
+                        else {
+                            notyf.error('Error en el servidor');
+                            $btn.prop('disabled', false).html(originalText);
+                        }
                     }
                 });
             });
