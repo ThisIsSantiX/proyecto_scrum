@@ -2570,6 +2570,11 @@
                                 <i class="bi bi-pencil-square me-2"></i>Editar
                             </a>
                         </li>
+                        <li>
+                            <a class="dropdown-item agregar-usuario-tablero" href="#" data-product-uid="${item.product_uid || item.uid}" data-sprint-uid="${item.sprint_uid || ''}">
+                                <i class="bi bi-person-plus me-2"></i>Agregar usuario
+                            </a>
+                        </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item text-danger eliminar-historia-tablero" href="#" data-product-uid="${item.product_uid || item.uid}">
@@ -2586,21 +2591,18 @@
         `;
 
         //Evento para poder abrir la modal de asignar miembros
-        card.addEventListener('click', function(e){
-            //evitar que se abra la modal al darle click a las opciones
-            if(e.target.closest('.dropdown, .editar-historia-tablero, .eliminar-historia-tablero')) return;
-
+        $(document).off('click','.agregar-usuario-tablero').on('click','.agregar-usuario-tablero', function (e){
+            e.preventDefault
             const proyectoUID = $('#tablero').data('proyecto');
             const sprintUID = $('#tablero').data('sprint');
-            const itemUID = item.product_uid || item.uid;
+            const itemUID  = $(this).data('product-uid');
 
             $('#asignar_proyecto_uid').val(proyectoUID);
             $('#asignar_sprint_uid').val(sprintUID);
             $('#asignar_item_uid').val(itemUID);
 
-            let miembrosSeleccinados = []; // limpiar seleccion previa
+            let miembrosSeleccionados = [];
 
-            //cargar miembros del equipo
             axios.get(`/proyectos/${proyectoUID}/miembros`)
                 .then(res => {
                     const miembros = res.data.miembros || [];
