@@ -30,23 +30,23 @@ class ProyectoController extends Controller
 
         $query = DB::table('proyectos')
             ->select(
-            'proyectos.*',
-            DB::raw("CONCAT(users.nombre, ' ', users.apellido) as usuario_nombre_completo"),
-            'users.email as usuario_email',
-            'users.foto_url as usuario_foto'
+                'proyectos.*',
+                DB::raw("CONCAT(users.nombre, ' ', users.apellido) as usuario_nombre_completo"),
+                'users.email as usuario_email',
+                'users.foto_url as usuario_foto'
             )
             ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
             ->leftJoin('miembros_equipos', 'proyectos.id', '=', 'miembros_equipos.id_proyecto')
             ->where('proyectos.estado', 1)
-            ->where(function($q) use ($userId) {
-            $q->where('proyectos.id_owner', $userId)
-            ->orWhere('miembros_equipos.id_usuario', $userId);
+            ->where(function ($q) use ($userId) {
+                $q->where('proyectos.id_owner', $userId)
+                    ->orWhere('miembros_equipos.id_usuario', $userId);
             });
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-            $q->where('proyectos.nombre', 'LIKE', '%' . $request->search . '%')
-            ->orWhere(DB::raw("CONCAT(users.nombre, ' ', users.apellido)"), 'LIKE', '%' . $request->search . '%');
+                $q->where('proyectos.nombre', 'LIKE', '%' . $request->search . '%')
+                    ->orWhere(DB::raw("CONCAT(users.nombre, ' ', users.apellido)"), 'LIKE', '%' . $request->search . '%');
             });
         }
 
@@ -109,11 +109,11 @@ class ProyectoController extends Controller
         try {
             $proyecto = DB::table('proyectos')
                 ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
-                ->leftJoin('product_backlog', function($join) {
+                ->leftJoin('product_backlog', function ($join) {
                     $join->on('proyectos.id', '=', 'product_backlog.id_proyecto')
                         ->where('product_backlog.estado', '=', 1);
                 })
-                ->leftJoin('sprints', function($join) {
+                ->leftJoin('sprints', function ($join) {
                     $join->on('proyectos.id', '=', 'sprints.id_proyecto')
                         ->where('sprints.estado', '=', 1);
                 })
@@ -153,6 +153,16 @@ class ProyectoController extends Controller
                     'message' => 'Proyecto no encontrado'
                 ], 404);
             }
+
+            \App\Models\ProyectoReciente::updateOrCreate(
+                [
+                    'id_usuario' => auth()->id(),
+                    'id_proyecto' => $proyecto->id
+                ],
+                [
+                    'opened_at' => now()
+                ]
+            );
 
             return response()->json([
                 'success' => true,
@@ -454,25 +464,93 @@ class ProyectoController extends Controller
         }
     }
 
-    
+
     public function proyectosRecientes()
     {
         try {
-            $proyectos = ProyectoReciente::with(['propietario', 'miembros.usuario'])
-                ->recientes()
-                ->take(5) // últimos 5 proyectos
+            $userId = auth()->id();
+
+            $recientes = DB::table('proyecto_recientes')
+                ->join('proyectos', 'proyecto_recientes.id_proyecto', '=', 'proyectos.id')
+                ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
+                ->select(
+                    'proyectos.uid',
+                    'proyectos.nombre',
+                    'proyectos.descripcion',
+                    'proyectos.progreso',
+                    'proyectos.visibilidad',
+                    'proyectos.fecha_inicio',
+                    'proyectos.fecha_fin',
+                    'proyectos.created_at',
+                    'proyectos.updated_at',
+                    'users.nombre as usuario_nombre',
+                    DB::raw("CONCAT(users.nombre, ' ', users.apellido) as usuario_nombre_completo"),
+                    'users.email as usuario_email',
+                    'users.foto_url as usuario_foto',
+                    'proyecto_recientes.opened_at'
+                )
+                ->where('proyecto_recientes.id_usuario', $userId)
+                ->orderByDesc('proyecto_recientes.opened_at')
+                ->limit(5)
                 ->get();
 
             return response()->json([
                 'success' => true,
-                'data' => $proyectos
+                'data' => $recientes
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener proyectos recientes: ' . $e->getMessage()
             ], 500);
-        }  
+        }
     }
 
+    public function registrarAcceso($uid)
+    {
+        try {
+            $userId = auth()->id();
+
+            //Buscar el proyecto por UID
+            $proyecto = DB::table('proyectos')
+                ->where('uid', $uid)
+                ->first();
+            if (!$proyecto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Proyecto no encontrado'
+                ], 404);
+            }
+
+            //Verificar si existe un registro de un proyecto reciente
+            $existe = DB::table('proyecto_recientes')
+                ->where('id_usuario', $userId)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+            if ($existe) {
+                // Actualizar la fecha de acceso
+                DB::table('proyecto_recientes')
+                    ->where('id_usuario', $userId)
+                    ->where('id_proyecto', $proyecto->id)
+                    ->update(['opened_at' => now()]);
+            } else {
+                // Insertar nuevo registro
+                DB::table('proyecto_recientes')->insert([
+                    'id_usuario' => $userId,
+                    'id_proyecto' => $proyecto->id,
+                    'opened_at' => now(),
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Acesso registrado'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al registrar acceso: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

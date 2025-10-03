@@ -144,6 +144,9 @@ Route::get('/proyecto/{uid}', [ProyectoController::class, 'detailsProyecto'])->n
 Route::get('/proyectos/edit/{uid}', [ProyectoController::class, 'edit'])->name('editProyecto');
 Route::put('/proyectos/update', [ProyectoController::class, 'update'])->name('updateProyecto');
 Route::delete('/proyectos/delete/{uid}', [ProyectoController::class, 'destroy'])->name('deleteProyecto');
+Route::get('/proyectos/recientes', [ProyectoController::class, 'proyectosRecientes'])->middleware('auth')->name('proyectos.recientes');
+Route::post('/proyectos/{uid}/registrar-acceso', [ProyectoController::class, 'registrarAcceso'])
+    ->name('proyectos.registrar-acceso');
 
 // Rutas para la gestion del backlog
 Route::get('/proyectos/backlog/{uid}', [ProductBacklogController::class, 'index'])

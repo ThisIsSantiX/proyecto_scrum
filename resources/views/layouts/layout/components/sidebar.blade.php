@@ -68,40 +68,16 @@
                     </a>
                     <ul class="sub-nav collapse {{ request()->is('proyectos') || request()->is('recientes/*') ? 'show' : '' }}" id="sidebar-special" data-bs-parent="#sidebar-menu">
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('proyectos.index') ? 'active' : '' }}" href="{{ route('proyectos.index') }}">
+                            <a class="nav-link {{ request()->routeIs('proyectos.index') && !request()->has('view') ? 'active' : '' }}" href="{{ route('proyectos.index') }}">
                                 <i class="sidenav-mini-icon"> T </i>
                                 <span class="item-name">Todos</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->is('recientes/*') ? 'active' : '' }}" data-bs-toggle="collapse" href="#sidebar-recientes" role="button" aria-expanded="{{ request()->is('recientes/*') ? 'true' : 'false' }}" aria-controls="sidebar-recientes">
-                                <i class="right-icon">
-                                    <svg class="icon-18" xmlns="http://www.w3.org/2000/svg" width="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </i>
+                            <a class="nav-link {{ request()->get('view') === 'recientes' ? 'active' : '' }}" href="{{ route('proyectos.index') }}?view=recientes">
+                                <i class="sidenav-mini-icon"> R </i>
                                 <span class="item-name">Recientes</span>
                             </a>
-                            <ul class="sub-nav collapse {{ request()->is('recientes/*') ? 'show' : '' }}" id="sidebar-recientes" data-bs-parent="#sidebar-special">
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->is('recientes/todos') ? 'active' : '' }}" href="/recientes/todos">
-                                        <i class="sidenav-mini-icon"> T </i>
-                                        <span class="item-name">Todos</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->is('recientes/favoritos') ? 'active' : '' }}" href="/recientes/favoritos">
-                                        <i class="sidenav-mini-icon"> F </i>
-                                        <span class="item-name">Favoritos</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->is('recientes/archivados') ? 'active' : '' }}" href="/recientes/archivados">
-                                        <i class="sidenav-mini-icon"> A </i>
-                                        <span class="item-name">Archivados</span>
-                                    </a>
-                                </li>
-                            </ul>
                         </li>
 
 

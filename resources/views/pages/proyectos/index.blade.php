@@ -52,6 +52,29 @@
                     </div>
                 </div>
             </div>
+            <!-- Recientes Section -->
+            <div id="recientesSection" style="display:none;">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="header-title">
+                            <h4 class="card-title">Proyectos Recientes</h4>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" id="btnVerTodos">Ver todos</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="recientesLoading" class="text-center py-5" style="display:none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Cargando proyectos recientes...</p>
+                        </div>
+                        <div id="recientesEmpty" class="text-center py-5" style="display:none;">
+                            <h5 class="text-muted">No hay proyectos recientes</h5>
+                        </div>
+                        <div id="recientesContainer" class="row g-4"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -477,7 +500,7 @@
         background-color: #495057;
         color: white;
     }
-    
+
 
     .avatar-img {
         width: 40px;
@@ -508,21 +531,20 @@
         display: flex;
         align-items: center;
     }
-
 </style>
 @endsection
 
 @section('js')
 <script>
-        //cargarlos como una tarje en el detalle
-        function loadProjectUsers(uid) {
-            axios.get(`/miembros-equipo/${uid}`)
-                .then(function(response) {
-                    if (response.data.miembros && response.data.miembros.length > 0) {
-                        let html = '';
+    //cargarlos como una tarje en el detalle
+    function loadProjectUsers(uid) {
+        axios.get(`/miembros-equipo/${uid}`)
+            .then(function(response) {
+                if (response.data.miembros && response.data.miembros.length > 0) {
+                    let html = '';
 
-                        response.data.miembros.forEach(miembro => {
-                            html += `
+                    response.data.miembros.forEach(miembro => {
+                        html += `
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="d-flex align-items-center">
@@ -553,107 +575,123 @@
                                         </div>
                                     </div>
                                 </div>`;
-                        });
+                    });
 
-                        $("#projectUsersContainer").html(html);
+                    $("#projectUsersContainer").html(html);
+                } else {
+                    $("#projectUsersContainer").html('<p class="text-muted">No hay usuarios en este proyecto.</p>');
+                }
+            })
+            .catch(function(error) {
+                console.error("Error cargando miembros del proyecto:", error);
+                $("#projectUsersContainer").html('<p class="text-danger">Error al cargar usuarios.</p>');
+            });
+    }
+
+
+    $(document).ready(function() {
+        let searchTimeout;
+        let allProjects = [];
+
+        //verificar si hay que cargar los proyectos recientes
+        const urlParams = new URLSearchParams(window.location.search);
+        const showRecientes = urlParams.get('view') === 'recientes';
+
+        if (showRecientes) {
+            //mostrar recientes al cargar
+            $('#recientesSection').show();
+            $('.card:has(#projectsContainer)').hide();
+            loadRecientes();
+        } else {
+            // Mostrar todos por defecto
+            $("#recientesSection").hide();
+            $(".card:has(#projectsContainer)").show();
+            loadProjects();
+        }
+
+        // Cargar proyectos al inicializar
+        // loadProjects();
+
+        // Búsqueda en tiempo real
+        $('#searchInput').on('input', function() {
+            clearTimeout(searchTimeout);
+            const searchTerm = $(this).val().trim();
+
+            searchTimeout = setTimeout(function() {
+                if (searchTerm.length >= 2 || searchTerm.length === 0) {
+                    loadProjects(searchTerm);
+                }
+            }, 500);
+        });
+
+        function loadProjects(search = '') {
+            showLoading();
+
+            const params = search ? {
+                search: search
+            } : {};
+
+            axios.get('{{ route("showProyectos") }}', {
+                    params: params
+                })
+                .then(function(response) {
+                    if (response.data.success) {
+                        allProjects = response.data.data;
+                        renderProjects(allProjects, search);
                     } else {
-                        $("#projectUsersContainer").html('<p class="text-muted">No hay usuarios en este proyecto.</p>');
+                        notyf.error('Error al cargar los proyectos');
+                        showEmptyState();
                     }
                 })
                 .catch(function(error) {
-                    console.error("Error cargando miembros del proyecto:", error);
-                    $("#projectUsersContainer").html('<p class="text-danger">Error al cargar usuarios.</p>');
+                    console.error('Error:', error);
+                    notyf.error('Error al cargar los proyectos: ' + (error.response?.data?.message || error.message));
+                    showEmptyState();
                 });
         }
 
+        function renderProjects(projects, searchTerm = '') {
+            hideLoading();
 
-        $(document).ready(function() {
-            let searchTimeout;
-            let allProjects = [];
+            if (projects.length === 0) {
+                showEmptyState();
+                return;
+            }
 
-            // Cargar proyectos al inicializar
-            loadProjects();
+            const container = $('#projectsContainer');
+            container.empty().show();
+            $('#emptyState').hide();
 
-            // Búsqueda en tiempo real
-            $('#searchInput').on('input', function() {
-                clearTimeout(searchTimeout);
-                const searchTerm = $(this).val().trim();
+            projects.forEach(function(project) {
+                const card = createProjectCard(project, searchTerm);
+                container.append(card);
 
-                searchTimeout = setTimeout(function() {
-                    if (searchTerm.length >= 2 || searchTerm.length === 0) {
-                        loadProjects(searchTerm);
-                    }
-                }, 500);
+                const membersContainer = $(`#membersContainer_${project.uid}`);
+                loadMembers(project.uid, membersContainer);
             });
 
-            function loadProjects(search = '') {
-                showLoading();
+            // Animar las cartas
+            $('.project-card').each(function(index) {
+                $(this).css('opacity', 0).delay(index * 100).animate({
+                    opacity: 1
+                }, 300);
+            });
+        }
 
-                const params = search ? {
-                    search: search
-                } : {};
+        function createProjectCard(project, searchTerm = '') {
+            // Generar iniciales para el avatar
+            const initials = getInitials(project.usuario_nombre || 'Usuario');
 
-                axios.get('{{ route("showProyectos") }}', {
-                        params: params
-                    })
-                    .then(function(response) {
-                        if (response.data.success) {
-                            allProjects = response.data.data;
-                            renderProjects(allProjects, search);
-                        } else {
-                            notyf.error('Error al cargar los proyectos');
-                            showEmptyState();
-                        }
-                    })
-                    .catch(function(error) {
-                        console.error('Error:', error);
-                        notyf.error('Error al cargar los proyectos: ' + (error.response?.data?.message || error.message));
-                        showEmptyState();
-                    });
-            }
+            // Destacar términos de búsqueda
+            const highlightedTitle = highlightSearchTerm(project.nombre || 'Sin título', searchTerm);
+            const highlightedOwner = highlightSearchTerm(project.usuario_nombre_completo || 'Usuario desconocido', searchTerm);
 
-            function renderProjects(projects, searchTerm = '') {
-                hideLoading();
+            // Determinar el progreso/estado
+            const progress = project.progreso;
+            const progressText = progress;
+            const progressClass = getProgressClass(progress);
 
-                if (projects.length === 0) {
-                    showEmptyState();
-                    return;
-                }
-
-                const container = $('#projectsContainer');
-                container.empty().show();
-                $('#emptyState').hide();
-
-                projects.forEach(function(project) {
-                    const card = createProjectCard(project, searchTerm);
-                    container.append(card);
-
-                    const membersContainer = $(`#membersContainer_${project.uid}`);
-                    loadMembers(project.uid, membersContainer);
-                });
-
-                // Animar las cartas
-                $('.project-card').each(function(index) {
-                    $(this).css('opacity', 0).delay(index * 100).animate({
-                        opacity: 1
-                    }, 300);
-                });
-            }
-
-            function createProjectCard(project, searchTerm = '') {
-                // Generar iniciales para el avatar
-                const initials = getInitials(project.usuario_nombre || 'Usuario');
-
-                // Destacar términos de búsqueda
-                const highlightedTitle = highlightSearchTerm(project.nombre || 'Sin título', searchTerm);
-                const highlightedOwner = highlightSearchTerm(project.usuario_nombre_completo || 'Usuario desconocido', searchTerm);
-
-                // Determinar el progreso/estado
-                const progress = project.progreso;
-                const progressText = progress;
-                const progressClass = getProgressClass(progress);
-
-                return `
+            return `
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="card project-card">
                             <div class="project-header">
@@ -729,7 +767,7 @@
                         </div>
                     </div>
                 `;
-            }
+        }
 
         // función para listar a los miembros
         function loadMembers(uid, container) {
@@ -738,18 +776,98 @@
                     if (response.data.miembros && response.data.miembros.length > 0) {
                         let membersHtml = '';
 
-                response.data.miembros.forEach(miembro => {
-                    membersHtml += renderAvatar(miembro);
-                });
+                        response.data.miembros.forEach(miembro => {
+                            membersHtml += renderAvatar(miembro);
+                        });
 
-                container.html(membersHtml);
-            }
-        })
-        .catch(function(error) {
-            console.error("Error cargando miembros:", error);
-            container.html('<small class="text-danger">Error al cargar</small>');
+                        container.html(membersHtml);
+                    }
+                })
+                .catch(function(error) {
+                    console.error("Error cargando miembros:", error);
+                    container.html('<small class="text-danger">Error al cargar</small>');
+                });
+        }
+
+        //====================
+        //FUNCION PARA CARGAR LOS PROYECTOS RECIENTES
+        //====================
+        $('#btnRecientes').on('click', function(e){
+            e.preventDefault();
+
+            window.history.pushState({view: 'recientes'}, '', '{{ route("proyectos.index") }}?view=recientes');
+
+            $(".card:has(#projectsContainer)").hide();
+            $("#recientesSection").show();
+            loadRecientes();
+
         });
-}
+
+        $('#btnVerTodos').on('click', function(e){
+            e.preventDefault();
+
+            window.history.pushState({view: 'todos'}, '', '{{ route("proyectos.index") }}');
+
+            $('#recientesSection').hide();
+            $(".card:has(#projectsContainer)").show();
+        });
+
+        // **NUEVO: Manejar el botón "atrás" del navegador**
+        window.addEventListener('popstate', function(event) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const view = urlParams.get('view');
+            
+            if (view === 'recientes') {
+                $(".card:has(#projectsContainer)").hide();
+                $("#recientesSection").show();
+                loadRecientes();
+            } else {
+                $("#recientesSection").hide();
+                $(".card:has(#projectsContainer)").show();
+            }
+        });
+
+        function loadRecientes() {
+            $("#recientesLoading").show();
+            $("#recientesEmpty").hide();
+            $("#recientesContainer").empty();
+
+            axios.get('{{ route("proyectos.recientes") }}')
+                .then(function(response) {
+                    $("#recientesLoading").hide();
+                    if (response.data.success && response.data.data.length > 0) {
+                        renderRecientes(response.data.data);
+                    } else {
+                        $("#recientesEmpty").show();
+                    }
+                })
+                .catch(function(error) {
+                    console.log(error);
+                    $("#recientesLoading").hide();
+                    $("#recientesEmpty").show();
+                    $("#recientesEmpty").text("Error al cargar proyectos recientes");
+                });
+        }
+
+        function renderRecientes(recientes){
+            const container = $('#recientesContainer');
+            container.empty();
+            recientes.forEach(function(project){
+                const card = createProjectCard(project);
+                container.append(card);
+                const membersContainer = $(`#membersContainer_${project.uid}`);
+                loadMembers(project.uid, membersContainer);
+            });
+            // **AÑADIDO: Animar las cartas de recientes también**
+            $('.project-card').each(function(index) {
+                $(this).css('opacity', 0).delay(index * 100).animate({
+                    opacity: 1
+                }, 300);
+            });
+        }
+
+        
+        //==============================
 
 
         // 🔹 Función que genera avatar según si hay foto o no
@@ -762,7 +880,7 @@
                 img.className = "avatar-img";
                 img.title = `${usuario.nombre} (${usuario.rol})`;
 
-                img.onerror = function () {
+                img.onerror = function() {
                     this.replaceWith(getFallbackAvatarElement(initials, usuario.nombre, usuario.rol));
                 };
 
@@ -803,14 +921,14 @@
             return div;
         }
 
-            //------------
+        //------------
 
-            document.addEventListener("DOMContentLoaded", function() {
-                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-                tooltipTriggerList.forEach(function(tooltipTriggerEl) {
-                    new bootstrap.Tooltip(tooltipTriggerEl)
-                })
-            });
+        document.addEventListener("DOMContentLoaded", function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
 
         // Funcion para crear un proyecto
         $(document).ready(function() {
@@ -1102,9 +1220,9 @@
 
                     if (p.usuario_foto) {
                         // Si es URL completa (http), la uso tal cual
-                        let fotoUrl = p.usuario_foto.startsWith('http')
-                            ? p.usuario_foto
-                            : `/storage/${p.usuario_foto}`;
+                        let fotoUrl = p.usuario_foto.startsWith('http') ?
+                            p.usuario_foto :
+                            `/storage/${p.usuario_foto}`;
 
                         avatarHtml = `
                             <img src="${fotoUrl}" 
@@ -1196,9 +1314,20 @@
     }
 
     $(document).on("click", ".project-link", function() {
+        // e.preventDefault();
+
         const uid = $(this).data("id");
         if (uid) {
-            window.location.href = `/proyectos/backlog/${uid}`;
+            //registrar el acceso primero
+            axios.post(`/proyectos/${uid}/registrar-acceso`)
+                .then(function(response) {
+                    window.location.href = `/proyectos/backlog/${uid}`;
+                })
+                .catch(function(error) {
+                    console.log('Error al registrar acceso: ', error);
+                    //se redirige de todas forma a la otra vista
+                    window.location.href = `/proyectos/backlog/${uid}`;
+                })
         }
     });
 
