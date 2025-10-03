@@ -110,7 +110,14 @@
         </div>
         <!-- Vista: Tablero -->
         <div id="tablero" style="display: none;">
-            <p>Aun no has iniciado un sprint, inicialo para visualizar el tablero!</p>
+            <div class="d-flex flex-column align-items-center justify-content-center py-5 text-muted">
+                <i class="bi bi-kanban-fill" style="font-size: 4rem;"></i>
+                <h3 class="mt-4 mb-2 fw-semibold" style="font-size: 2rem;">¡No hay ningún sprint iniciado!</h3>
+                <p class="lead mb-0" style="font-size: 1.25rem;">
+                    Para comenzar a trabajar en el tablero, inicia un sprint desde la sección <a class="fw-bold text-primary" onclick="mostrarSeccion('vista-pendiente')">Sprints</a>
+                    <br>
+                </p>
+            </div>
         </div>
             
         <div id="reuniones" style="display: none;">

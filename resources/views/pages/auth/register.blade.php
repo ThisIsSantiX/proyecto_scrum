@@ -43,38 +43,59 @@
                         <form id="registerForm" action="route{{ ('register') }}" method="POST">
                             @csrf
                             <div class="row">
-                                <div class="col-lg-12">
+                                <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="full-name" class="form-label">Nombre</label>
-                                        <input type="text" class="form-control" id="full-name" placeholder="Cesar Yepes" required>
+                                        <input type="text" class="form-control" id="full-name" placeholder="Ej: Juan" required>
                                         <div class="invalid-feedback">El nombre es obligatorio</div>
                                     </div>
                                 </div>
-                                <div class="col-lg-12">
+                                <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="full-name" class="form-label">Apellido</label>
-                                        <input type="text" class="form-control" id="last-name" placeholder="Yepes" required>
+                                        <input type="text" class="form-control" id="last-name" placeholder="Ej: Pérez" required>
                                         <div class="invalid-feedback">El apellido es obligatorio</div>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="form-group">
                                         <label for="email" class="form-label">Correo</label>
-                                        <input type="email" class="form-control" id="email" name="email" placeholder="example@gmail.com" required>
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="ejemplo@correo.com" required>
                                         <div class="invalid-feedback">Debes ingresar un correo válido</div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="password" class="form-label">Contraseña</label>
-                                        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required minlength="8">
-                                        <div class="invalid-feedback">Mínimo 8 caracteres</div>
-                                    </div> 
+                                        <input type="password" class="form-control" id="password" name="password" 
+                                            placeholder="Tu contraseña" required minlength="8">
+
+                                        <!-- Barra de fuerza -->
+                                        <div class="progress mt-2" style="height: 6px;">
+                                            <div id="password-strength" class="progress-bar bg-danger" role="progressbar" 
+                                                style="width: 0%"></div>
+                                        </div>
+
+                                        
+                                        <!-- Requisitos -->
+                                        <div class="form-text">
+                                            La contraseña debe tener al menos:
+                                            <ul id="password-rules" class="mb-0 small text-muted">
+                                                <li id="rule-length">8 caracteres</li>
+                                                <li id="rule-upper">Una mayúscula</li>
+                                                <li id="rule-lower">Una minúscula</li>
+                                                <li id="rule-number">Un número</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="invalid-feedback">La contraseña no cumple los requisitos</div>
+                                    </div>
                                 </div>
+
                                 <div class="col-lg-6">
                                     <div class="form-group position-relative">
                                         <label for="confirm-password" class="form-label">Confirmar Contraseña</label>
-                                        <input type="password" class="form-control" id="confirm-password" name="confirm-password" placeholder="••••••••" required>
+                                        <input type="password" class="form-control" id="confirm-password" name="confirm-password" placeholder="Repite tu contraseña" required>
                                         <div class="invalid-feedback">Las contraseñas no coinciden</div>
                                     </div>
                                 </div>
@@ -98,7 +119,41 @@
 
 @section('js')
     <script>
-        
+
+        // =============================
+        // Validación de fuerza contraseña
+        // =============================
+        $("#password").on("input", function () {
+            const password = $(this).val();
+
+            // Reglas
+            const hasLength = password.length >= 8;
+            const hasUpper  = /[A-Z]/.test(password);
+            const hasLower  = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+
+            // Actualizar reglas en la UI
+            $("#rule-length").css("color", hasLength ? "green" : "red");
+            $("#rule-upper").css("color", hasUpper ? "green" : "red");
+            $("#rule-lower").css("color", hasLower ? "green" : "red");
+            $("#rule-number").css("color", hasNumber ? "green" : "red");
+
+            // Calcular fuerza
+            let strength = hasLength + hasUpper + hasLower + hasNumber;
+            let strengthPercent = (strength / 4) * 100;
+
+            let $bar = $("#password-strength");
+            $bar.css("width", strengthPercent + "%");
+
+            if (strength <= 1) {
+                $bar.removeClass().addClass("progress-bar bg-danger");
+            } else if (strength === 2 || strength === 3) {
+                $bar.removeClass().addClass("progress-bar bg-warning");
+            } else {
+                $bar.removeClass().addClass("progress-bar bg-success");
+            }
+        });
+
 
         $(document).ready(function () {
             const notyf = new Notyf({
