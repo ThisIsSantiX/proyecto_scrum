@@ -1,5 +1,7 @@
 @extends('layouts.layout.layout')
 
+@section('title', 'Proyectos - WorkScrum')
+
 @section('content')
 
 <div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
@@ -531,6 +533,24 @@
         display: flex;
         align-items: center;
     }
+
+    @media (max-width: 576px) {
+        .card-header .d-flex.gap-2 {
+            flex-direction: column;      
+            align-items: stretch;       
+        }
+
+        .card-header .d-flex.gap-2 input {
+            width: 100% !important;    
+        }
+
+        .card-header .d-flex.gap-2 .btn-sm {
+            width: 100%;                
+            text-align: center;         
+        }
+    }
+
+
 </style>
 @endsection
 

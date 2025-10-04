@@ -43,13 +43,14 @@ class SprintController extends Controller
             // Validar datos
             $request->validate([
                 'nombre' => 'required|string|max:50',
-                'objetivo' => 'required|string',
+                'objetivo' => 'nullable|string|max:255',
                 'fecha_inicio' => 'required|date',
                 'fecha_fin' => 'required|date|after:fecha_inicio'
             ], [
                 'nombre.required' => 'El nombre del sprint es requerido',
                 'nombre.max' => 'El nombre del sprint no puede exceder 50 caracteres',
                 'objetivo.required' => 'El objetivo del sprint es requerido',
+                'objetivo.nullable' => 'El objetivo no se puede exceder de 255 caracteres',
                 'fecha_inicio.required' => 'La fecha de inicio es requerida',
                 'fecha_fin.required' => 'La fecha de fin es requerida',
                 'fecha_fin.after' => 'La fecha de fin debe ser posterior a la fecha de inicio'
@@ -145,7 +146,7 @@ class SprintController extends Controller
             $request->validate([
                 'uid' => 'required|string|exists:sprints,uid',
                 'nombre' => 'required|string|max:50',
-                'objetivo' => 'required|string',
+                'objetivo' => 'nullable|string|max:255',
                 'fecha_inicio' => 'required|date',
                 'fecha_fin' => 'required|date|after:fecha_inicio'
             ], [
@@ -154,6 +155,7 @@ class SprintController extends Controller
                 'nombre.required' => 'El nombre del sprint es requerido',
                 'nombre.max' => 'El nombre del sprint no puede exceder 50 caracteres',
                 'objetivo.required' => 'El objetivo del sprint es requerido',
+                'objetivo.nullable' => 'El objetivo no se puede exceder de 255 caracteres',
                 'fecha_inicio.required' => 'La fecha de inicio es requerida',
                 'fecha_fin.required' => 'La fecha de fin es requerida',
                 'fecha_fin.after' => 'La fecha de fin debe ser posterior a la fecha de inicio'
@@ -543,8 +545,8 @@ class SprintController extends Controller
         $request->validate([
             'titulo' => 'required|string|max:50',
             'descripcion' => 'nullable|string|max:255',
-            'prioridad' => 'required|string|in:Alta,Media,Baja',
-            'valor_historia' => 'required|integer|min:1|max:100',
+            'prioridad' => 'nullable|string|in:Alta,Media,Baja',
+            'valor_historia' => 'nullable|integer|min:1|max:100',
             'progreso' => 'required|string|in:Por hacer,En progreso,En revision,Completado'
         ]);
 

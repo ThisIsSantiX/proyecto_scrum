@@ -1,6 +1,6 @@
 @extends('layouts.layout.layout')
 
-@section('title', 'Scrum')
+@section('title', 'Home - WorkScrum')
 
 @section('css')
 <style>

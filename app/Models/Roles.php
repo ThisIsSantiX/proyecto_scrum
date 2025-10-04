@@ -15,5 +15,14 @@ class Roles extends Model
         'uid',
     ];
 
+    protected $table = 'roles';
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'role_users', 'role_id', 'user_id')
+                    ->withPivot('estado', 'uid')
+                    ->withTimestamps();
+    }
+
     protected $primaryKey = 'id';
 }

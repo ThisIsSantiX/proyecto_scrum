@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Daily_scrum extends Model
+class DailyScrum extends Model
 {
     use HasFactory;
 

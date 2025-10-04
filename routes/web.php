@@ -122,17 +122,17 @@ Route::get('/perfil/{username}', [UserController::class, 'profile'])
 Route::put('/perfil/update', [UserController::class, 'updateProfile'])->name('profile.update');
 
 // Rutas para gestión de usuarios
-Route::get('/usuarios', [UserController::class, 'index'])
-    ->name('usuarios.index')
-    ->middleware('auth');
-Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.create');
-Route::post('/usuarios/store', [UserController::class, 'store'])->name('usuarios.store');
-Route::get('/showUsuarios', [UserController::class, 'show'])->name('showUsuarios');
-Route::get('/usuarios/edit/{uid}', [UserController::class, 'edit'])->name('editUsuario');
-Route::put('/usuarios/update/{uid}', [UserController::class, 'update'])->name('updateUsuario');
-Route::delete('/usuarios/eliminar/{uid}', [UserController::class, 'destroy'])->name('deleteUsuario');
-Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
-Route::delete('/usuarios/{uid}/foto', [UserController::class, 'deleteFotoPerfil'])->name('deleteFotoUsuario');
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
+    Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.create');
+    Route::post('/usuarios/store', [UserController::class, 'store'])->name('usuarios.store');
+    Route::get('/showUsuarios', [UserController::class, 'show'])->name('showUsuarios');
+    Route::get('/usuarios/edit/{uid}', [UserController::class, 'edit'])->name('editUsuario');
+    Route::put('/usuarios/update/{uid}', [UserController::class, 'update'])->name('updateUsuario');
+    Route::delete('/usuarios/eliminar/{uid}', [UserController::class, 'destroy'])->name('deleteUsuario');
+    Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
+    Route::delete('/usuarios/{uid}/foto', [UserController::class, 'deleteFotoPerfil'])->name('deleteFotoUsuario');
+});
 
 //  Rutas para la gestion de proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
 Route::get('/proyectos', [ProyectoController::class, 'index'])

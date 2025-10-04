@@ -1,6 +1,6 @@
 @extends('layouts.layout.layout')
 
-@section('title', 'Scrum')
+@section('title', $proyecto->nombre . ' - Backlog - WorkScrum')
 
 @section('content')
 <div class="container-fluid content-inner mt-5 pt-4 py-0">
@@ -121,11 +121,61 @@
         </div>
             
         <div id="reuniones" style="display: none;">
-            <p>Aquí estarán las reuniones del proyecto.</p>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 px-2">
+                        <div class="card shadow">
+                            <!-- Header de Reuniones -->
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Reuniones</h5>
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#createModal" id="btnNuevaReunion">
+                                    <i class="fas fa-plus me-2"></i>Nueva Reunión
+                                </button>
+                            </div>
+                            
+                            <!-- Contenido de Reuniones -->
+                            <div class="card-body px-0">
+                                <div class="table-responsive"> 
+                                    <table class="table table-striped" id="dailyScrumTable" role="grid" data-bs-toggle="data-table">
+                                        <thead>
+                                            <tr class="ligth">
+                                                <th>Fecha Programada</th>
+                                                <th>Duración (min)</th>
+                                                <th>Proyecto</th>
+                                                <th>Sprint</th>
+                                                <th style="min-width: 120px">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dailyScrumTableBody">
+                                            <!-- Estado de Carga -->
+                                            <tr id="loadingRow">
+                                                <td colspan="5" class="text-center py-4">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Cargando...</span>
+                                                    </div>
+                                                    <p class="mt-2">Cargando reuniones...</p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Paginación -->
+                                <nav aria-label="Page navigation" class="mt-3" id="paginationContainer"
+                                    style="display: none;">
+                                    <ul class="pagination justify-content-center" id="pagination">
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="calendario" style="display: none;">
-            <div class="container-fluid">
+            <div class="container-fluid px-0">
                 <div class="row" style="height: 100%;">
 
                     <!-- Columna izquierda - Sprints -->
@@ -763,10 +813,183 @@
             </div>
         </div>
     </div>
-    <!-- Modal para Editar Historia de Usuario que esta en el sprint -->
+
+    <!-- MODAL: CREAR REUNIÓN -->
+    <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createModalLabel">Crear Nueva Reunión</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createForm" method="POST" action="{{ route('storeDailyScrum', $proyecto->uid) }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha" class="form-label">Fecha *</label>
+                                <input type="date" class="form-control" id="fecha" name="fecha" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="duracion" class="form-label">Duración (minutos) *</label>
+                                <input type="number" class="form-control" id="duracion" name="duracion" min="1" max="15" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_proyectos" class="form-label">Proyecto *</label>
+                                <select class="form-select" id="id_proyectos" name="id_proyectos" required>
+                                    <option value="">Seleccionar proyecto...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_sprints" class="form-label">Sprint *</label>
+                                <select class="form-select" id="id_sprints" name="id_sprints" required>
+                                    <option value="">Seleccionar sprint...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="URL" class="form-label">URL de la Reunión</label>
+                            <input type="url" class="form-control" id="URL" name="URL"
+                                placeholder="https://ejemplo.com/reunion">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveDailyScrum">
+                        <span class="btn-loading" style="display: none;">
+                            <span class="spinner-border spinner-border-sm me-2"></span> Guardando...
+                        </span>
+                        <span class="btn-text">Guardar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR REUNIÓN -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Editar Reunión</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm" method="POST" action="{{ route('updateDailyScrum', $proyecto->uid) }}">
+                        <input type="hidden" name="_method" value="PUT">
+                        <input type="hidden" id="edit_uid" name="uid">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_fecha" class="form-label">Fecha *</label>
+                                <input type="date" class="form-control" id="edit_fecha" name="fecha" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_duracion" class="form-label">Duración (minutos) *</label>
+                                <input type="number" class="form-control" id="edit_duracion" name="duracion" min="1" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_id_proyectos" class="form-label">Proyecto *</label>
+                                <select class="form-select" id="edit_id_proyectos" name="id_proyectos" required>
+                                    <option value="">Seleccionar proyecto...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_id_sprints" class="form-label">Sprint *</label>
+                                <select class="form-select" id="edit_id_sprints" name="id_sprints" required>
+                                    <option value="">Seleccionar sprint...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_URL" class="form-label">URL de la Reunión</label>
+                            <input type="url" class="form-control" id="edit_URL" name="URL"
+                                placeholder="https://ejemplo.com/reunion">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_observaciones" class="form-label">Observaciones</label>
+                            <textarea class="form-control" id="edit_observaciones" name="observaciones" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_bloqueos_detectados" class="form-label">Bloqueos Detectados</label>
+                            <textarea class="form-control" id="edit_bloqueos_detectados" name="bloqueos_detectados" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_acuerdos" class="form-label">Acuerdos</label>
+                            <textarea class="form-control" id="edit_acuerdos" name="acuerdos" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="updateDailyScrum">
+                        <span class="btn-loading" style="display: none;">
+                            <span class="spinner-border spinner-border-sm me-2"></span> Actualizando...
+                        </span>
+                        <span class="btn-text">Actualizar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DETALLES REUNIÓN -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Detalles de la reunión</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <strong>Fecha:</strong> <span id="detail_fecha"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Duración:</strong> <span id="detail_duracion"></span> min
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <strong>Proyecto:</strong> <span id="detail_proyecto"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Sprint:</strong> <span id="detail_sprint"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-12">
+                            <strong>URL:</strong> <a id="detail_URL" href="#" target="_blank"></a>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-12">
+                            <strong>Observaciones:</strong>
+                            <div id="detail_observaciones" class="border rounded p-2 bg-light"></div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-12">
+                            <strong>Bloqueos detectados:</strong>
+                            <div id="detail_bloqueos" class="border rounded p-2 bg-light"></div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-12">
+                            <strong>Acuerdos:</strong>
+                            <div id="detail_acuerdos" class="border rounded p-2 bg-light"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
-
-
 
 @endsection
 
@@ -1005,7 +1228,6 @@
 
     /* Dropdown con colores oscuros */
     .custom-dropdown {
-        background-color: #2b2f38;
         /* gris oscuro */
         color: #f1f1f1;
         /* texto claro */
@@ -2579,7 +2801,7 @@
                         </li>
                         <li>
                             <a class="dropdown-item agregar-usuario-tablero" href="#" data-product-uid="${item.product_uid || item.uid}" data-sprint-uid="${item.sprint_uid || ''}">
-                                <i class="bi bi-person-plus me-2"></i>Agregar usuario
+                                <i class="bi bi-person-plus me-2"></i>Asignar usuarios
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
@@ -3519,5 +3741,460 @@
             if (menu.__toggle) positionMenu(menu, menu.__toggle);
         });
     });
+
+
+    // ========== MÓDULO DE REUNIONES (DAILY SCRUMS) ==========
+        $(document).ready(function() {
+            // Variables globales para reuniones
+            let reuniones = [];
+            let proyectos = [];
+            let sprints = [];
+            const proyectoUID = "{{ $proyecto->uid }}";
+            const proyectoID = "{{ $proyecto->id }}";
+
+            // Inicializar Notyf para notificaciones
+            const notyf = new Notyf({
+                duration: 4000,
+                position: {
+                    x: 'right',
+                    y: 'top',
+                }
+            });
+
+            // ========== INICIALIZACIÓN ==========
+            function inicializarReuniones() {
+                cargarReuniones();
+                cargarProyectos();
+                cargarSprints();
+                configurarEventListeners();
+            }
+
+            // ========== CONFIGURACIÓN DE EVENT LISTENERS ==========
+            function configurarEventListeners() {
+                $('#saveDailyScrum').on('click', crearReunion);
+                $('#updateDailyScrum').on('click', actualizarReunion);
+                $('#createModal').on('show.bs.modal', prepararModalCrear);
+                $('#editModal').on('show.bs.modal', prepararModalEditar);
+            }
+
+            // ========== FUNCIONES DE CARGA DE DATOS ==========
+            
+            // Cargar reuniones del proyecto
+            function cargarReuniones() {
+                $('#loadingRow').show();
+
+                axios.get(`/reuniones`)
+                    .then(function(response) {
+                        if (response.data.success) {
+                            // Filtrar reuniones por el proyecto actual
+                            reuniones = response.data.data.filter(reunion =>
+                                reunion.id_proyectos == proyectoID
+                            );
+                            mostrarReuniones();
+                        } else {
+                            notyf.error(response.data.message ||
+                                'Error al cargar las reuniones');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error al cargar reuniones:', error);
+                        notyf.error('Error al cargar las reuniones');
+                    })
+                    .finally(function() {
+                        $('#loadingRow').hide();
+                    });
+            }
+
+            // Cargar proyectos disponibles
+            function cargarProyectos() {
+                proyectos = [{
+                    id: proyectoID,
+                    nombre: "{{ $proyecto->nombre }}"
+                }];
+
+                // Llenar select de proyectos en modales
+                $('#id_proyectos, #edit_id_proyectos').empty();
+                proyectos.forEach(proyecto => {
+                    $('#id_proyectos').append(
+                        `<option value="${proyecto.id}">${proyecto.nombre}</option>`
+                    );
+                    $('#edit_id_proyectos').append(
+                        `<option value="${proyecto.id}">${proyecto.nombre}</option>`
+                    );
+                });
+            }
+
+            // Cargar sprints del proyecto
+            function cargarSprints() {
+                axios.get(`/proyectos/backlog/${proyectoUID}/sprints/show`)
+                    .then(function(response) {
+                        sprints = Array.isArray(response.data) ? response.data : [];
+                        
+                        // Llenar select de sprints en modales
+                        $('#id_sprints, #edit_id_sprints').empty();
+                        $('#id_sprints, #edit_id_sprints').append(
+                            '<option value="">Seleccionar sprint...</option>');
+
+                        if (sprints.length > 0) {
+                            sprints.forEach(sprint => {
+                                $('#id_sprints').append(
+                                    `<option value="${sprint.id}">${sprint.nombre}</option>`
+                                );
+                                $('#edit_id_sprints').append(
+                                    `<option value="${sprint.id}">${sprint.nombre}</option>`
+                                );
+                            });
+                        } else {
+                            $('#id_sprints, #edit_id_sprints').append(
+                                '<option value="">No hay sprints disponibles</option>'
+                            );
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error al cargar sprints:', error);
+                        notyf.error('Error al cargar los sprints');
+                        $('#id_sprints, #edit_id_sprints').append(
+                            '<option value="">Error al cargar sprints</option>');
+                    });
+            }
+
+            // ========== FUNCIONES DE VISUALIZACIÓN ==========
+            
+            // Mostrar reuniones en la tabla
+            function mostrarReuniones() {
+                const tbody = $('#dailyScrumTableBody');
+                tbody.empty();
+
+                if (reuniones.length === 0) {
+                    tbody.append(`
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <i class="fas fa-calendar-times fs-1 text-muted d-block mb-2"></i>
+                                <p class="text-muted small">No hay reuniones registradas</p>
+                                <button class="btn btn-sm btn-primary mt-1" data-bs-toggle="modal" data-bs-target="#createModal">
+                                    <i class="fas fa-plus me-1"></i> Crear primera reunión
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                    return;
+                }
+
+                reuniones.forEach(reunion => {
+                    const fecha = new Date(reunion.fecha).toLocaleDateString();
+                    const row = `
+                        <tr data-uid="${reunion.uid}">
+                            <td>${fecha}</td>
+                            <td>${reunion.duracion} min</td>
+                            <td>${reunion.proyecto_nombre || 'N/A'}</td>
+                            <td>${reunion.sprint_nombre || 'N/A'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info view-reunion" data-uid="${reunion.uid}" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-primary edit-reunion" data-uid="${reunion.uid}" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger delete-reunion" data-uid="${reunion.uid}" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+
+                // Agregar event listeners a los botones
+                $('.view-reunion').on('click', function() {
+                    const uid = $(this).data('uid');
+                    verReunion(uid);
+                });
+
+                $('.edit-reunion').on('click', function() {
+                    const uid = $(this).data('uid');
+                    abrirModalEditar(uid);
+                });
+
+                $('.delete-reunion').on('click', function() {
+                    const uid = $(this).data('uid');
+                    eliminarReunion(uid);
+                });
+            }
+
+            // ========== FUNCIONES DE MODALES ==========
+            
+            // Preparar modal de creación
+            function prepararModalCrear() {
+                $('#createForm')[0].reset();
+
+                // Establecer fecha actual por defecto
+                const today = new Date().toISOString().split('T')[0];
+                $('#fecha').val(today);
+
+                // Seleccionar el proyecto actual por defecto
+                $('#id_proyectos').val(proyectoID);
+
+                // Forzar recarga de sprints por si hay nuevos
+                cargarSprints();
+            }
+
+            // Preparar modal de edición
+            function prepararModalEditar() {
+                // Esta función se ejecuta cuando el modal se abre
+            }
+
+            // Abrir modal de edición
+            function abrirModalEditar(uid) {
+                const reunion = reuniones.find(r => r.uid === uid);
+
+                if (!reunion) {
+                    notyf.error('No se encontró la reunión');
+                    return;
+                }
+
+                // Llenar el formulario
+                $('#edit_uid').val(reunion.uid);
+                $('#edit_fecha').val(reunion.fecha);
+                $('#edit_duracion').val(reunion.duracion);
+                $('#edit_URL').val(reunion.URL || '');
+                $('#edit_id_proyectos').val(reunion.id_proyectos);
+                $('#edit_id_sprints').val(reunion.id_sprints);
+                $('#edit_observaciones').val(reunion.observaciones || '');
+                $('#edit_bloqueos_detectados').val(reunion.bloqueos_detectados || '');
+                $('#edit_acuerdos').val(reunion.acuerdos || '');
+
+                // Abrir modal
+                $('#editModal').modal('show');
+            }
+
+            // ========== FUNCIONES CRUD ==========
+            
+            // Crear nueva reunión
+            function crearReunion() {
+                const btn = $('#saveDailyScrum');
+                const loading = btn.find('.btn-loading');
+                const text = btn.find('.btn-text');
+
+                // Validar formulario
+                if (!$('#createForm')[0].checkValidity()) {
+                    $('#createForm')[0].reportValidity();
+                    return;
+                }
+
+                // Validar que se haya seleccionado un sprint
+                if (!$('#id_sprints').val()) {
+                    notyf.error('Por favor selecciona un sprint');
+                    return;
+                }
+
+                // Mostrar loading
+                loading.show();
+                text.hide();
+                btn.prop('disabled', true);
+
+                // Obtener datos del formulario
+                const formData = {
+                    fecha: $('#fecha').val(),
+                    duracion: $('#duracion').val(),
+                    URL: $('#URL').val(),
+                    id_proyectos: $('#id_proyectos').val(),
+                    id_sprints: $('#id_sprints').val(),
+                    observaciones: $('#observaciones').val(),
+                    bloqueos_detectados: $('#bloqueos_detectados').val(),
+                    acuerdos: $('#acuerdos').val()
+                };
+
+                axios.post(`/proyectos/backlog/${proyectoUID}/reuniones/store`, formData)
+                    .then(function(response) {
+                        if (response.data.success) {
+                            notyf.success(response.data.message);
+                            $('#createModal').modal('hide');
+                            cargarReuniones();
+                        } else {
+                            notyf.error(response.data.message ||
+                                'Error al crear la reunión');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error al crear reunión:', error);
+
+                        if (error.response && error.response.data && error.response.data
+                            .errors) {
+                            // Mostrar errores de validación
+                            const errors = error.response.data.errors;
+                            Object.keys(errors).forEach(key => {
+                                notyf.error(errors[key][0]);
+                            });
+                        } else if (error.response && error.response.data && error
+                            .response.data.message) {
+                            notyf.error(error.response.data.message);
+                        } else {
+                            notyf.error('Error al crear la reunión');
+                        }
+                    })
+                    .finally(function() {
+                        // Ocultar loading
+                        loading.hide();
+                        text.show();
+                        btn.prop('disabled', false);
+                    });
+            }
+
+            // Actualizar reunión existente
+            function actualizarReunion() {
+                const btn = $('#updateDailyScrum');
+                const loading = btn.find('.btn-loading');
+                const text = btn.find('.btn-text');
+
+                // Validar formulario
+                if (!$('#editForm')[0].checkValidity()) {
+                    $('#editForm')[0].reportValidity();
+                    return;
+                }
+
+                // Validar que se haya seleccionado un sprint
+                if (!$('#edit_id_sprints').val()) {
+                    notyf.error('Por favor selecciona un sprint');
+                    return;
+                }
+
+                // Mostrar loading
+                loading.show();
+                text.hide();
+                btn.prop('disabled', true);
+
+                // Obtener datos del formulario
+                const uid = $('#edit_uid').val();
+                const formData = {
+                    fecha: $('#edit_fecha').val(),
+                    duracion: $('#edit_duracion').val(),
+                    URL: $('#edit_URL').val(),
+                    id_proyectos: $('#edit_id_proyectos').val(),
+                    id_sprints: $('#edit_id_sprints').val(),
+                    observaciones: $('#edit_observaciones').val(),
+                    bloqueos_detectados: $('#edit_bloqueos_detectados').val(),
+                    acuerdos: $('#edit_acuerdos').val()
+                };
+
+                axios.put(`/proyectos/backlog/${uid}/reuniones/update`, {
+                        ...formData,
+                        uid: uid
+                    })
+                    .then(function(response) {
+                        if (response.data.success) {
+                            notyf.success(response.data.message);
+                            $('#editModal').modal('hide');
+                            cargarReuniones();
+                        } else {
+                            notyf.error(response.data.message ||
+                                'Error al actualizar la reunión');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error al actualizar reunión:', error);
+
+                        if (error.response && error.response.data && error.response.data
+                            .errors) {
+                            // Mostrar errores de validación
+                            const errors = error.response.data.errors;
+                            Object.keys(errors).forEach(key => {
+                                notyf.error(errors[key][0]);
+                            });
+                        } else if (error.response && error.response.data && error
+                            .response.data.message) {
+                            notyf.error(error.response.data.message);
+                        } else {
+                            notyf.error('Error al actualizar la reunión');
+                        }
+                    })
+                    .finally(function() {
+                        // Ocultar loading
+                        loading.hide();
+                        text.show();
+                        btn.prop('disabled', false);
+                    });
+            }
+
+            // Eliminar reunión
+            function eliminarReunion(uid) {
+                const isDark = $("body").hasClass("dark");
+
+                // Confirmación con SweetAlert
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: "Esta acción no se puede deshacer",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: isDark ? '#444' : '#aaa',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true,
+                    background: isDark ? '#1e1e2d' : '#fff',
+                    color: isDark ? '#f1f1f1' : '#000'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Enviar solicitud de eliminación
+                        axios.post(`/proyectos/backlog/${uid}/reuniones/destroy`, {
+                                uid: uid
+                            })
+                            .then(function(response) {
+                                if (response.data.success) {
+                                    notyf.success(response.data.message);
+                                    cargarReuniones();
+                                } else {
+                                    notyf.error(response.data.message ||
+                                        'Error al eliminar la reunión');
+                                }
+                            })
+                            .catch(function(error) {
+                                console.error('Error al eliminar reunión:',
+                                    error);
+                                notyf.error('Error al eliminar la reunión');
+                            });
+                    }
+                });
+            }
+
+            // Ver detalles de reunión
+            function verReunion(uid) {
+                const reunion = reuniones.find(r => r.uid === uid);
+
+                if (!reunion) {
+                    notyf.error('No se encontró la reunión');
+                    return;
+                }
+
+                // Formatear fecha
+                const fecha = new Date(reunion.fecha).toLocaleDateString();
+
+                // Llenar el modal de detalles
+                $('#detail_fecha').text(fecha);
+                $('#detail_duracion').text(reunion.duracion);
+                $('#detail_proyecto').text(reunion.proyecto_nombre || 'N/A');
+                $('#detail_sprint').text(reunion.sprint_nombre || 'N/A');
+
+                // URL
+                if (reunion.URL) {
+                    $('#detail_URL').attr('href', reunion.URL).text(reunion.URL);
+                } else {
+                    $('#detail_URL').attr('href', '#').text('No especificada');
+                }
+
+                // Campos de texto
+                $('#detail_observaciones').text(reunion.observaciones ||
+                    'No hay observaciones');
+                $('#detail_bloqueos').text(reunion.bloqueos_detectados ||
+                    'No se detectaron bloqueos');
+                $('#detail_acuerdos').text(reunion.acuerdos ||
+                'No se registraron acuerdos');
+
+                // Abrir modal
+                $('#detailsModal').modal('show');
+            }
+
+            // ========== INICIALIZAR MÓDULO ==========
+            inicializarReuniones();
+        });
 </script>
 @endsection

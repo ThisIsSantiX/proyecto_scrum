@@ -6,14 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Daily_scrum;
+use App\Models\DailyScrum;
 
 class DailyScrumController extends Controller
 {
     public function index()
     {
         try {
-            $dailies = Daily_scrum::with(['proyecto:id,id,nombre', 'sprint:id,id,nombre'])
+            $dailies = DailyScrum::with(['proyecto:id,id,nombre', 'sprint:id,id,nombre'])
                 ->where('estado', 1)
                 ->get();
 
@@ -73,7 +73,7 @@ class DailyScrumController extends Controller
                 ], 422);
             }
 
-            $daily = Daily_scrum::create([
+            $daily = DailyScrum::create([
                 'fecha' => $request->fecha,
                 'duracion' => $request->duracion,
                 'URL' => $request->URL,
@@ -106,7 +106,7 @@ class DailyScrumController extends Controller
     public function show($uid)
     {
         try {
-            $daily = Daily_scrum::with(['proyecto', 'sprint'])
+            $daily = DailyScrum::with(['proyecto', 'sprint'])
                 ->where('uid', $uid)
                 ->where('estado', 1)
                 ->first();
@@ -139,7 +139,7 @@ class DailyScrumController extends Controller
     public function update(Request $request, $uid)
     {
         try {
-            $daily = Daily_scrum::where('uid', $uid)
+            $daily = DailyScrum::where('uid', $uid)
                 ->where('estado', 1)
                 ->first();
 
@@ -200,7 +200,7 @@ class DailyScrumController extends Controller
     public function destroy($uid)
     {
         try {
-            $daily = Daily_scrum::where('uid', $uid)
+            $daily = DailyScrum::where('uid', $uid)
                 ->where('estado', 1)
                 ->first();
 

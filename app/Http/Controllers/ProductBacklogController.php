@@ -57,6 +57,15 @@ class ProductBacklogController extends Controller
 
     public function store(Request $request, $uid)
     {
+        // Validar los campos del request
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:50',
+            'descripcion' => 'nullable|string|255',
+            'prioridad' => 'nullable|integer|min:1',
+            'valor_historia' => 'nullable|integer|min:1',
+            'progreso' => 'required|string',
+        ]);
+
         try {
             // Buscar el proyecto por UID
             $proyecto = Proyecto::where('uid', $uid)->first();
@@ -68,15 +77,15 @@ class ProductBacklogController extends Controller
                 ], 404);
             }
 
-            // Crear la historia de usuario directamente con datos del request
+            // Crear la historia de usuario directamente con datos validados
             $historia = ProductBacklog::create([
                 'id_proyecto' => $proyecto->id,
                 'creado_por' => Auth::id(),
-                'titulo' => $request->titulo,
-                'descripcion' => $request->descripcion,
-                'prioridad' => $request->prioridad,
-                'valor_historia' => $request->valor_historia,
-                'progreso' => $request->progreso,
+                'titulo' => $validated['titulo'],
+                'descripcion' => $validated['descripcion'],
+                'prioridad' => $validated['prioridad'],
+                'valor_historia' => $validated['valor_historia'],
+                'progreso' => $validated['progreso'] ?? 0,
                 'estado' => 1,
                 'uid' => Str::uuid()
             ]);

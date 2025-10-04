@@ -3,6 +3,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
+@section('title', $user->username . ' - WorkScrum')
+
 @section('content')
 
 <div class="container-fluid content-inner mt-2 pt-3 py-0">
@@ -39,7 +41,8 @@
                             <div id="displayMode">
                                 <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                                     <div>
-                                        <h2 class="profile-username mb-2" id="displayUsername">{{ $user->username }} {{ $user->apellido }}</h2>
+                                        <h2 class="profile-username mb-2" id="displayUsername">{{ $user->nombre }} {{ $user->apellido }}</h2>
+                                        <p class="text-muted">{{$user->username}} </p>
                                         <div class="profile-meta">
                                             <div class="meta-item">
                                                 <i class="bi bi-envelope"></i>

@@ -93,10 +93,6 @@
                                     <label class="form-label">Email</label>
                                     <input type="email" name="email" id="email" class="form-control" value="{{ $user->email }}" required>
                                 </div>
-                                <div class="form-group col-md-6">
-                                    <label class="form-label">Contraseña (opcional)</label>
-                                    <input type="password" name="password" class="form-control" placeholder="Dejar vacío si no deseas cambiarla">
-                                </div>
                             </div>
                         
                             <div class="mt-4 d-flex justify-content-end">
