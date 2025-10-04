@@ -536,21 +536,19 @@
 
     @media (max-width: 576px) {
         .card-header .d-flex.gap-2 {
-            flex-direction: column;      
-            align-items: stretch;       
+            flex-direction: column;
+            align-items: stretch;
         }
 
         .card-header .d-flex.gap-2 input {
-            width: 100% !important;    
+            width: 100% !important;
         }
 
         .card-header .d-flex.gap-2 .btn-sm {
-            width: 100%;                
-            text-align: center;         
+            width: 100%;
+            text-align: center;
         }
     }
-
-
 </style>
 @endsection
 
@@ -612,6 +610,7 @@
     $(document).ready(function() {
         let searchTimeout;
         let allProjects = [];
+        let recientesLoaded = false;
 
         //verificar si hay que cargar los proyectos recientes
         const urlParams = new URLSearchParams(window.location.search);
@@ -812,10 +811,12 @@
         //====================
         //FUNCION PARA CARGAR LOS PROYECTOS RECIENTES
         //====================
-        $('#btnRecientes').on('click', function(e){
+        $('#btnRecientes').on('click', function(e) {
             e.preventDefault();
 
-            window.history.pushState({view: 'recientes'}, '', '{{ route("proyectos.index") }}?view=recientes');
+            window.history.pushState({
+                view: 'recientes'
+            }, '', '{{ route("proyectos.index") }}?view=recientes');
 
             $(".card:has(#projectsContainer)").hide();
             $("#recientesSection").show();
@@ -823,10 +824,12 @@
 
         });
 
-        $('#btnVerTodos').on('click', function(e){
+        $('#btnVerTodos').on('click', function(e) {
             e.preventDefault();
 
-            window.history.pushState({view: 'todos'}, '', '{{ route("proyectos.index") }}');
+            window.history.pushState({
+                view: 'todos'
+            }, '', '{{ route("proyectos.index") }}');
 
             $('#recientesSection').hide();
             $(".card:has(#projectsContainer)").show();
@@ -836,7 +839,7 @@
         window.addEventListener('popstate', function(event) {
             const urlParams = new URLSearchParams(window.location.search);
             const view = urlParams.get('view');
-            
+
             if (view === 'recientes') {
                 $(".card:has(#projectsContainer)").hide();
                 $("#recientesSection").show();
@@ -869,10 +872,10 @@
                 });
         }
 
-        function renderRecientes(recientes){
+        function renderRecientes(recientes) {
             const container = $('#recientesContainer');
             container.empty();
-            recientes.forEach(function(project){
+            recientes.forEach(function(project) {
                 const card = createProjectCard(project);
                 container.append(card);
                 const membersContainer = $(`#membersContainer_${project.uid}`);
@@ -885,11 +888,7 @@
                 }, 300);
             });
         }
-
-        
         //==============================
-
-
         // 🔹 Función que genera avatar según si hay foto o no
         function renderAvatar(usuario) {
             const initials = getInitials(usuario.nombre);
