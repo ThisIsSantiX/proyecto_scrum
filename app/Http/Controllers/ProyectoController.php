@@ -481,17 +481,6 @@ class ProyectoController extends Controller
                 ->select(
                     'proyectos.uid',
                     'proyectos.nombre',
-                    'proyectos.descripcion',
-                    'proyectos.progreso',
-                    'proyectos.visibilidad',
-                    'proyectos.fecha_inicio',
-                    'proyectos.fecha_fin',
-                    'proyectos.created_at',
-                    'proyectos.updated_at',
-                    'users.nombre as usuario_nombre',
-                    DB::raw("CONCAT(users.nombre, ' ', users.apellido) as usuario_nombre_completo"),
-                    'users.email as usuario_email',
-                    'users.foto_url as usuario_foto',
                     'proyecto_recientes.opened_at'
                 )
                 ->where('proyecto_recientes.id_usuario', $userId)
