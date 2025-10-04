@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Roles;
+use App\Models\RoleUser;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -37,10 +38,8 @@ class UserController extends Controller
     {
         $request->validate([
             'nombre'    => 'required|string|max:50',
-            'apellido'    => 'required|string|max:50',
-            'username'    => 'required|string|max:50',
+            'apellido'  => 'required|string|max:50',
             'email'     => 'required|email|unique:users,email',
-            'password'  => 'required|min:6|confirmed',
             'estado'    => 'required|in:1,0',
             'foto_url'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
@@ -57,17 +56,23 @@ class UserController extends Controller
                 } else {
                     $fotoPath = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
                 }
-
-
-                User::create([
-                    'nombre'      => $request->nombre,
-                    'apellido'    => $request->apellido,
-                    'username'    => Str::slug($request->nombre . '.' . $request->apellido) . rand(100, 999),
+                
+                $user = User::create([
+                    'nombre'    => $request->nombre,
+                    'apellido'  => $request->apellido,
+                    'username'  => Str::slug($request->nombre . '.' . $request->apellido) . rand(100, 999),
                     'email'     => $request->email,
-                    'password'  => Hash::make($request->password),
+                    'password'  => $request->nombre . $request->apellido . rand(10,99), // Contraseña temporal
                     'estado'    => $request->estado,
                     'foto_url'  => $fotoPath,
                     'uid'       => Str::uuid(),
+                ]);
+
+                RoleUser::create([
+                    'user_id' => $user->id,
+                    'role_id' => 4,
+                    'estado'  => 1,
+                    'uid'     => Str::uuid(),
                 ]);
             });
 
@@ -78,6 +83,7 @@ class UserController extends Controller
             return back()->withErrors(['error' => 'No se pudo crear el usuario, inténtalo de nuevo.']);
         }
     }
+
 
     /**
      * Mostrar un usuario específico
@@ -125,7 +131,6 @@ class UserController extends Controller
             'apellido'    => 'required|string|max:50',
             'username'    => 'required|string|max:50',
             'email'     => 'required|email|unique:users,email,' . $user->id,
-            'password'  => 'nullable|min:6|confirmed',
             'estado'    => 'required|in:1,0',
             'foto_url'  => 'nullable|file|image|max:2048',
             'id_rol'    => 'required|integer|exists:roles,id',

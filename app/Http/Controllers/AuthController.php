@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Models\RoleUser;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
@@ -40,7 +40,7 @@ class AuthController extends Controller
     // Esta función muestra la vista de confirmación de correo electrónico
     public function showMailSent()
     {
-        $email = session('email'); // obtiene el email que pusimos en with()
+        $email = session('email'); 
         return view('pages.auth.mail-sent', ['email' => $email]);
     }
 
@@ -102,29 +102,28 @@ class AuthController extends Controller
     // Número máximo de intentos
     protected function maxAttempts()
     {
-        return 3; // 5 intentos
+        return 3; 
     }
 
     // Tiempo de bloqueo
     protected function decayMinutes()
     {
-        return 1; // 1 minuto
+        return 1; 
     }
 
 
-
+    // Función de registro
     public function authRegister(Request $request)
     {
-        // Validación de datos de entrada
         $request->validate([
             'email'    => 'required|email|unique:users,email',
             'password' => [
                 'required',
                 'confirmed',
-                Password::min(8) // mínimo 8 caracteres
-                    ->letters() // al menos una letra
-                    ->mixedCase() // mayúsculas y minúsculas
-                    ->numbers() // al menos un número
+                Password::min(8)
+                    ->letters() 
+                    ->mixedCase()
+                    ->numbers()
             ],
             'nombre'   => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
@@ -140,9 +139,9 @@ class AuthController extends Controller
 
         try {
             $user = DB::transaction(function () use ($request) {
-                return User::create([
+                $user = User::create([
                     'nombre'   => $request->nombre,
-                    'apellido'   => $request->apellido,
+                    'apellido' => $request->apellido,
                     'username' => Str::slug($request->nombre . $request->apellido) . rand(100, 999),
                     'email'    => $request->email,
                     'password' => Hash::make($request->password),
@@ -150,6 +149,15 @@ class AuthController extends Controller
                     'foto_url' => "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff",
                     'uid'      => Str::uuid(),
                 ]);
+
+                RoleUser::create([
+                    'user_id' => $user->id,
+                    'role_id' => 4,
+                    'estado'  => 1,
+                    'uid'     => Str::uuid(),
+                ]);
+
+                return $user;
             });
 
             return response()->json([
@@ -166,6 +174,7 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
 
     public function sendRecoveryEmail(Request $request)
     {

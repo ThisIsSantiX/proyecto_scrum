@@ -62,4 +62,20 @@ class User extends Authenticatable
         return "https://ui-avatars.com/api/?name=" . urlencode($fullName) . "&background=random&color=fff";
     }
 
+    public function roles()
+    {
+        return $this->belongsToMany(Roles::class, 'role_users', 'user_id', 'role_id')
+                    ->withPivot('estado', 'uid');
+    }
+
+    public function isAdmin()
+    {
+        return $this->roles()
+            ->wherePivot('estado', 1)  
+            ->where('roles.id', 5)      
+            ->exists();
+    }
+
+
+
 }
