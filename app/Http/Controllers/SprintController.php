@@ -49,8 +49,7 @@ class SprintController extends Controller
             ], [
                 'nombre.required' => 'El nombre del sprint es requerido',
                 'nombre.max' => 'El nombre del sprint no puede exceder 50 caracteres',
-                'objetivo.required' => 'El objetivo del sprint es requerido',
-                'objetivo.nullable' => 'El objetivo no se puede exceder de 255 caracteres',
+                'objetivo.max' => 'El objetivo no se puede exceder de 255 caracteres',
                 'fecha_inicio.required' => 'La fecha de inicio es requerida',
                 'fecha_fin.required' => 'La fecha de fin es requerida',
                 'fecha_fin.after' => 'La fecha de fin debe ser posterior a la fecha de inicio'
@@ -154,8 +153,7 @@ class SprintController extends Controller
                 'uid.exists' => 'El sprint no existe',
                 'nombre.required' => 'El nombre del sprint es requerido',
                 'nombre.max' => 'El nombre del sprint no puede exceder 50 caracteres',
-                'objetivo.required' => 'El objetivo del sprint es requerido',
-                'objetivo.nullable' => 'El objetivo no se puede exceder de 255 caracteres',
+                'objetivo.max' => 'El objetivo no se puede exceder de 255 caracteres',
                 'fecha_inicio.required' => 'La fecha de inicio es requerida',
                 'fecha_fin.required' => 'La fecha de fin es requerida',
                 'fecha_fin.after' => 'La fecha de fin debe ser posterior a la fecha de inicio'

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Roles;
 use App\Models\RoleUser;
 use App\Models\User;
@@ -48,21 +49,20 @@ class UserController extends Controller
             DB::transaction(function () use ($request) {
                 if ($request->hasFile('foto_url')) {
                     $file = $request->file('foto_url');
-                    $filename = time().'_'.$file->getClientOriginalName();
+                    $filename = time() . '_' . $file->getClientOriginalName();
                     $file->storeAs('usuarios', $filename, 'public');
-
-                    $fotoPath = $filename;
+                    
                     $fotoPath = $request->file('foto_url')->store('usuarios', 'public');
                 } else {
                     $fotoPath = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
                 }
-                
+
                 $user = User::create([
                     'nombre'    => $request->nombre,
                     'apellido'  => $request->apellido,
                     'username'  => Str::slug($request->nombre . '.' . $request->apellido) . rand(100, 999),
                     'email'     => $request->email,
-                    'password'  => $request->nombre . $request->apellido . rand(10,99), // Contraseña temporal
+                    'password'  => $request->nombre . $request->apellido . rand(10, 99), // Contraseña temporal
                     'estado'    => $request->estado,
                     'foto_url'  => $fotoPath,
                     'uid'       => Str::uuid(),
@@ -91,10 +91,10 @@ class UserController extends Controller
     public function show(Request $request)
     {
         $query = User::select(
-                'users.*',
-                'role_users.role_id',
-                'roles.nombre as rol_texto'
-            )
+            'users.*',
+            'role_users.role_id',
+            'roles.nombre as rol_texto'
+        )
             ->leftJoin('role_users', 'users.id', '=', 'role_users.user_id')
             ->leftJoin('roles', 'role_users.role_id', '=', 'roles.id')
             ->where('users.estado', 1);
@@ -117,7 +117,7 @@ class UserController extends Controller
 
         $userRole = DB::table('role_users')
             ->where('user_id', $user->id)
-            ->value('role_id'); 
+            ->value('role_id');
 
         return view('pages.usuarios.edit', compact('user', 'userRole'));
     }
@@ -162,7 +162,7 @@ class UserController extends Controller
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente.');
     }
-    
+
     public function destroy($uid)
     {
         $usuario = User::where('uid', $uid)->first();
@@ -179,24 +179,24 @@ class UserController extends Controller
 
     public function showRoles()
     {
-        $roles = Roles::where('estado', 1)->get(); 
+        $roles = Roles::where('estado', 1)->get();
         return response()->json($roles);
     }
 
 
     public function deleteFotoPerfil($uid)
     {
-    $user = User::where('uid', $uid)->firstOrFail();
-    
-    if ($user->foto_url && Storage::exists($user->foto_url)) {
-        Storage::delete($user->foto_url);
+        $user = User::where('uid', $uid)->firstOrFail();
+
+        if ($user->foto_url && Storage::exists($user->foto_url)) {
+            Storage::delete($user->foto_url);
+        }
+
+        $user->foto_url = null;
+        $user->save();
+
+        return response()->json(['success' => true]);
     }
-
-    $user->foto_url = null;
-    $user->save();
-
-    return response()->json(['success' => true]);
-    }   
 
     public function profile($username)
     {
@@ -205,61 +205,77 @@ class UserController extends Controller
     }
 
     public function updateProfile(Request $request)
-{
-    $user = User::findOrFail(auth()->id());
+    {
+        $user = User::findOrFail(auth()->id());
 
-    $request->validate([
-        'nombre'    => 'required|string|max:50',
-        'username'    => 'required|string|max:50',
-        'apellido'  => 'required|string|max:50',
-        'email'     => 'required|email|max:255|unique:users,email,' . $user->id,
-        'foto_url'  => 'nullable|file|image|max:2048',
-    ]);
-
-    $data = $request->only(['nombre','username', 'apellido', 'email']);
-
-    if ($request->hasFile('foto_url')) {
-        $data['foto_url'] = $request->file('foto_url')->store('usuarios', 'public');
-    } elseif (!$user->foto_url) {
-        $data['foto_url'] = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
-    }
-
-    $user->update($data);
-
-    if ($request->ajax()) {
-        return response()->json([
-            'success' => true,
-            'foto_url' => $user->foto_url 
-                ? asset('storage/' . $user->foto_url) 
-                : "https://ui-avatars.com/api/?name=" . urlencode("{$user->username} {$user->apellido}") . "&background=6e40c9&color=fff"
+        $request->validate([
+            'nombre'    => 'required|string|max:50',
+            'username'    => 'required|string|max:50',
+            'apellido'  => 'nullable|string|max:50',
+            'email'     => 'required|email|max:255|unique:users,email,' . $user->id,
+            'foto_url'  => 'nullable|file|image|max:2048',
         ]);
-    }
 
-    return redirect()->route('user.profile', $user->username)
-        ->with('success', 'Perfil actualizado correctamente.');
-}
+        $data = $request->only(['nombre','username', 'email']);
 
-public function marcarTour(Request $request)
-{
-    try {
-        $userId = auth()->id();
+        if ($request->hasFile('foto_url')) {
+            $data['foto_url'] = $request->file('foto_url')->store('usuarios', 'public');
+        } elseif (!$user->foto_url) {
+            $data['foto_url'] = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
+        }
 
-        DB::table('users')
-            ->where('id', $userId)
-            ->update(['tour_completed' => true]);
+        $user->update($data);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Tour marcado como completado correctamente'
+
+        $request->validate([
+            'nombre'    => 'required|string|max:50',
+            'username'    => 'required|string|max:50',
+            'apellido'  => 'required|string|max:50',
+            'email'     => 'required|email|max:255|unique:users,email,' . $user->id,
+            'foto_url'  => 'nullable|file|image|max:2048',
         ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar el estado del tour: ' . $e->getMessage()
-        ], 500);
+
+        $data = $request->only(['nombre', 'username', 'apellido', 'email']);
+
+        if ($request->hasFile('foto_url')) {
+            $data['foto_url'] = $request->file('foto_url')->store('usuarios', 'public');
+        } elseif (!$user->foto_url) {
+            $data['foto_url'] = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
+        }
+        $user->update($data);
+
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'foto_url' => $user->foto_url
+                    ? asset('storage/' . $user->foto_url)
+                    : "https://ui-avatars.com/api/?name=" . urlencode("{$user->username} {$user->apellido}") . "&background=6e40c9&color=fff"
+            ]);
+        }
+
+        return redirect()->route('user.profile', $user->username)
+            ->with('success', 'Perfil actualizado correctamente.');
+    }
+  
+    public function marcarTour(Request $request)
+    {
+        try {
+            $userId = auth()->id();
+
+            DB::table('users')
+                ->where('id', $userId)
+                ->update(['tour_completed' => true]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tour marcado como completado correctamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el estado del tour: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
-
-
-
-}    

@@ -78,6 +78,22 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
+        $user = User::where('email',$request->email)->first();
+
+        if(!$user){
+            return response()->json([
+                'message' => 'El usuario no existe.',
+                'status' => 'error'
+            ]);
+        }
+
+        if($user->estado != 1){
+            return response()->json([
+                'message' => 'Tu cuenta esta inactiva. Comunicate con el administrador.',
+                'status' => 'error'
+            ]);
+        }
+
         if (auth()->attempt($credentials)) {
             $request->session()->regenerate();
             $this->clearLoginAttempts($request); 

@@ -129,6 +129,15 @@
 
         $('form').on('submit', function (e) {
             e.preventDefault();
+            //  Guardamos los valores originales al cargar la página
+            const originalData = {
+                nombre: "{{ $user->nombre }}",
+                apellido: "{{ $user->apellido }}",
+                username: "{{ $user->username }}",
+                email: "{{ $user->email }}",
+                estado: "{{ $user->estado }}",
+                id_rol: "{{$userRole}}"
+            };
 
             let formData = new FormData(this);
 
@@ -142,6 +151,29 @@
             formData.set('username', $('#username').val());
             formData.set('apellido', $('#apellido').val());
             formData.set('email', $('#email').val());
+
+             // Verificamos cambios
+            const newData = {
+                nombre: $('#nombre').val(),
+                apellido: $('#apellido').val(),
+                username: $('#username').val(),
+                email: $('#email').val(),
+                estado: $('#estado').val(),
+                id_rol: $('#id_rol').val()
+            };
+
+            let hasChanges = false;
+            for (const key in newData) {
+                if (newData[key] != originalData[key]) {
+                    hasChanges = true;
+                    break;
+                }
+            }
+
+            if (!hasChanges && !foto) {
+                notyf.error(" Edita al menos un campo antes de guardar.");
+                return; // detener aquí
+            }
 
 
             axios.post("{{ route('updateUsuario', $user->uid) }}", formData, {
