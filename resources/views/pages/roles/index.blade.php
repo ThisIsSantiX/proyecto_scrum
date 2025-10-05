@@ -228,6 +228,10 @@
     $('#Uid').val(uid);
     $('#nombre').val(nombre);
 
+     // Guardar datos originales del rol en el modal
+    $('#editRolForm').data('original', {
+        nombre: nombre
+    });
     // Actualizar action del form
     $('#editRolForm').attr('action', `/roles/${uid}`);
 
@@ -235,7 +239,31 @@
     const modal = new bootstrap.Modal(document.getElementById('editRolModal'));
     modal.show();
 }
+// Validación con Notyf antes de enviar el form
+$(document).ready(function () {
+    const notyf = new Notyf();
 
+    $('#editRolForm').on('submit', function (e) {
+        const originalData = $(this).data('original') || {};
+        const newData = {
+            nombre: $('#nombre').val()
+        };
+
+        let hasChanges = false;
+        for (const key in newData) {
+            if (newData[key] != originalData[key]) {
+                hasChanges = true;
+                break;
+            }
+        }
+
+        if (!hasChanges) {
+            e.preventDefault(); // detenemos el submit
+            notyf.error(" Edita al menos un campo antes de guardar.");
+            return;
+        }
+    });
+});
 
 
     function deleteRoles(uid) {
