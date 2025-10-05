@@ -20,9 +20,12 @@ class User extends Authenticatable
     protected $fillable = [
         'nombre',
         'apellido',
+        'username',
+        'apellido',
         'email',
         'password',
         'estado',
+        'google_id',
         'foto_url',
         'uid',
     ];
@@ -52,11 +55,27 @@ class User extends Authenticatable
             return $value;
         }
 
-        $nombre = $this->nombre ?? 'Usuario';
+        $username = $this->username ?? 'Usuario';
         $apellido = $this->apellido ?? '';
-        $fullName = trim("{$nombre} {$apellido}");
+        $fullName = trim("{$username} {$apellido}");
 
         return "https://ui-avatars.com/api/?name=" . urlencode($fullName) . "&background=random&color=fff";
     }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Roles::class, 'role_users', 'user_id', 'role_id')
+                    ->withPivot('estado', 'uid');
+    }
+
+    public function isAdmin()
+    {
+        return $this->roles()
+            ->wherePivot('estado', 1)  
+            ->where('roles.id', 5)      
+            ->exists();
+    }
+
+
 
 }

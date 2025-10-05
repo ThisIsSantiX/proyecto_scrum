@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Models\RoleUser;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
@@ -10,7 +10,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Password as PasswordFacade;  
+use Illuminate\Validation\Rules\Password;
+
+use Illuminate\Foundation\Auth\ThrottlesLogins;
+
 
 class AuthController extends Controller
 {
@@ -36,11 +40,16 @@ class AuthController extends Controller
     // Esta función muestra la vista de confirmación de correo electrónico
     public function showMailSent()
     {
-        $email = session('email'); // obtiene el email que pusimos en with()
+        $email = session('email'); 
         return view('pages.auth.mail-sent', ['email' => $email]);
     }
 
+    use ThrottlesLogins;
 
+    public function username()
+    {
+        return 'email';
+    }
 
     // Funcion de inicio de sesión
     public function authLogin(Request $request)
@@ -55,10 +64,40 @@ class AuthController extends Controller
             'password.required' => 'La contraseña es requerida'
         ]);
 
+        if ($this->hasTooManyLoginAttempts($request)) {
+            $seconds = $this->limiter()->availableIn(
+                $this->throttleKey($request)
+            );
+
+            return response()->json([
+                'message' => 'Demasiados intentos fallidos. Intenta de nuevo en ' . $seconds . ' segundos.',
+                'retry_after' => $seconds
+            ], 429);
+        }
+
+
         $credentials = $request->only('email', 'password');
 
-        if (auth()->attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+        $user = User::where('email',$request->email)->first();
+
+        if(!$user){
+            return response()->json([
+                'message' => 'El usuario no existe.',
+                'status' => 'error'
+            ]);
+        }
+
+        if($user->estado != 1){
+            return response()->json([
+                'message' => 'Tu cuenta esta inactiva. Comunicate con el administrador.',
+                'status' => 'error'
+            ]);
+        }
+
+        if (auth()->attempt($credentials)) {
             $request->session()->regenerate();
+            $this->clearLoginAttempts($request); 
+
             session(['active_role_id' => 4]);
             session(['active_role_name' => 'Usuario']);
 
@@ -67,43 +106,74 @@ class AuthController extends Controller
                 'status' => 'success'
             ]);
         } else {
+            $this->incrementLoginAttempts($request);
+
             return response()->json([
                 'message' => 'Correo o contraseña incorrecto',
-                'icon' => 'error'
+                'status' => 'error'
             ]);
         }
     }
 
+    // Número máximo de intentos
+    protected function maxAttempts()
+    {
+        return 3; 
+    }
+
+    // Tiempo de bloqueo
+    protected function decayMinutes()
+    {
+        return 1; 
+    }
+
+
+    // Función de registro
     public function authRegister(Request $request)
     {
-        // Validación de datos de entrada
         $request->validate([
             'email'    => 'required|email|unique:users,email',
-            'password' => 'required|min:8|confirmed',
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(8)
+                    ->letters() 
+                    ->mixedCase()
+                    ->numbers()
+            ],
             'nombre'   => 'required|string|max:255',
-            'apellido' => 'required|string|max:255'
+            'apellido' => 'required|string|max:255',
         ], [
             'email.required'     => 'El correo es requerido',
             'email.email'        => 'El correo no es válido',
             'email.unique'       => 'El correo ya está registrado',
             'password.required'  => 'La contraseña es requerida',
-            'password.min'       => 'La contraseña debe tener al menos 8 caracteres',
             'password.confirmed' => 'Las contraseñas no coinciden',
             'nombre.required'    => 'El nombre es requerido',
-            'apellido.required'  => 'El apellido es requerido'
+            'apellido.required'  => 'El apellido es requerido',
         ]);
 
         try {
             $user = DB::transaction(function () use ($request) {
-                return User::create([
+                $user = User::create([
                     'nombre'   => $request->nombre,
                     'apellido' => $request->apellido,
+                    'username' => Str::slug($request->nombre . $request->apellido) . rand(100, 999),
                     'email'    => $request->email,
                     'password' => Hash::make($request->password),
                     'estado'   => 1,
                     'foto_url' => "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff",
                     'uid'      => Str::uuid(),
                 ]);
+
+                RoleUser::create([
+                    'user_id' => $user->id,
+                    'role_id' => 4,
+                    'estado'  => 1,
+                    'uid'     => Str::uuid(),
+                ]);
+
+                return $user;
             });
 
             return response()->json([
@@ -121,18 +191,20 @@ class AuthController extends Controller
         }
     }
 
+
     public function sendRecoveryEmail(Request $request)
     {
         $request->validate(['email' => 'required|email']);
 
-        $status = Password::sendResetLink($request->only('email'));
+        $status = PasswordFacade::sendResetLink($request->only('email'));
 
-        if ($status === Password::RESET_LINK_SENT) {
+        if ($status === PasswordFacade::RESET_LINK_SENT) {
             return redirect()->route('mail.sent')->with('email', $request->email);
         } else {
             return back()->withErrors(['email' => __($status)]);
         }
     }
+
 
     // Funcion de cierre de sesión
     public function logout(Request $request)

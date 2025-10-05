@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\product_backlog;
+use App\Models\ProductBacklog;
 use Illuminate\Http\Request;
 use App\Models\Proyecto;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +26,7 @@ class ProductBacklogController extends Controller
         $historias = DB::table('product_backlog')
             ->join('criterios_aceptacion', 'product_backlog.id', '=', 'criterios_aceptacion.id_item_backlog')
             ->where('product_backlog.id_proyecto', $proyecto->id)
+            ->where('product_backlog.estado', 1) // Solo activas
             ->select(
                 'product_backlog.id as historia_id',
                 'product_backlog.titulo as historia_titulo',
@@ -56,6 +57,25 @@ class ProductBacklogController extends Controller
 
     public function store(Request $request, $uid)
     {
+        // Validar los campos del request
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:50',
+            'descripcion' => 'nullable|string|max:255',
+            'prioridad' => 'nullable|string|min:1',
+            'valor_historia' => 'nullable|integer|min:1|max:100',
+            'progreso' => 'required|string',
+        ],
+        [
+            'titulo.required' => 'El titulo de la historia de usuario es requerida.',
+            'titulo.max' => 'La historia de usuario no debe de tener mas de 50 caracteres.',
+            'descripcion.max' => 'La descripcion de la historia no puede tener mas de 255 caracteres.',
+            'valor_historia.integer' => 'El valor de la historia debe ser un número entero.',
+            'valor_historia.min' => 'El valor de la historia no puede ser menor que 1.',
+            'valor_historia.max' => 'El valor de la historia no puede ser mayor que 100.',
+            'progreso.required' => 'El progreso de la historia es requerido.'
+        ]
+    );
+
         try {
             // Buscar el proyecto por UID
             $proyecto = Proyecto::where('uid', $uid)->first();
@@ -67,37 +87,15 @@ class ProductBacklogController extends Controller
                 ], 404);
             }
 
-            // Validar los datos de entrada (sin id_proyecto porque ya lo tenemos)
-            $validatedData = $request->validate([
-                'titulo' => 'required|string|max:50',
-                'descripcion' => 'required|string|max:255',
-                'prioridad' => 'required|in:Alta,Media,Baja',
-                'valor_historia' => 'required|integer|min:1|max:100',
-                'progreso' => 'required|in:Por hacer,En progreso,Completado'
-            ], [
-                'titulo.required' => 'El título es requerido.',
-                'titulo.max' => 'El título no puede exceder los 50 caracteres.',
-                'descripcion.required' => 'La descripción es requerida.',
-                'descripcion.max' => 'La descripción no puede exceder los 255 caracteres.',
-                'prioridad.required' => 'La prioridad es requerida.',
-                'prioridad.in' => 'La prioridad debe ser Alta, Media o Baja.',
-                'valor_historia.required' => 'El valor de la historia es requerido.',
-                'valor_historia.integer' => 'El valor de la historia debe ser un número entero.',
-                'valor_historia.min' => 'El valor de la historia debe ser al menos 1.',
-                'valor_historia.max' => 'El valor de la historia no puede ser mayor a 100.',
-                'progreso.required' => 'El estado de progreso es requerido.',
-                'progreso.in' => 'El estado debe ser: Por hacer, En progreso o Completado.'
-            ]);
-
-            // Crear la historia de usuario en el backlog
-            $historia = product_backlog::create([
+            // Crear la historia de usuario directamente con datos validados
+            $historia = ProductBacklog::create([
                 'id_proyecto' => $proyecto->id,
                 'creado_por' => Auth::id(),
-                'titulo' => $validatedData['titulo'],
-                'descripcion' => $validatedData['descripcion'],
-                'prioridad' => $validatedData['prioridad'],
-                'valor_historia' => $validatedData['valor_historia'],
-                'progreso' => $validatedData['progreso'],
+                'titulo' => $validated['titulo'],
+                'descripcion' => $validated['descripcion'],
+                'prioridad' => $validated['prioridad'],
+                'valor_historia' => $validated['valor_historia'],
+                'progreso' => $validated['progreso'] ?? 0,
                 'estado' => 1,
                 'uid' => Str::uuid()
             ]);
@@ -115,12 +113,7 @@ class ProductBacklogController extends Controller
                     'uid' => $historia->uid
                 ]
             ], 201);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Datos de validación incorrectos.',
-                'errors' => $e->errors()
-            ], 422);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -129,7 +122,6 @@ class ProductBacklogController extends Controller
             ], 500);
         }
     }
-
 
     public function show($uid)
     {
@@ -159,7 +151,7 @@ class ProductBacklogController extends Controller
                     'product_backlog.progreso',
                     'product_backlog.uid as historia_uid',
                     'product_backlog.created_at',
-                    'users.nombre as creador_nombre',
+                    DB::raw("CONCAT(users.nombre, ' ', users.apellido) as creador_nombre"),
                     'users.foto_url as foto_url',
                     'criterios_aceptacion.id as criterio_id',
                     'criterios_aceptacion.descripcion as criterio_descripcion',
@@ -242,7 +234,7 @@ class ProductBacklogController extends Controller
             }
 
             // Buscar la historia
-            $historia = product_backlog::where('uid', $historiaUid)
+            $historia = ProductBacklog::where('uid', $historiaUid)
                 ->where('id_proyecto', $proyecto->id)
                 ->first();
 
@@ -253,17 +245,13 @@ class ProductBacklogController extends Controller
                 ], 404);
             }
 
-            // Validación
-            $validatedData = $request->validate([
-                'titulo' => 'required|string|max:50',
-                'descripcion' => 'required|string|max:255',
-                'prioridad' => 'required|in:Alta,Media,Baja',
-                'valor_historia' => 'required|integer|min:1|max:100',
-                'progreso' => 'required|in:Por hacer,En progreso,Completado'
+            $historia->update([
+                'titulo' => $request->titulo,
+                'descripcion' => $request->descripcion,
+                'prioridad' => $request->prioridad,
+                'valor_historia' => $request->valor_historia,
+                'progreso' => $request->progreso
             ]);
-
-            // Actualizar
-            $historia->update($validatedData);
 
             return response()->json([
                 'success' => true,

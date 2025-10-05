@@ -1,5 +1,7 @@
 @extends('layouts.layout.layout')
 
+@section('title', 'Proyectos - WorkScrum')
+
 @section('content')
 
 <div class="conatiner-fluid content-inner mt-5 pt-4 py-0">
@@ -147,11 +149,6 @@
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="descripcion-tab" data-bs-toggle="tab" data-bs-target="#descripcion" type="button" role="tab">
-                                    Descripción
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios" type="button" role="tab">
                                     Usuarios del proyecto
                                 </button>
@@ -164,7 +161,7 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label text-muted">Nombre del proyecto</label>
-                                        <input type="text" class="form-control" id="detalleNombre" value="Diseño estándar">
+                                        <input type="text" class="form-control" id="detalleNombre" value="Diseño estándar" maxlength="50">
                                     </div>
 
                                     <div class="col-md-6">
@@ -202,7 +199,7 @@
 
                                     <div class="col-12">
                                         <label class="form-label text-muted">Descripción</label>
-                                        <textarea class="form-control" rows="3" id="detalleDescripcionInput">Este es un proyecto de diseño estándar que incluye la creación de interfaces modernas y funcionales.</textarea>
+                                        <textarea class="form-control" rows="3" id="detalleDescripcionInput" maxlength="255">Este es un proyecto de diseño estándar que incluye la creación de interfaces modernas y funcionales.</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -223,11 +220,13 @@
                                     <div class="card">
                                         <div class="card-body">
                                             <div class="d-flex align-items-center">
-                                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3" style="width: 48px; height: 48px;">
-                                                    <span id="userInitial">S</span>
+                                                <!-- Avatar -->
+                                                <div id="userAvatarContainer" class="me-3">
+                                                    <!-- aquí JS inserta la imagen o inicial -->
                                                 </div>
+
+                                                <!-- Info -->
                                                 <div>
-                                                    <!-- Updated to use dynamic user data from backend -->
                                                     <h6 class="fw-bold mb-1" id="userName">Santiago Torres</h6>
                                                     <p class="text-muted small mb-2" id="userEmail">santiago@example.com</p>
                                                     <span class="badge bg-primary">Propietario</span>
@@ -355,7 +354,7 @@
             <!-- Footer -->
             <div class="modal-footer border-top">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" id="btnSaveUser" class="btn btn-primary">Guardar</button>
+                <button type="button" id="btnSaveUser" class="btn btn-primary">Invitar</button>
             </div>
         </div>
     </div>
@@ -367,14 +366,14 @@
 <style>
     .project-card {
         transition: all 0.3s ease;
-        border: 1px solid rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--bs-primary);
         border-radius: 12px;
         height: 100%;
     }
 
     .project-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.10);
         border-color: var(--bs-primary);
     }
 
@@ -427,19 +426,6 @@
         margin-bottom: 1rem;
     }
 
-    .owner-avatar {
-        width: 35px;
-        height: 35px;
-        background: var(--bs-primary);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
     .project-meta {
         font-size: 0.85rem;
         color: var(--bs-secondary);
@@ -460,7 +446,7 @@
 
     /* Status badges colors */
     .status-planificacion {
-        background-color: #6f42c1;
+        background-color: #8054d1ff;
         color: white;
     }
 
@@ -493,6 +479,53 @@
         background-color: #495057;
         color: white;
     }
+
+
+    .avatar-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #0d6efd;
+        margin-right: -10px;
+    }
+
+    /* Fallback con iniciales cuando no hay foto */
+    .avatar-fallback {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #0d6efd;
+        color: #fff;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: -10px;
+        border: 2px solid #fff;
+    }
+
+    /* Que los avatares se acomoden en fila */
+    #membersContainer_[id] {
+        display: flex;
+        align-items: center;
+    }
+
+    @media (max-width: 576px) {
+        .card-header .d-flex.gap-2 {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .card-header .d-flex.gap-2 input {
+            width: 100% !important;
+        }
+
+        .card-header .d-flex.gap-2 .btn-sm {
+            width: 100%;
+            text-align: center;
+        }
+    }
 </style>
 @endsection
 
@@ -507,30 +540,36 @@
 
                     response.data.miembros.forEach(miembro => {
                         html += `
-                            <div class="card mb-2">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        ${miembro.foto_url ? `
-                                       <img src="${miembro.foto_url ? miembro.foto_url + '?v=' + new Date().getTime() : ''}" 
-                                            class="rounded-circle me-3"
-                                            style="width: 48px; height: 48px; object-fit: cover;">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <!-- Avatar -->
+                                            <div class="me-3" style="width: 40px; height: 40px;">
+                                                ${miembro.foto_url ? `
+                                                    <img src="${miembro.foto_url}" 
+                                                        alt="Avatar usuario"
+                                                        class="rounded-circle"
+                                                        style="width: 40px; height: 40px; object-fit: cover;"
+                                                        onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(miembro.nombre + ' ' + miembro.apellido)}&background=random&color=fff';">
+                                                ` : `
+                                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                                        style="width: 40px; height: 40px; font-size: 14px;">
+                                                        ${getInitials(miembro.nombre)}
+                                                    </div>
+                                                `}
+                                            </div>
 
-                                    ` : `
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3"
-                                            style="width: 48px; height: 48px;">
-                                            ${getInitials(miembro.nombre + ' ' + miembro.apellido)}
-                                        </div>
-                                    `}
-                                    <div>
-                                        <h6 class="fw-bold mb-1">${miembro.nombre} ${miembro.apellido}</h6>
-                                        <p class="text-muted small mb-2">${miembro.email}</p>
-                                            ${miembro.rol === 'propietario' ? `
-                                            <span class="badge bg-primary">Propietario</span>
-                                    ` : ''}
+                                            <!-- Info -->
+                                            <div>
+                                                <h6 class="fw-bold mb-1">${miembro.nombre} ${miembro.apellido}</h6>
+                                                <p class="text-muted small mb-2">${miembro.email}</p>
+                                                ${miembro.rol === 'propietario' ? `
+                                                    <span class="badge bg-primary">Propietario</span>
+                                                ` : ''}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>`;
+                                </div>`;
                     });
 
                     $("#projectUsersContainer").html(html);
@@ -548,9 +587,26 @@
     $(document).ready(function() {
         let searchTimeout;
         let allProjects = [];
+        let recientesLoaded = false;
+
+        //verificar si hay que cargar los proyectos recientes
+        const urlParams = new URLSearchParams(window.location.search);
+        const showRecientes = urlParams.get('view') === 'recientes';
+
+        if (showRecientes) {
+            //mostrar recientes al cargar
+            $('#recientesSection').show();
+            $('.card:has(#projectsContainer)').hide();
+            loadRecientes();
+        } else {
+            // Mostrar todos por defecto
+            $("#recientesSection").hide();
+            $(".card:has(#projectsContainer)").show();
+            loadProjects();
+        }
 
         // Cargar proyectos al inicializar
-        loadProjects();
+        // loadProjects();
 
         // Búsqueda en tiempo real
         $('#searchInput').on('input', function() {
@@ -579,13 +635,13 @@
                         allProjects = response.data.data;
                         renderProjects(allProjects, search);
                     } else {
-                        showError('Error al cargar los proyectos');
+                        notyf.error('Error al cargar los proyectos');
                         showEmptyState();
                     }
                 })
                 .catch(function(error) {
                     console.error('Error:', error);
-                    showError('Error al cargar los proyectos: ' + (error.response?.data?.message || error.message));
+                    notyf.error('Error al cargar los proyectos: ' + (error.response?.data?.message || error.message));
                     showEmptyState();
                 });
         }
@@ -624,7 +680,7 @@
 
             // Destacar términos de búsqueda
             const highlightedTitle = highlightSearchTerm(project.nombre || 'Sin título', searchTerm);
-            const highlightedOwner = highlightSearchTerm(project.usuario_nombre || 'Usuario desconocido', searchTerm);
+            const highlightedOwner = highlightSearchTerm(project.usuario_nombre_completo || 'Usuario desconocido', searchTerm);
 
             // Determinar el progreso/estado
             const progress = project.progreso;
@@ -632,114 +688,185 @@
             const progressClass = getProgressClass(progress);
 
             return `
-                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
-                    <div class="card project-card">
-                        <div class="project-header">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <!-- Título -->
-                                <h5 class="project-title mb-2 project-link" data-id="${project.uid}">
-                                    ${highlightedTitle}
-                                </h5>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                        <div class="card project-card">
+                            <div class="project-header">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <!-- Título -->
+                                    <h5 class="project-title text-white mb-2 project-link" data-id="${project.uid}">
+                                        ${highlightedTitle}
+                                    </h5>
 
-                                <!-- Ícono Ver Detalles -->
-                                <button type="button" class="btn btn-sm btn-link text-white p-0 ms-2 btn-view"
-                                        data-id="${project.uid}" data-bs-toggle="tooltip" data-bs-placement="bottom" 
-                                        title="Ver detalles">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
-                                        class="bi bi-info-circle" viewBox="0 0 16 16">
-                                        <path d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zM8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0z"/>
-                                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533l.738-3.468c.194-.897-.105-1.319-.808-1.319z"/>
-                                        <circle cx="8" cy="4.5" r="1"/>
-                                    </svg>
-                                </button>
+                                    <!-- Ícono Ver Detalles -->
+                                    <button type="button" class="btn btn-sm btn-link text-white p-0 ms-2 btn-view"
+                                            data-id="${project.uid}" data-bs-toggle="tooltip" data-bs-placement="bottom" 
+                                            title="Ver detalles">
+                                            <svg class="icon-32" width="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">                                <path opacity="0.4" d="M22 11.9998C22 17.5238 17.523 21.9998 12 21.9998C6.477 21.9998 2 17.5238 2 11.9998C2 6.47776 6.477 1.99976 12 1.99976C17.523 1.99976 22 6.47776 22 11.9998Z" fill="currentColor"></path>                                <path fill-rule="evenodd" clip-rule="evenodd" d="M7.52075 10.8035C6.85975 10.8035 6.32275 11.3405 6.32275 11.9995C6.32275 12.6595 6.85975 13.1975 7.52075 13.1975C8.18175 13.1975 8.71875 12.6595 8.71875 11.9995C8.71875 11.3405 8.18175 10.8035 7.52075 10.8035ZM11.9999 10.8035C11.3389 10.8035 10.8019 11.3405 10.8019 11.9995C10.8019 12.6595 11.3389 13.1975 11.9999 13.1975C12.6609 13.1975 13.1979 12.6595 13.1979 11.9995C13.1979 11.3405 12.6609 10.8035 11.9999 10.8035ZM15.2813 11.9995C15.2813 11.3405 15.8183 10.8035 16.4793 10.8035C17.1403 10.8035 17.6773 11.3405 17.6773 11.9995C17.6773 12.6595 17.1403 13.1975 16.4793 13.1975C15.8183 13.1975 15.2813 12.6595 15.2813 11.9995Z" fill="currentColor"></path>                                </svg>                            
+                                    </button>
 
-                            </div>
-
-                            <!-- Descripción dentro del header -->
-                            <p class="project-description mb-0">
-                                ${project.descripcion || 'Sin descripción disponible'}
-                            </p>
-                        </div>
-
-                        
-                        <div class="card-body">
-                            <div class="mt-2 mb-3 d-flex justify-content-between align-items-center">
-                                <span class="badge badge-status ${progressClass}">
-                                    ${getProgressIcon(progress)}
-                                    ${progressText}
-                                </span>
-                            </div>
-
-                            <div class="owner-info d-flex mb-0 align-items-center">
-                                <!-- Avatar con iniciales (tooltip con nombre del propietario) -->
-                                <div class="owner-avatar rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
-                                    style="width: 40px; height: 40px; background-color: #0d6efd; color: white; font-weight: bold; margin-right: -10px; z-index: 1;"
-                                    data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                    title="Propietario del proyecto: ${highlightedOwner}">
-                                    ${initials}
                                 </div>
 
-                                <!-- miembros -->
-                                <div class="d-flex align-items-center" id="membersContainer_${project.uid}"></div>
-
-                                <!-- Botón con "+" (tooltip con añadir usuarios) -->
-                                <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary bg-white text-primary"
-                                    style="width: 40px; height: 40px; cursor: pointer; z-index: 2;"
-                                    id="btnAddUser_${project.id}"
-                                    data-project-id="${project.id}"
-                                    data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                    title="Añadir usuarios">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                                    </svg>
-                                </div>
+                                <!-- Descripción dentro del header -->
+                                <p class="project-description mb-0">
+                                    ${project.descripcion || ''}
+                                </p>
                             </div>
 
+                            
+                            <div class="card-body">
+                                <div class="mt-2 mb-3 d-flex justify-content-between align-items-center">
+                                    <span class="badge badge-status ${progressClass}">
+                                        ${getProgressIcon(progress)}
+                                        ${progressText}
+                                    </span>
+                                </div>
+
+                                <div class="owner-info d-flex mb-0 align-items-center">
+                                    <!-- Avatar con iniciales (tooltip con nombre del propietario) -->
+                                    <div class="owner-avatar rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
+                                        style="width: 40px; height: 40px; margin-right: -10px; z-index: 1; overflow: hidden;"
+                                        data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                        title="Propietario del proyecto: ${highlightedOwner}">
+                                        
+                                        <img src="${
+                                            project.usuario_foto
+                                                ? (project.usuario_foto.startsWith('http')
+                                                    ? project.usuario_foto                       // URL externa
+                                                    : `/storage/${project.usuario_foto}`)       // foto local en storage
+                                                : `https://ui-avatars.com/api/?name=${encodeURIComponent(highlightedOwner)}&background=random&color=fff` // fallback
+                                        }" 
+                                            alt="Owner-Avatar" 
+                                            class="img-fluid" 
+                                            style="width: 100%; height: 100%; object-fit: cover;"
+                                            onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(highlightedOwner)}&background=random&color=fff';">
+                                    </div>
+
+
+
+                                    <!-- miembros -->
+                                    <div class="d-flex align-items-center" id="membersContainer_${project.uid}"></div>
+
+                                    <!-- Botón con "+" (tooltip con añadir usuarios) -->
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary bg-white text-primary"
+                                        style="width: 40px; height: 40px; cursor: pointer; z-index: 2;"
+                                        id="btnAddUser_${project.id}"
+                                        data-project-id="${project.id}"
+                                        data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                        title="Añadir usuarios">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
+                `;
+        }
+
+        // función para listar a los miembros
+        function loadMembers(uid, container) {
+            axios.get(`/miembros-equipo/${uid}`)
+                .then(function(response) {
+                    if (response.data.miembros && response.data.miembros.length > 0) {
+                        let membersHtml = '';
+
+                        response.data.miembros.forEach(miembro => {
+                            membersHtml += renderAvatar(miembro);
+                        });
+
+                        container.html(membersHtml);
+                    }
+                })
+                .catch(function(error) {
+                    console.error("Error cargando miembros:", error);
+                    container.html('<small class="text-danger">Error al cargar</small>');
+                });
+        }
+
+        // **NUEVO: Manejar el botón "atrás" del navegador**
+        window.addEventListener('popstate', function(event) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const view = urlParams.get('view');
+
+            if (view === 'recientes') {
+                $(".card:has(#projectsContainer)").hide();
+                $("#recientesSection").show();
+                loadRecientes();
+            } else {
+                $("#recientesSection").hide();
+                $(".card:has(#projectsContainer)").show();
+            }
+        });
+
+        function renderRecientes(recientes) {
+            const container = $('#recientesContainer');
+            container.empty();
+            recientes.forEach(function(project) {
+                const card = createProjectCard(project);
+                container.append(card);
+                const membersContainer = $(`#membersContainer_${project.uid}`);
+                loadMembers(project.uid, membersContainer);
+            });
+            // **AÑADIDO: Animar las cartas de recientes también**
+            $('.project-card').each(function(index) {
+                $(this).css('opacity', 0).delay(index * 100).animate({
+                    opacity: 1
+                }, 300);
+            });
+        }
+        //==============================
+        // 🔹 Función que genera avatar según si hay foto o no
+        function renderAvatar(usuario) {
+            const initials = getInitials(usuario.nombre);
+
+            if (usuario.foto_url) {
+                const img = document.createElement("img");
+                img.src = usuario.foto_url;
+                img.className = "avatar-img";
+                img.title = `${usuario.nombre} (${usuario.rol})`;
+
+                img.onerror = function() {
+                    this.replaceWith(getFallbackAvatarElement(initials, usuario.nombre, usuario.rol));
+                };
+
+                return img.outerHTML;
+            } else {
+                return getFallbackAvatar(initials, usuario.nombre, usuario.rol);
+            }
+        }
+
+
+
+        function getFallbackAvatar(initials, nombre, rol) {
+            return `
+                <div class="avatar-fallback"
+                    title="${nombre} (${rol})">
+                    ${initials}
                 </div>
             `;
         }
 
-       // función para listar a los miembros
-            function loadMembers(uid, container) {
-                axios.get(`/miembros-equipo/${uid}`)
-                    .then(function(response) {
-                        if (response.data.miembros && response.data.miembros.length > 0) {
-                            let membersHtml = '';
+        window.getFallbackAvatarElement = function(initials, nombre, rol) {
+            const div = document.createElement('div');
+            div.className = 'avatar-fallback';
+            div.title = `${nombre} (${rol})`;
+            div.textContent = initials;
+            return div;
+        };
 
-                            response.data.miembros.forEach(miembro => {
-                                if (miembro.foto_url) {
-                                    // Si tiene foto -> evitar caché con timestamp
-                                    membersHtml += `
-                                        <img src="${miembro.foto_url}?v=${new Date().getTime()}" 
-                                            class="rounded-circle border border-2 border-primary"
-                                            style="width: 40px; height: 40px; object-fit: cover; margin-right: -10px; z-index: 1;"
-                                            data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                            title="${miembro.nombre} ${miembro.apellido}">
-                                    `;
-                                } else {
-                                    // Si no tiene foto -> iniciales
-                                    membersHtml += `
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
-                                            style="width: 40px; height: 40px; background-color: #6c757d; color: white; font-weight: bold; margin-right: -10px; z-index: 1;"
-                                            data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                            title="${miembro.nombre} ${miembro.apellido}">
-                                            ${getInitials(miembro.nombre + ' ' + miembro.apellido)}
-                                        </div>
-                                    `;
-                                }
-                            });
 
-                            container.html(membersHtml);
-                        }
-                    })
-                    .catch(function(error) {
-                        console.error("Error cargando miembros:", error);
-                        container.html('<small class="text-danger">Error al cargar</small>');
-                    });
-            }
-            
+
+
+        // Esta función devuelve un nodo real para el replaceWith
+        function getFallbackAvatarElement(initials, nombre, rol) {
+            const div = document.createElement('div');
+            div.className = 'avatar-fallback';
+            div.title = `${nombre} (${rol})`;
+            div.textContent = initials;
+            return div;
+        }
 
         //------------
 
@@ -881,41 +1008,6 @@
             $('#emptyState').show();
         }
 
-        function showError(message) {
-            $.notify({
-                title: 'Error',
-                message: message
-            }, {
-                type: 'danger',
-                placement: {
-                    from: "top",
-                    align: "right"
-                },
-                delay: 5000,
-                animate: {
-                    enter: 'animated fadeInRight',
-                    exit: 'animated fadeOutRight'
-                }
-            });
-        }
-
-        function showSuccess(message) {
-            $.notify({
-                title: 'Éxito',
-                message: message
-            }, {
-                type: 'success',
-                placement: {
-                    from: "top",
-                    align: "right"
-                },
-                delay: 3000,
-                animate: {
-                    enter: 'animated fadeInRight',
-                    exit: 'animated fadeOutRight'
-                }
-            });
-        }
 
         $(document).on("click", "#deleteProjectBtn", function() {
             const uid = $(this).data('uid'); // Obtenemos el UID que asignamos antes
@@ -1065,12 +1157,42 @@
                     let p = response.data.data;
 
                     $("#projectTitleDisplay").text(p.nombre || "Sin nombre");
-                    $("#ownerNameDisplay").text(p.usuario_nombre || "Desconocido");
+                    $("#ownerNameDisplay").text(p.usuario_nombre_completo || "Desconocido");
                     $("#createdDateDisplay").text(formatDate(p.created_at) || "N/A");
 
-                    $("#userName").text(p.usuario_nombre || "Desconocido");
+                    $("#userName").text(p.usuario_nombre_completo || "Desconocido");
                     $("#userEmail").text(p.usuario_email || "Sin email");
-                    $("#userInitial").text((p.usuario_nombre || "U").charAt(0).toUpperCase());
+
+                    let avatarHtml = "";
+
+                    if (p.usuario_foto) {
+                        // Si es URL completa (http), la uso tal cual
+                        let fotoUrl = p.usuario_foto.startsWith('http') ?
+                            p.usuario_foto :
+                            `/storage/${p.usuario_foto}`;
+
+                        avatarHtml = `
+                            <img src="${fotoUrl}" 
+                                alt="Foto usuario"
+                                class="rounded-circle"
+                                style="width: 48px; height: 48px; object-fit: cover;"
+                                onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.usuario_nombre_completo || 'U')}&background=random&color=fff';">
+                        `;
+                    } else {
+                        // Si no hay foto en BD → inicial
+                        let initial = (p.usuario_nombre_completo || "U").charAt(0).toUpperCase();
+                        avatarHtml = `
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3"
+                                style="width: 48px; height: 48px;">
+                                <span>${initial}</span>
+                            </div>
+                        `;
+                    }
+
+                    // Insertar en el contenedor
+                    $("#userAvatarContainer").html(avatarHtml);
+
+
 
                     $("#progressValue").text(getProgressText(p.progreso));
                     $("#visibilityValue").text(getVisibilityText(p.visibilidad));
@@ -1139,9 +1261,20 @@
     }
 
     $(document).on("click", ".project-link", function() {
+        // e.preventDefault();
+
         const uid = $(this).data("id");
         if (uid) {
-            window.location.href = `/proyectos/backlog/${uid}`;
+            //registrar el acceso primero
+            axios.post(`/proyectos/${uid}/registrar-acceso`)
+                .then(function(response) {
+                    window.location.href = `/proyectos/backlog/${uid}`;
+                })
+                .catch(function(error) {
+                    console.log('Error al registrar acceso: ', error);
+                    //se redirige de todas forma a la otra vista
+                    window.location.href = `/proyectos/backlog/${uid}`;
+                })
         }
     });
 

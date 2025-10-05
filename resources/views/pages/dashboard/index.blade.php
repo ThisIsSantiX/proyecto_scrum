@@ -1,6 +1,6 @@
 @extends('layouts.layout.layout')
 
-@section('title', 'Scrum')
+@section('title', 'Home - WorkScrum')
 
 @section('css')
 <style>
@@ -19,7 +19,7 @@
 
     @keyframes pulse {
         0% {
-            transform: scale(1);
+            transform: scale(2);
         }
 
         50% {
@@ -30,21 +30,25 @@
             transform: scale(1);
         }
     }
-
     .modal-proyecto-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
     }
+
+    html, body {
+        overflow-x: hidden;
+    }
+
 </style>
 @endsection
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-2 py-4">
 
     <!-- Saludo -->
     <div class="text-center mb-4">
         <p class="text-muted mb-1">{{ $fecha }}</p>
-        <h2 class="fw-bold">{{ $saludo }}, {{ Auth::user()->nombre }}</h2>
+        <h2 class="fw-bold">{{ $saludo }}, {{ Auth::user()->nombre ?? Auth::user()->username }}</h2>
     </div>
 
     <!-- Barra de búsqueda -->
@@ -59,7 +63,6 @@
             </div>
         </div>
     </div>
-
     <!-- Chips / Filtros -->
     <div class="d-flex justify-content-center gap-2 mb-5">
         <span class="badge rounded-pill bg-body-secondary text-body px-3 py-2">
@@ -77,11 +80,10 @@
             <!-- Tarjeta Tareas -->
             <div class="card shadow-sm rounded-3">
                 <div class="card-body">
-                    <h6 class="fw-semibold mb-3"><i class="bi bi-check-circle me-2"></i> Tareas</h6>
+                    <h6 class="fw-semibold mb-3">
+                    <i class="bi bi-check-circle me-2">
+                    </i> Tareas</h6>
                     <div class="text-center p-4">
-                        <img src="https://img.icons8.com/ios/150/000000/todo-list--v1.png" 
-                            alt="Sin tareas" 
-                            class="mb-3 opacity-50" width="75">
                         <p class="text-muted mb-1">No hay tareas asignadas a usted</p>
                         <small class="text-muted">También puedes fijar tareas para verlas aquí</small>
                     </div>
@@ -140,24 +142,26 @@
                     </ul>
 
                     <div class="tab-content flex-grow-1">
-                        <div class="tab-pane fade show active" id="all">
-                            <div class="alert alert-light d-flex align-items-start border rounded-3">
-                                <span class="badge bg-danger me-2">2</span>
-                                <div>
-                                    <strong>Hola  {{ Auth::user()->nombre }}, ¡Bienvenido a Scrum!</strong><br>
-                                    Estamos encantados de tenerte a bordo. Disfruta.
-                                    <div class="mt-1"><small class="text-muted">21 de agosto</small></div>
-                                </div>
+                        <div class="tab-pane fade" id="all">
+                            <div class="empty-state py-4 text-center">
+                                <i class="bi bi-bell-slash fs-1 mb-3"></i>
+                                <p class="mb-0">No tienes notificaciones</p>
+                                <small>No hay notificaciones para mostrar</small>
                             </div>
                         </div>
-                        <div class="tab-pane fade" id="mentions">No hay menciones nuevas.</div>
-                        <div class="tab-pane fade" id="projects" class="tab-pane fade show active">
-                            <div id="invitacionesProyectos">
-                                <!-- Las invitaciones se cargarán aquí -->
+                        <div class="tab-pane fade" id="mentions">
+                            <div class="empty-state py-4 text-center">
+                                <i class="bi bi-at fs-1 mb-3"></i>
+                                <p class="mb-0">No hay menciones nuevas</p>
+                                <small>Te notificaremos cuando alguien te mencione</small>
                             </div>
-                            <div id="noInvitacionesProyectos" class="text-center py-3" style="display: none;">
-                                <i class="bi bi-inbox fs-4 text-muted mb-2"></i>
-                                <p class="text-muted mb-0">No hay invitaciones pendientes</p>
+                        </div>
+                        <div class="tab-pane fade" id="projects">
+                            <div id="invitacionesProyectos"></div>
+                            <div id="noInvitacionesProyectos" class="empty-state py-4 text-center" style="display: none;">
+                                <i class="bi bi-inbox fs-1 mb-3"></i>
+                                <p class="mb-0">No hay invitaciones pendientes</p>
+                                <small>Las invitaciones a proyectos aparecerán aquí</small>
                             </div>
                         </div>
                     </div>
@@ -248,10 +252,19 @@
     </div>
     <!-- ------------------------- -->
 
+
+
     @endsection
+    @include('pages.dashboard.onboarding')
 
     @section('js')
     <script>
+
+        const notyf = new Notyf({
+            duration: 3000,
+            position: { x: 'right', y: 'top' }
+        });
+
         let invitacionActual = null;
 
         //cargar invitaciones en las notificaciones
@@ -331,7 +344,7 @@
 
                 return `
                 <div class="notification-item alert alert-light d-flex align-items-start border rounded-3 mb-2" 
-                 onclick="abrirDetalleInvitacion('${invitacion.uid}')">
+                    onclick="abrirDetalleInvitacion('${invitacion.uid}')">
                     <span class="badge bg-primary me-2">!</span>
                     <div>
                         <strong>Invitación a proyecto: ${invitacion.proyecto.nombre}</strong><br>

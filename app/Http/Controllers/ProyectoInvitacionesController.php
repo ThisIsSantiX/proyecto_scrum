@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\proyecto_invitaciones;
+use App\Models\ProyectoInvitaciones;
 use Illuminate\Http\Request;
 
 class ProyectoInvitacionesController extends Controller
@@ -34,7 +34,7 @@ class ProyectoInvitacionesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(proyecto_invitaciones $proyecto_invitaciones)
+    public function show(ProyectoInvitaciones $ProyectoInvitaciones)
     {
         //
     }
@@ -42,7 +42,7 @@ class ProyectoInvitacionesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(proyecto_invitaciones $proyecto_invitaciones)
+    public function edit(ProyectoInvitaciones $ProyectoInvitaciones)
     {
         //
     }
@@ -50,7 +50,7 @@ class ProyectoInvitacionesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, proyecto_invitaciones $proyecto_invitaciones)
+    public function update(Request $request, ProyectoInvitaciones $ProyectoInvitaciones)
     {
         //
     }
@@ -58,7 +58,7 @@ class ProyectoInvitacionesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(proyecto_invitaciones $proyecto_invitaciones)
+    public function destroy(ProyectoInvitaciones $ProyectoInvitaciones)
     {
         //
     }

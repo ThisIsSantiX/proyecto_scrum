@@ -35,7 +35,12 @@ class SprintBacklogController extends Controller
             'progreso' => 'required|string',
             // 'asignado_a' => 'required|array', // IDs de miembros_equipos
             // 'asignado_a.*' => 'integer'
-        ]);
+        ],
+        [
+            'id_item_backlog.required' => 'La historia de usuario es requerida para agregarla al sprint.',
+            'progreso.required' => 'Debe de selecionar un estado.' 
+        ]
+    );
 
         try {
             DB::beginTransaction();
@@ -116,14 +121,24 @@ class SprintBacklogController extends Controller
                     ->where('sbm.id_sprint_backlog', $item->id)
                     ->select(
                         'u.foto_url as foto_url',
-                        DB::raw("CONCAT(u.nombre,' ',u.apellido) as nombre_completo")
+                        DB::raw("CONCAT(u.nombre, ' ', u.apellido) as nombre_completo")
                     )
-                    ->pluck('nombre_completo')
-                    ->toArray();
+                    ->get();
 
-                $item->responsables = implode(', ', $usuarios);
+                // 🔹 string con todos los nombres (como ya lo tenías)
+                $item->responsables = $usuarios->pluck('nombre_completo')->implode(', ');
+
+                // 🔹 array con nombre + foto (para que puedas mostrar la imagen)
+                $item->responsables_detalle = $usuarios->map(function ($u) {
+                    return [
+                        'nombre'   => $u->nombre_completo,
+                        'foto_url' => $u->foto_url,
+                    ];
+                });
+
                 return $item;
             });
+
 
             return response()->json([
                 'success' => true,

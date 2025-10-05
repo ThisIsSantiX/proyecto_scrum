@@ -6,49 +6,51 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex align-items-center">
                     <div class="header-title">
                         <h4 class="card-title">Lista de Usuarios</h4>
                     </div>
 
-                    <div>
-                        <input type="text" class="form-control form-control-sm" name="buscarUsuario" id="buscarUsuario" 
+                    <div class="d-flex ms-auto align-items-center gap-2 flex-grow-1" style="max-width: 400px;">
+                        <input type="text" class="form-control form-control-sm flex-grow-1" 
+                            name="buscarUsuario" id="buscarUsuario" 
                             placeholder="Buscar usuario..." onkeyup="showUsuarios()">
-                    </div>
 
-                    <div>
-                        <a href="{{ route('usuarios.create') }}" class="btn btn-sm btn-primary">+ Agregar Usuario</a>
+                        <a href="{{ route('usuarios.create') }}" class="btn btn-sm btn-primary" style="white-space: nowrap;">
+                            + Agregar Usuario
+                        </a>
                     </div>
                 </div>
-            <div class="card-body px-0">
-                <div class="table-responsive">
-                    <table id="user-list-table" class="table table-striped" role="grid" data-bs-toggle="data-table">
-                        <thead>
-                            <tr class="ligth">
-                                <th>Foto</th>
-                                <th>Nombre</th>
-                                <th>Email</th>
-                                <th>Rol</th>
-                                <th>Estado</th>
-                                <th style="min-width: 120px">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usuarios-tbody">
-                            <tr>
-                                <td colspan="6" class="text-center">
-                                    <div class="mb-0">Cargando usuarios...</div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="card-body px-0">
+                    <div class="table-responsive">
+                        <table id="user-list-table" class="table table-striped" role="grid" data-bs-toggle="data-table">
+                            <thead>
+                                <tr class="ligth">
+                                    <th>Foto</th>
+                                    <th>Nombre completo</th>
+                                    <th>Nombre de usuario</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Estado</th>
+                                    <th style="min-width: 120px">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usuarios-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        <div class="mb-0">Cargando usuarios...</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                    <nav class="ms-4 mt-2" aria-label="Page navigation example">
-                        <ul id="paginacionUsuarios" class="pagination pagination-sm">
-                            {{-- Paginación generada dinámicamente --}}
-                        </ul>
-                    </nav>
+                        <nav class="ms-4 mt-2" aria-label="Page navigation example">
+                            <ul id="paginacionUsuarios" class="pagination pagination-sm">
+                                {{-- Paginación generada dinámicamente --}}
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
     </div>
@@ -58,7 +60,18 @@
 
 
 @endsection
+    <style>
+        @media (max-width: 576px) {
+            .card-header .btn-sm {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
 
+            #buscarUsuario {
+                min-width: 80px; /* el input no se achique demasiado */
+            }
+        }
+    </style>
 @section('js')
     <script>
 
@@ -77,7 +90,7 @@
 
                     const tabla = usuarios.map(user => `
                         <tr>
-                           <!-- Foto -->
+                            <!-- Foto -->
                             <td class="text-center">
                                 <img src="${user.foto_url.startsWith('http') 
                                             ? user.foto_url 
@@ -85,16 +98,18 @@
                                     alt="foto" 
                                     class="bg-soft-primary rounded-circle img-fluid avatar-40"
                                     style="cursor: pointer width: 40px; height: 40px; object-fit: cover;"
-                                   onclick="verFoto(
+                                    onclick="verFoto(
                                             '${user.foto_url.startsWith('http') ? user.foto_url : `/storage/${user.foto_url}`}',
                                             '${user.uid}'
                                         )"
-                                    onerror="this.onerror=null;this.src='/images/avatar/01.jpg';">
+                                    onerror="this.onerror=null;this.src= "https://ui-avatars.com/api/?name=${encodeURIComponent(user.username + ' ' + user.apellido)}&background=random&color=fff";">
                             </td>
 
 
                             <!-- Nombre -->
-                            <td>${user.nombre} ${user.apellido}</td>
+                            <td>${user.nombre} ${user.apellido || ''}</td>
+
+                            <td>${user.username}</td>
 
                             <!-- Email -->
                             <td>${user.email}</td>
@@ -243,57 +258,84 @@
             showUsuarios();
         });
 
-// este diseño es para que la imagen ocupe todo el espacio del modal 
-// el border hace que la imagen sea circular
-function verFoto(url, uid ) {
+        // este diseño es para que la imagen ocupe todo el espacio del modal 
+        // el border hace que la imagen sea circular
+function verFoto(url, uid) {
+    const esAvatarPorDefecto = url.includes('ui-avatars.com') || url.includes('/images/avatar/01.jpg');
+    let deleteBtn = '';
+
+    if (!esAvatarPorDefecto && uid !== 'nuevo') {
+        deleteBtn = `
+            <button onclick="deleteFotoPerfil('${uid}')" 
+                    style="
+                        position:absolute;
+                        top:18px;
+                        left:18px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        width:40px;
+                        height:40px;
+                        background: linear-gradient(135deg, #ff4b5c, #c9184a);
+                        border:none;
+                        border-radius:50%;
+                        color:white;
+                        cursor:pointer;
+                        box-shadow:0 4px 12px rgba(0,0,0,0.25);
+                        transition: all 0.25s ease;
+                    "
+                    onmouseover="this.style.transform='scale(1.1)'; this.style.background='linear-gradient(135deg,#ff6b75,#e63956)';"
+                    onmouseout="this.style.transform='scale(1)'; this.style.background='linear-gradient(135deg,#ff4b5c,#c9184a)';"
+                    title="Eliminar foto">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" 
+                     viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5.5a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                    <path fill-rule="evenodd" 
+                          d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1 0-2h3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1h3a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118z"/>
+                </svg>
+            </button>
+        `;
+    }
+
     Swal.fire({
         html: `
-            <div style="width:400px;height:400px;margin:auto;display:flex;align-items:center;justify-content:center;">
+            <div style="width:400px;height:400px;margin:auto;display:flex;align-items:center;justify-content:center;position:relative;">
                 <img src="${url}" 
                      alt="Foto de perfil" 
                      style="width:100%;height:100%;object-fit:cover;border-radius:50%;"> 
-                
-            </div>
-
-            <!-- Botón de eliminar -->
-                 <button onclick="deleteFotoPerfil('${uid}')" 
-                        style="
-                            position:absolute;
-                            top:18px;
-                            left:18px;
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            width:40px;
-                            height:40px;
-                            background: linear-gradient(135deg, #ff4b5c, #c9184a);
-                            border:none;
-                            border-radius:50%;
-                            color:white;
-                            cursor:pointer;
-                            box-shadow:0 4px 12px rgba(0,0,0,0.25);
-                            transition: all 0.25s ease;
-                        "
-                        onmouseover="this.style.transform='scale(1.1)'; this.style.background='linear-gradient(135deg,#ff6b75,#e63956)';"
-                        onmouseout="this.style.transform='scale(1)'; this.style.background='linear-gradient(135deg,#ff4b5c,#c9184a)';"
-                        title="Eliminar foto">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" 
-                         viewBox="0 0 16 16">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5.5a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                        <path fill-rule="evenodd" 
-                              d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1 0-2h3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1h3a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118z"/>
-                    </svg>
-                </button>
+                ${deleteBtn}
             </div>
         `,
         showCloseButton: true,
         showConfirmButton: false,
         background: '#000000cc',
         width: 'auto',
-        padding: 0
+        padding: 1
     });
 }
 
+function activarPreview(inputId, previewId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+
+    if (input && preview) {
+        input.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    preview.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+}
+
+// Llamar a la función en DOMContentLoaded
+document.addEventListener("DOMContentLoaded", () => {
+    activarPreview("foto_url", "previewForm");
+});
 function deleteFotoPerfil(uid) {
     Swal.fire({
         title: '¿Eliminar foto de perfil?',
@@ -305,14 +347,30 @@ function deleteFotoPerfil(uid) {
         confirmButtonColor: '#dc3545'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Usamos la URL directa que coincide con tu ruta web.php
             axios.delete(`/usuarios/${uid}/foto`, {
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
             })
             .then(response => {
                 if (response.data.success) {
                     Swal.fire('Eliminada!', 'La foto de perfil ha sido eliminada.', 'success')
-                        .then(() => showUsuarios());
+                    .then(() => location.reload());
+                    
+
+                    // Generar avatar por defecto dinámico
+                    const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(response.data.username + ' ' + response.data.apellido)}&background=random&color=fff`;
+
+                    // Actualizar avatar en header (si existe)
+                    const previewHeader = document.getElementById('preview');
+                    if (previewHeader) previewHeader.src = defaultAvatar;
+
+                    // Actualizar avatar en formulario de edición (si existe)
+                    const previewForm = document.getElementById('previewForm');
+                    if (previewForm) previewForm.src = defaultAvatar;
+
+                    // Actualizar tabla/lista de usuarios (si hay img con id="foto-UID")
+                    const avatarEnLista = document.getElementById(`foto-${uid}`);
+                    if (avatarEnLista) avatarEnLista.src = defaultAvatar;
+
                 } else {
                     Swal.fire('Error', 'No se pudo eliminar la foto.', 'error');
                 }
@@ -325,6 +383,6 @@ function deleteFotoPerfil(uid) {
     });
 }
 
-        
+  
     </script>
 @endsection

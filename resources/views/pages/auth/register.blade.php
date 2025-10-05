@@ -1,7 +1,5 @@
 @extends('layouts.layoutAuth.layoutAuth')   
 
-@section('title', 'Scrum')
-
 @section('css')
     <style>
         .form-group {
@@ -30,37 +28,17 @@
                 <div class="col-md-10">
                     <div class="card card-transparent shadow-none d-flex justify-content-center mb-0 auth-card">
                     <div class="card-body">
-                        <a href="../../dashboard/index.html" class="navbar-brand d-flex align-items-center mb-3">
-                            <!--Logo start-->
-                            <!--logo End-->
-                            
-                            <!--Logo start-->
-                            <div class="logo-main">
-                                <div class="logo-normal">
-                                    <svg class="text-primary icon-30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <rect x="-0.757324" y="19.2427" width="28" height="4" rx="2" transform="rotate(-45 -0.757324 19.2427)" fill="currentColor"/>
-                                        <rect x="7.72803" y="27.728" width="28" height="4" rx="2" transform="rotate(-45 7.72803 27.728)" fill="currentColor"/>
-                                        <rect x="10.5366" y="16.3945" width="16" height="4" rx="2" transform="rotate(45 10.5366 16.3945)" fill="currentColor"/>
-                                        <rect x="10.5562" y="-0.556152" width="28" height="4" rx="2" transform="rotate(45 10.5562 -0.556152)" fill="currentColor"/>
-                                    </svg>
-                                </div>
-                                <div class="logo-mini">
-                                    <svg class="text-primary icon-30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <rect x="-0.757324" y="19.2427" width="28" height="4" rx="2" transform="rotate(-45 -0.757324 19.2427)" fill="currentColor"/>
-                                        <rect x="7.72803" y="27.728" width="28" height="4" rx="2" transform="rotate(-45 7.72803 27.728)" fill="currentColor"/>
-                                        <rect x="10.5366" y="16.3945" width="16" height="4" rx="2" transform="rotate(45 10.5366 16.3945)" fill="currentColor"/>
-                                        <rect x="10.5562" y="-0.556152" width="28" height="4" rx="2" transform="rotate(45 10.5562 -0.556152)" fill="currentColor"/>
-                                    </svg>
-                                </div>
-                            </div>
-                            <!--logo End-->
-                            
-                            
-                            
-                            
-                            <h4 class="logo-title ms-3">Scrum</h4>
-                        </a>
-                        <h2 class="mb-2 text-center">Bienvenido a Scrum</h2>
+                        
+                        <div class="logo-main d-flex align-items-center justify-content-center mb-3">
+                            <img src="../../assets/images/logos/workscrum.png" 
+                                alt="WorkScrum Logo" 
+                                class="me-2" 
+                                width="40" 
+                                height="40">
+
+                            <!-- Nombre -->
+                            <h2 class="mb-0 fw-bold">WorkScrum</h2>
+                        </div>
                         <p class="text-center">Crea una cuenta</p>
                         <form id="registerForm" action="route{{ ('register') }}" method="POST">
                             @csrf
@@ -68,35 +46,56 @@
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="full-name" class="form-label">Nombre</label>
-                                        <input type="text" class="form-control" id="full-name" placeholder="Cesar" required>
+                                        <input type="text" class="form-control" id="full-name" placeholder="Ej: Juan" required>
                                         <div class="invalid-feedback">El nombre es obligatorio</div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <label for="last-name" class="form-label">Apellido</label>
-                                        <input type="text" class="form-control" id="last-name" placeholder="Yepes" required>
+                                        <label for="full-name" class="form-label">Apellido</label>
+                                        <input type="text" class="form-control" id="last-name" placeholder="Ej: Pérez" required>
                                         <div class="invalid-feedback">El apellido es obligatorio</div>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="form-group">
                                         <label for="email" class="form-label">Correo</label>
-                                        <input type="email" class="form-control" id="email" name="email" placeholder="example@gmail.com" required>
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="ejemplo@correo.com" required>
                                         <div class="invalid-feedback">Debes ingresar un correo válido</div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="password" class="form-label">Contraseña</label>
-                                        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required minlength="8">
-                                        <div class="invalid-feedback">Mínimo 8 caracteres</div>
-                                    </div> 
+                                        <input type="password" class="form-control" id="password" name="password" 
+                                            placeholder="Tu contraseña" required minlength="8">
+
+                                        <!-- Barra de fuerza -->
+                                        <div class="progress mt-2" style="height: 6px;">
+                                            <div id="password-strength" class="progress-bar bg-danger" role="progressbar" 
+                                                style="width: 0%"></div>
+                                        </div>
+
+                                        
+                                        <!-- Requisitos -->
+                                        <div class="form-text">
+                                            La contraseña debe tener al menos:
+                                            <ul id="password-rules" class="mb-0 small text-muted">
+                                                <li id="rule-length">8 caracteres</li>
+                                                <li id="rule-upper">Una mayúscula</li>
+                                                <li id="rule-lower">Una minúscula</li>
+                                                <li id="rule-number">Un número</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="invalid-feedback">La contraseña no cumple los requisitos</div>
+                                    </div>
                                 </div>
+
                                 <div class="col-lg-6">
                                     <div class="form-group position-relative">
                                         <label for="confirm-password" class="form-label">Confirmar Contraseña</label>
-                                        <input type="password" class="form-control" id="confirm-password" name="confirm-password" placeholder="••••••••" required>
+                                        <input type="password" class="form-control" id="confirm-password" name="confirm-password" placeholder="Repite tu contraseña" required>
                                         <div class="invalid-feedback">Las contraseñas no coinciden</div>
                                     </div>
                                 </div>
@@ -111,16 +110,6 @@
                     </div>
                 </div>
             </div>
-            <div class="sign-bg">
-                <svg width="280" height="230" viewBox="0 0 431 398" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <g opacity="0.05">
-                    <rect x="-157.085" y="193.773" width="543" height="77.5714" rx="38.7857" transform="rotate(-45 -157.085 193.773)" fill="#3B8AFF"/>
-                    <rect x="7.46875" y="358.327" width="543" height="77.5714" rx="38.7857" transform="rotate(-45 7.46875 358.327)" fill="#3B8AFF"/>
-                    <rect x="61.9355" y="138.545" width="310.286" height="77.5714" rx="38.7857" transform="rotate(45 61.9355 138.545)" fill="#3B8AFF"/>
-                    <rect x="62.3154" y="-190.173" width="543" height="77.5714" rx="38.7857" transform="rotate(45 62.3154 -190.173)" fill="#3B8AFF"/>
-                    </g>
-                </svg>
-            </div>
         </div>
         <div class="col-md-6 d-md-block d-none bg-primary p-0 mt-n1 vh-100 overflow-hidden">
             <img src="../../assets/images/auth/01.png" class="img-fluid gradient-main animated-scaleX" alt="images">
@@ -130,7 +119,41 @@
 
 @section('js')
     <script>
-        
+
+        // =============================
+        // Validación de fuerza contraseña
+        // =============================
+        $("#password").on("input", function () {
+            const password = $(this).val();
+
+            // Reglas
+            const hasLength = password.length >= 8;
+            const hasUpper  = /[A-Z]/.test(password);
+            const hasLower  = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+
+            // Actualizar reglas en la UI
+            $("#rule-length").css("color", hasLength ? "green" : "red");
+            $("#rule-upper").css("color", hasUpper ? "green" : "red");
+            $("#rule-lower").css("color", hasLower ? "green" : "red");
+            $("#rule-number").css("color", hasNumber ? "green" : "red");
+
+            // Calcular fuerza
+            let strength = hasLength + hasUpper + hasLower + hasNumber;
+            let strengthPercent = (strength / 4) * 100;
+
+            let $bar = $("#password-strength");
+            $bar.css("width", strengthPercent + "%");
+
+            if (strength <= 1) {
+                $bar.removeClass().addClass("progress-bar bg-danger");
+            } else if (strength === 2 || strength === 3) {
+                $bar.removeClass().addClass("progress-bar bg-warning");
+            } else {
+                $bar.removeClass().addClass("progress-bar bg-success");
+            }
+        });
+
 
         $(document).ready(function () {
             const notyf = new Notyf({
@@ -163,13 +186,9 @@
                         if (error.response && error.response.status === 422) {
                             let errors = error.response.data.errors;
 
-                            if (errors.nombre) {
+                            if (errors.username) {
                                 $("#full-name").addClass("is-invalid")
-                                    .siblings(".invalid-feedback").text(errors.nombre[0]);
-                            }
-                            if (errors.apellido) {
-                                $("#last-name").addClass("is-invalid")
-                                    .siblings(".invalid-feedback").text(errors.apellido[0]);
+                                    .siblings(".invalid-feedback").text(errors.username[0]);
                             }
                             if (errors.email) {
                                 $("#email").addClass("is-invalid")
@@ -198,10 +217,7 @@
             input.after(`
                 <span class="togglePassword" data-input="${inputId}" 
                     style="position: absolute; right: 20px; top: 38px; cursor: pointer; z-index: 2;">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
-                        <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
-                    </svg>
+                    <svg class="icon-32" width="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">                                <path fill-rule="evenodd" clip-rule="evenodd" d="M8.09756 12C8.09756 14.1333 9.8439 15.8691 12 15.8691C14.1463 15.8691 15.8927 14.1333 15.8927 12C15.8927 9.85697 14.1463 8.12121 12 8.12121C9.8439 8.12121 8.09756 9.85697 8.09756 12ZM17.7366 6.04606C19.4439 7.36485 20.8976 9.29455 21.9415 11.7091C22.0195 11.8933 22.0195 12.1067 21.9415 12.2812C19.8537 17.1103 16.1366 20 12 20H11.9902C7.86341 20 4.14634 17.1103 2.05854 12.2812C1.98049 12.1067 1.98049 11.8933 2.05854 11.7091C4.14634 6.88 7.86341 4 11.9902 4H12C14.0683 4 16.0293 4.71758 17.7366 6.04606ZM12.0012 14.4124C13.3378 14.4124 14.4304 13.3264 14.4304 11.9979C14.4304 10.6597 13.3378 9.57362 12.0012 9.57362C11.8841 9.57362 11.767 9.58332 11.6597 9.60272C11.6207 10.6694 10.7426 11.5227 9.65971 11.5227H9.61093C9.58166 11.6779 9.56215 11.833 9.56215 11.9979C9.56215 13.3264 10.6548 14.4124 12.0012 14.4124Z" fill="currentColor"></path>                                </svg>                            
                 </span>
             `);
 
@@ -220,13 +236,8 @@
 
             $(this).html(
                 type === 'password'
-                    ? `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
-                        <path d="M8 5a3 3 0 0 0 0 6 3 3 0 0 0 0-6z"/>
-                    </svg>`
-                    : `<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M13.359 11.238l2.122 2.122a.5.5 0 0 1-.708.708l-2.122-2.122A7.027 7.027 0 0 1 8 13.5c-5 0-8-5.5-8-5.5a13.134 13.134 0 0 1 2.478-3.197l-1.147-1.147a.5.5 0 1 1 .708-.708l13 13a.5.5 0 0 1-.708.708l-1.147-1.147z"/>
-                    </svg>`
+                    ? `<svg class="icon-32" width="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">                                <path fill-rule="evenodd" clip-rule="evenodd" d="M8.09756 12C8.09756 14.1333 9.8439 15.8691 12 15.8691C14.1463 15.8691 15.8927 14.1333 15.8927 12C15.8927 9.85697 14.1463 8.12121 12 8.12121C9.8439 8.12121 8.09756 9.85697 8.09756 12ZM17.7366 6.04606C19.4439 7.36485 20.8976 9.29455 21.9415 11.7091C22.0195 11.8933 22.0195 12.1067 21.9415 12.2812C19.8537 17.1103 16.1366 20 12 20H11.9902C7.86341 20 4.14634 17.1103 2.05854 12.2812C1.98049 12.1067 1.98049 11.8933 2.05854 11.7091C4.14634 6.88 7.86341 4 11.9902 4H12C14.0683 4 16.0293 4.71758 17.7366 6.04606ZM12.0012 14.4124C13.3378 14.4124 14.4304 13.3264 14.4304 11.9979C14.4304 10.6597 13.3378 9.57362 12.0012 9.57362C11.8841 9.57362 11.767 9.58332 11.6597 9.60272C11.6207 10.6694 10.7426 11.5227 9.65971 11.5227H9.61093C9.58166 11.6779 9.56215 11.833 9.56215 11.9979C9.56215 13.3264 10.6548 14.4124 12.0012 14.4124Z" fill="currentColor"></path>                                </svg>                            `
+                    : `<svg class="icon-32" width="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">                                <path fill-rule="evenodd" clip-rule="evenodd" d="M9.80327 15.2526C10.4277 15.6759 11.1888 15.9319 11.9987 15.9319C14.1453 15.9319 15.8919 14.1696 15.8919 12.0037C15.8919 11.1866 15.6382 10.4186 15.2186 9.78855L14.1551 10.8617C14.3307 11.1964 14.4283 11.5902 14.4283 12.0037C14.4283 13.3525 13.3354 14.4551 11.9987 14.4551C11.5889 14.4551 11.1986 14.3567 10.8668 14.1795L9.80327 15.2526ZM18.4288 6.54952C19.8436 7.84907 21.0438 9.60149 21.9415 11.7083C22.0195 11.8954 22.0195 12.112 21.9415 12.2892C19.8534 17.1921 16.1358 20.1259 11.9987 20.1259H11.9889C10.1058 20.1259 8.30063 19.5056 6.71018 18.3735L4.81725 20.2834C4.67089 20.4311 4.4855 20.5 4.30011 20.5C4.11472 20.5 3.91957 20.4311 3.78297 20.2834C3.53903 20.0373 3.5 19.6435 3.69515 19.358L3.72442 19.3186L18.1556 4.75771C18.1751 4.73802 18.1946 4.71833 18.2044 4.69864L18.2044 4.69863C18.2239 4.67894 18.2434 4.65925 18.2532 4.63957L19.1704 3.71413C19.4631 3.42862 19.9217 3.42862 20.2046 3.71413C20.4974 3.99964 20.4974 4.4722 20.2046 4.75771L18.4288 6.54952ZM8.09836 12.0075C8.09836 12.2635 8.12764 12.5195 8.16667 12.7558L4.55643 16.3984C3.5807 15.2564 2.7318 13.8781 2.05854 12.293C1.98049 12.1158 1.98049 11.8992 2.05854 11.7122C4.14662 6.80933 7.86419 3.88534 11.9916 3.88534H12.0013C13.3966 3.88534 14.7529 4.22007 16.0018 4.85015L12.7429 8.13841C12.5087 8.09903 12.255 8.0695 12.0013 8.0695C9.84494 8.0695 8.09836 9.83177 8.09836 12.0075Z" fill="currentColor"></path>                                </svg>                            `
             );
         });
 

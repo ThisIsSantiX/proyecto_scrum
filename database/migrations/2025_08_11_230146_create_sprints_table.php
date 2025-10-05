@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('sprints', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 50);
-            $table->text('objetivo', 255);
+            $table->text('objetivo', 255)->nullable();
             $table->unsignedBigInteger('id_proyecto');
             $table->foreign('id_proyecto')->references('id')->on('proyectos');
-            $table->date('fecha_inicio');
-            $table->date('fecha_fin');
-            $table->string('progreso', 20);
+            $table->date('fecha_inicio')->nullable();
+            $table->date('fecha_fin')->nullable();
+            $table->string('progreso', 20)->nullable();
             $table->integer('estado')->default(1);
             $table->text('uid');
             $table->timestamps();

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class proyecto_invitaciones extends Model
+class ProyectoInvitaciones extends Model
 {
     use HasFactory;
 
@@ -24,7 +24,7 @@ class proyecto_invitaciones extends Model
     ];
 
     public function proyecto(){
-        return $this->belongsTo(proyecto::class,'proyecto_id');
+        return $this->belongsTo(Proyecto::class,'proyecto_id');
     }
 
     public function invitadoPor(){
@@ -39,7 +39,7 @@ class proyecto_invitaciones extends Model
         return $query->where('estadoInvitacion','pendiente')
                     ->where(function($q){
                         $q->whereNull('expira_en')
-                          ->orwhere('expira_en','>',now());
+                        ->orwhere('expira_en','>',now());
                     });
     }
 

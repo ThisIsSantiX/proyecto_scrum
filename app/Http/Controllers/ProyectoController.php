@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\miembros_equipo;
 use App\Models\Proyecto;
-use App\Models\proyecto_invitaciones;
 use Illuminate\Http\Request;
+use App\Models\ProyectoInvitaciones;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ProyectoReciente;
 
 class ProyectoController extends Controller
 {
@@ -29,34 +28,36 @@ class ProyectoController extends Controller
     {
         $userId = auth()->id();
 
-        $query = Proyecto::select(
-            'proyectos.*',
-            'users.nombre as usuario_nombre',
-            'users.email as usuario_email'
-        )
+        $query = DB::table('proyectos')
+            ->select(
+                'proyectos.*',
+                DB::raw("CONCAT(users.nombre, ' ', users.apellido) as usuario_nombre_completo"),
+                'users.email as usuario_email',
+                'users.foto_url as usuario_foto'
+            )
             ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
             ->leftJoin('miembros_equipos', 'proyectos.id', '=', 'miembros_equipos.id_proyecto')
             ->where('proyectos.estado', 1)
-            ->where(function($q) use ($userId) {
+            ->where(function ($q) use ($userId) {
                 $q->where('proyectos.id_owner', $userId)
-                ->orWhere('miembros_equipos.id_usuario', $userId);
+                    ->orWhere('miembros_equipos.id_usuario', $userId);
             });
 
-        if ($request->has('search') && !empty($request->search)) {
+        if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('proyectos.nombre', 'LIKE', '%' . $request->search . '%')
-                    ->orWhere('users.nombre', 'LIKE', '%' . $request->search . '%');
+                    ->orWhere(DB::raw("CONCAT(users.nombre, ' ', users.apellido)"), 'LIKE', '%' . $request->search . '%');
             });
         }
 
-
         $proyectos = $query->distinct()->get();
-        
+
         return response()->json([
             'success' => true,
             'data' => $proyectos
         ]);
     }
+
 
 
     // Función store
@@ -66,9 +67,16 @@ class ProyectoController extends Controller
             $request->validate([
                 'nombre' => 'required|string|max:50',
                 'descripcion' => 'nullable|string|max:255',
+                'visibilidad' => 'required|integer|in:0,1',
+                'progreso' => 'nullable|string|max:20',
                 'fecha_inicio' => 'nullable|date',
-                'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
-                'visibilidad' => 'required|integer|in:0,1'
+                'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio'
+            ], [
+                'nombre.required' => 'El nombre del proyecto es obligatorio.',
+                'nombre.max' => 'El nombre del proyecto no debe exceder los 50 caracteres.',
+                'descripcion.max' => 'La descripcion no debe de exceder los 255 caracteres.',
+                'fecha_fin.after_or_equal' => 'La fecha de fin no puede ser menor a la fecha de inicio.'
+
             ]);
 
             $proyecto = new Proyecto();
@@ -78,7 +86,7 @@ class ProyectoController extends Controller
             $proyecto->estado = 1; // Activo por defecto
             $proyecto->uid = Str::uuid(); // Generar UUID único
             $proyecto->visibilidad = $request->visibilidad;
-            $proyecto->progreso = $request->progreso;
+            $proyecto->progreso = $request->progreso ?? 'planificacion';
             $proyecto->fecha_inicio = $request->fecha_inicio;
             $proyecto->fecha_fin = $request->fecha_fin;
 
@@ -109,18 +117,19 @@ class ProyectoController extends Controller
         try {
             $proyecto = DB::table('proyectos')
                 ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
-                ->leftJoin('product_backlog', function($join) {
+                ->leftJoin('product_backlog', function ($join) {
                     $join->on('proyectos.id', '=', 'product_backlog.id_proyecto')
                         ->where('product_backlog.estado', '=', 1);
                 })
-                ->leftJoin('sprints', function($join) {
+                ->leftJoin('sprints', function ($join) {
                     $join->on('proyectos.id', '=', 'sprints.id_proyecto')
                         ->where('sprints.estado', '=', 1);
                 })
                 ->select(
                     'proyectos.*',
-                    'users.nombre as usuario_nombre',
+                    DB::raw("CONCAT(users.nombre, ' ', users.apellido) as usuario_nombre_completo"),
                     'users.email as usuario_email',
+                    'users.foto_url as usuario_foto', // 👈 sin procesar
                     DB::raw('COUNT(DISTINCT product_backlog.id) as total_elementos'),
                     DB::raw('COUNT(DISTINCT sprints.id) as total_sprints')
                 )
@@ -139,7 +148,10 @@ class ProyectoController extends Controller
                     'proyectos.created_at',
                     'proyectos.updated_at',
                     'users.nombre',
-                    'users.email'
+                    'users.apellido',
+                    'users.username',
+                    'users.email',
+                    'users.foto_url'
                 )
                 ->first();
 
@@ -149,6 +161,16 @@ class ProyectoController extends Controller
                     'message' => 'Proyecto no encontrado'
                 ], 404);
             }
+
+            \App\Models\ProyectoReciente::updateOrCreate(
+                [
+                    'id_usuario' => auth()->id(),
+                    'id_proyecto' => $proyecto->id
+                ],
+                [
+                    'opened_at' => now()
+                ]
+            );
 
             return response()->json([
                 'success' => true,
@@ -161,7 +183,6 @@ class ProyectoController extends Controller
             ], 500);
         }
     }
-
 
     // Función edit
     public function edit($uid)
@@ -200,7 +221,13 @@ class ProyectoController extends Controller
                 'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
                 'visibilidad' => 'required|integer|in:0,1',
                 'progreso' => 'nullable|string|max:20'
-            ]);
+            ],
+            [
+                'nombre.required' => 'El nombre del proyecto es requerido.',
+                'nombre.max' => 'El nombre del proyecto no debe exceder los 50 caracteres.',
+                'descripcion.max' => 'La descripcion no debe de exceder los 255 caracteres.'
+            ]
+        );
 
             // Buscar proyecto por uid
             $proyecto = Proyecto::where('uid', $request->uid)->firstOrFail();
@@ -316,7 +343,7 @@ class ProyectoController extends Controller
                 ], 400);
             }
 
-            $invitacionPendiente = proyecto_invitaciones::where('proyecto_id', $idProyecto)
+            $invitacionPendiente = ProyectoInvitaciones::where('proyecto_id', $idProyecto)
                 ->where('usuario_invitado', $usuarioInvitado->id)
                 ->where('estadoInvitacion', 'pendiente')
                 ->where(function ($q) {
@@ -331,7 +358,7 @@ class ProyectoController extends Controller
                 ], 400);
             }
 
-            $invitacion = proyecto_invitaciones::create([
+            $invitacion = ProyectoInvitaciones::create([
                 'proyecto_id' => $idProyecto,
                 'invitado_por' => $usuarioActual->id,
                 'usuario_invitado' => $usuarioInvitado->id,
@@ -346,7 +373,7 @@ class ProyectoController extends Controller
             return response()->json([
                 'message' => 'Invitacion enviada exitosamente',
                 'invitacion' => [
-                    'usuario' => $usuarioInvitado->name,
+                    'usuario' => $usuarioInvitado->nombre . ' ' . $usuarioInvitado->apellido,
                     'email' => $usuarioInvitado->email,
                     'proyecto' => $proyecto->nombre
                 ]
@@ -365,7 +392,7 @@ class ProyectoController extends Controller
         try {
             $user = Auth::user();
 
-            $invitaciones = proyecto_invitaciones::with(['proyecto', 'invitadoPor'])
+            $invitaciones = ProyectoInvitaciones::with(['proyecto', 'invitadoPor'])
                 ->where('usuario_invitado', $user->id)
                 ->pendientes()
                 ->orderBy('created_at', 'desc')
@@ -398,7 +425,7 @@ class ProyectoController extends Controller
         try {
             $user = Auth::user();
 
-            $invitacion = proyecto_invitaciones::where('uid', $uid)
+            $invitacion = ProyectoInvitaciones::where('uid', $uid)
                 ->where('usuario_invitado', $user->id)
                 ->where('estadoInvitacion', 'pendiente')
                 ->first();
@@ -447,6 +474,85 @@ class ProyectoController extends Controller
             DB::rollBack();
             return response()->json([
                 'message' => 'error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function proyectosRecientes()
+    {
+        try {
+            $userId = auth()->id();
+
+            $recientes = DB::table('proyecto_recientes')
+                ->join('proyectos', 'proyecto_recientes.id_proyecto', '=', 'proyectos.id')
+                ->leftJoin('users', 'proyectos.id_owner', '=', 'users.id')
+                ->select(
+                    'proyectos.uid',
+                    'proyectos.nombre',
+                    'proyecto_recientes.opened_at'
+                )
+                ->where('proyecto_recientes.id_usuario', $userId)
+                ->orderByDesc('proyecto_recientes.opened_at')
+                ->limit(5)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $recientes
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener proyectos recientes: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function registrarAcceso($uid)
+    {
+        try {
+            $userId = auth()->id();
+
+            //Buscar el proyecto por UID
+            $proyecto = DB::table('proyectos')
+                ->where('uid', $uid)
+                ->first();
+            if (!$proyecto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Proyecto no encontrado'
+                ], 404);
+            }
+
+            //Verificar si existe un registro de un proyecto reciente
+            $existe = DB::table('proyecto_recientes')
+                ->where('id_usuario', $userId)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+            if ($existe) {
+                // Actualizar la fecha de acceso
+                DB::table('proyecto_recientes')
+                    ->where('id_usuario', $userId)
+                    ->where('id_proyecto', $proyecto->id)
+                    ->update(['opened_at' => now()]);
+            } else {
+                // Insertar nuevo registro
+                DB::table('proyecto_recientes')->insert([
+                    'id_usuario' => $userId,
+                    'id_proyecto' => $proyecto->id,
+                    'opened_at' => now(),
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Acesso registrado'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al registrar acceso: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -4,31 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\miembros_equipo;
 
-class proyecto extends Model
+class Equipo extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'nombre',
         'descripcion',
-        'id_owner',
+        'id_proyecto',
         'estado',
         'uid',
-        'visibilidad',
-        'progreso',
-        'fecha_inicio',
-        'fecha_fin',    
     ];
 
     protected $primaryKey = 'id';
-
-    public function miembrosEquipos()
-{
-    return $this->hasMany(miembros_equipo::class, 'id_proyecto');
 }
-
-}
-
-
