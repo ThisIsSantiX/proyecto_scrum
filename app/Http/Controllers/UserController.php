@@ -51,8 +51,7 @@ class UserController extends Controller
                     $file = $request->file('foto_url');
                     $filename = time() . '_' . $file->getClientOriginalName();
                     $file->storeAs('usuarios', $filename, 'public');
-
-                    $fotoPath = $filename;
+                    
                     $fotoPath = $request->file('foto_url')->store('usuarios', 'public');
                 } else {
                     $fotoPath = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
@@ -208,6 +207,25 @@ class UserController extends Controller
     public function updateProfile(Request $request)
     {
         $user = User::findOrFail(auth()->id());
+
+        $request->validate([
+            'nombre'    => 'required|string|max:50',
+            'username'    => 'required|string|max:50',
+            'apellido'  => 'nullable|string|max:50',
+            'email'     => 'required|email|max:255|unique:users,email,' . $user->id,
+            'foto_url'  => 'nullable|file|image|max:2048',
+        ]);
+
+        $data = $request->only(['nombre','username', 'email']);
+
+        if ($request->hasFile('foto_url')) {
+            $data['foto_url'] = $request->file('foto_url')->store('usuarios', 'public');
+        } elseif (!$user->foto_url) {
+            $data['foto_url'] = "https://ui-avatars.com/api/?name=" . urlencode("{$request->nombre} {$request->apellido}") . "&background=random&color=fff";
+        }
+
+        $user->update($data);
+
 
         $request->validate([
             'nombre'    => 'required|string|max:50',
