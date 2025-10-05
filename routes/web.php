@@ -214,6 +214,9 @@ Route::post('/onboarding/completado', [DashboardController::class, 'marcarOnboar
         Route::get('/auth/recovery', [AuthController::class, 'showRecoveryForm'])->name('recoverypw');
         Route::post('/auth/recovery', [AuthController::class, 'sendRecoveryEmail'])->name('recoverypw.send');
         Route::get('/auth/mail-sent', [AuthController::class, 'showMailSent'])->name('mail.sent');
+
+        Route::get('/auth/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+        Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
     });
 
 
