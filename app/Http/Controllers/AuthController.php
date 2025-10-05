@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password as PasswordFacade;  
 use Illuminate\Validation\Rules\Password;
+use App\Mail\ResetPasswordMail;
+use Illuminate\Support\Facades\Mail;
+
 
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 
@@ -196,13 +199,53 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $status = PasswordFacade::sendResetLink($request->only('email'));
+        $status = PasswordFacade::sendResetLink($request->only('email'), function ($user, $token) {
+            $url = url(route('password.reset', [
+                'token' => $token,
+                'email' => $user->email,
+            ], false));
 
-        if ($status === PasswordFacade::RESET_LINK_SENT) {
-            return redirect()->route('mail.sent')->with('email', $request->email);
-        } else {
-            return back()->withErrors(['email' => __($status)]);
-        }
+            Mail::to($user->email)->send(new ResetPasswordMail($user, $url));
+        });
+
+        return $status === PasswordFacade::RESET_LINK_SENT
+            ? back()->with(['status' => __($status)])
+            : back()->withErrors(['email' => __($status)]);
+    }
+
+    public function showResetForm($token)
+    {
+        return view('pages.auth.reset-password', ['token' => $token]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(8)
+                    ->letters() 
+                    ->mixedCase()
+                    ->numbers()
+            ],
+        ]);
+
+        $status = PasswordFacade::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+            }
+        );
+
+        return $status === PasswordFacade::PASSWORD_RESET
+            ? redirect()->route('login')->with('status', __($status))
+            : back()->withErrors(['email' => [__($status)]]);
     }
 
 

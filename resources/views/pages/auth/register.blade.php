@@ -1,5 +1,6 @@
 @extends('layouts.layoutAuth.layoutAuth')   
 
+
 @section('css')
     <style>
         .form-group {
