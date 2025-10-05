@@ -100,8 +100,8 @@
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2 px-3 rounded-2" 
-                                href="../dashboard/app/user-privacy-setting.html">
-                                    <i class="fas fa-lock me-2"></i> Ajustes Privacidad
+                                    href="{{ route('configuracion') }}">
+                                    <i class="fas fa-cog me-2"></i> Configuración
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>

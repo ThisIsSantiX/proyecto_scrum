@@ -57,29 +57,6 @@
         animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
     
-    /* Tooltip específico para tablero - Ancho y compacto */
-    .introjs-tooltip.tooltip-tablero-ancho {
-        max-width: 650px !important;
-        min-width: 500px !important;
-        max-height: none !important;
-    }
-    
-    .introjs-tooltip.tooltip-tablero-ancho .introjs-tooltiptext {
-        padding: 16px 20px !important;
-        max-height: none !important;
-    }
-    
-    .introjs-tooltip.tooltip-tablero-ancho h5 {
-        margin-bottom: 4px !important;
-        font-size: 1.1rem !important;
-    }
-    
-    .introjs-tooltip.tooltip-tablero-ancho p {
-        margin-bottom: 0 !important;
-        font-size: 0.9rem !important;
-        line-height: 1.3 !important;
-    }
-    
     /* Tooltip en modo oscuro */
     [data-bs-theme="dark"] .introjs-tooltip,
     .dark .introjs-tooltip,
@@ -487,96 +464,108 @@
         0%, 100% { transform: scale(1); opacity: 1; }
         50% { transform: scale(1.1); opacity: 0.8; }
     }
+
+    @media (max-width: 768px) {
+    .tour-step {
+        left: auto !important;
+        right: 100%; /* lo manda a la izquierda del botón */
+        top: 50%;
+        transform: translateY(-50%);
+        margin-right: 10px; /* separación entre el botón y el tooltip */
+    }
+
+    .tour-step::after {
+        /* si tiene una flecha, ajústala también */
+        left: auto;
+        right: -6px;
+        transform: rotate(90deg);
+    }
+}
     
-    /* ===== RESPONSIVE ===== */
+    /* ===== RESPONSIVE FIX BOTONES ===== */
     @media (max-width: 768px) {
         .introjs-tooltip {
             max-width: 90vw !important;
             min-width: 280px !important;
-            margin: 15px !important;
+            margin: 15px auto !important;
         }
-        
-        /* Tooltip tablero en móvil */
-        .introjs-tooltip.tooltip-tablero-ancho {
-            max-width: 90vw !important;
-            min-width: 280px !important;
-            max-height: 150px !important;
+
+        .introjs-tooltip.introjs-floating {
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            margin: 0 auto !important;
         }
-        
+
+        .introjs-tooltipbuttons {
+            padding: 10px 14px !important;
+            gap: 6px !important;
+            justify-content: center !important;
+            flex-wrap: wrap !important;
+        }
+
+        .introjs-button,
+        .introjs-skipbutton {
+            padding: 8px 14px !important;
+            font-size: 12px !important;
+            flex: 0 1 auto !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Evita que al hacer focus se muevan */
+        .introjs-button:focus,
+        .introjs-skipbutton:focus {
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3) !important;
+            transform: none !important;
+        }
+
         .introjs-tooltiptext {
             padding: 14px !important;
             font-size: 13px !important;
             max-height: 50vh !important;
         }
-        
+
         .introjs-tooltip h4 {
             font-size: 1.15rem !important;
         }
-        
+
         .introjs-tooltip h5 {
             font-size: 0.95rem !important;
         }
-        
+
         .introjs-tooltip p {
             font-size: 0.85rem !important;
         }
-        
-        .introjs-tooltip ul,
-        .introjs-tooltip ol {
-            font-size: 0.8rem !important;
-            padding-left: 15px !important;
-        }
-        
-        .introjs-tooltipbuttons {
-            padding: 10px 14px !important;
-            gap: 6px !important;
-        }
-        
-        .introjs-button {
-            padding: 7px 12px !important;
-            font-size: 12px !important;
-        }
-        
-        /* Ajustando el padding horizontal del botón skip en móviles */
-        .introjs-skipbutton {
-            padding: 7px 18px !important;
-            font-size: 12px !important;
-        }
-        
-        /* Ajustando la separación del calendario en móviles */
-        .introjs-helperLayer:has(~ .introjs-tooltipReferenceLayer #calendar) ~ .introjs-tooltipReferenceLayer .introjs-tooltip {
-            margin-left: 60px !important;
-        }
     }
-    
+
     @media (max-width: 480px) {
         .introjs-tooltip {
             max-width: 95vw !important;
             min-width: 260px !important;
+            margin: 10px auto !important;
         }
-        
-        .introjs-tooltiptext {
-            padding: 12px !important;
-            font-size: 12px !important;
+
+        .introjs-tooltipbuttons {
+            gap: 4px !important;
         }
-        
-        .introjs-button {
-            padding: 6px 10px !important;
-            font-size: 11px !important;
-        }
-        
-        /* Ajustando el padding horizontal del botón skip en pantallas muy pequeñas */
+
+        .introjs-button,
         .introjs-skipbutton {
-            padding: 6px 14px !important;
+            padding: 7px 10px !important;
             font-size: 11px !important;
+            transform: none !important;
+            box-shadow: none !important;
         }
-        
-        /* Separación mínima del calendario en pantallas muy pequeñas */
-        .introjs-helperLayer:has(~ .introjs-tooltipReferenceLayer #calendar) ~ .introjs-tooltipReferenceLayer .introjs-tooltip {
-            margin-left: 30px !important;
+
+        .introjs-button:focus,
+        .introjs-skipbutton:focus {
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3) !important;
+            transform: none !important;
         }
     }
-    
+
+
     /* ===== Z-INDEX FIX PARA MODALES ===== */
     .introjs-overlay {
         z-index: 999998 !important;
@@ -603,19 +592,6 @@
         z-index: 999989 !important;
     }
     
-    /* ===== FORZAR TOOLTIPS PEGADOS A BOTONES ===== */
-    .introjs-arrow.top {
-        border-bottom-color: white !important;
-        border-top-color: transparent !important;
-        top: -10px !important;
-    }
-    
-    [data-bs-theme="dark"] .introjs-arrow.top,
-    .dark .introjs-arrow.top,
-    body.dark .introjs-arrow.top {
-        border-bottom-color: #1e1e2d !important;
-    }
-
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/intro.min.js"></script>
@@ -673,7 +649,7 @@ const guiasProyecto = {
             {
                 intro: `
                     <div style="text-align: center;">
-                        <i class="bi bi-rocket-takeoff intro-icon" style="font-size: 3rem; color: #667eea;"></i>
+                        <i class="bi bi-rocket-takeoff intro-icon-pulse" style="font-size: 3rem; color: #667eea;"></i>
                         <h4 style="margin-top: 15px;">¡Bienvenido a tu proyecto!</h4>
                         <p style="margin-top: 10px;">Te mostraremos cómo funciona cada sección en pocos pasos.</p>
                         <div style="margin-top: 15px; padding: 12px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border: 1px solid rgba(102, 126, 234, 0.3);">
@@ -708,7 +684,7 @@ const guiasProyecto = {
             {
                 element: document.querySelector('.col-md-6:last-child .card'),
                 intro: `
-                    <h5><i class="bi bi-flag intro-icon" style="color: #10b981;"></i> Gestión de Sprints</h5>
+                    <h5><i class="bi bi-flag intro-icon-pulse" style="color: #10b981;"></i> Gestión de Sprints</h5>
                     <p>Un <strong>sprint</strong> es un período (1-4 semanas) donde trabajas en historias específicas.</p>
                     <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid rgba(16, 185, 129, 0.3);">
                         <p style="margin: 0 0 6px 0;"><strong>📋 Flujo:</strong></p>
@@ -752,7 +728,7 @@ const guiasProyecto = {
             {
                 intro: `
                     <div style="text-align: center;">
-                        <i class="bi bi-kanban intro-icon" style="font-size: 4rem; color: #8b5cf6;"></i>
+                        <i class="bi bi-kanban intro-icon-pulse" style="font-size: 4rem; color: #8b5cf6;"></i>
                         <h4 style="margin-top: 20px; font-size: 1.8rem;">Tablero Kanban</h4>
                         <p style="font-size: 1.1rem; color: #6b7280; margin-top: 10px;">Gestiona visualmente las tareas de tu sprint activo.</p>
                         <div style="margin-top: 20px; padding: 15px;
@@ -774,7 +750,6 @@ const guiasProyecto = {
                     </div>
                 `,
                 position: 'top',
-                tooltipClass: 'tooltip-tablero-ancho'
             }
         ]
     },
@@ -784,7 +759,7 @@ const guiasProyecto = {
             {
                 intro: `
                     <div style="text-align: center;">
-                        <i class="bi bi-people intro-icon" style="font-size: 4rem; color: #ec4899;"></i>
+                        <i class="bi bi-people intro-icon-pulse" style="font-size: 4rem; color: #ec4899;"></i>
                         <h4 style="margin-top: 20px; font-size: 1.8rem;">Reuniones Daily Scrum</h4>
                         <p style="font-size: 1.1rem; color: #6b7280; margin-top: 10px;">Gestiona las reuniones diarias de tu equipo.</p>
                         <div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #ec489915 0%, #db277715 100%); border-radius: 10px;">
@@ -824,7 +799,7 @@ const guiasProyecto = {
             {
                 intro: `
                     <div style="text-align: center;">
-                        <i class="bi bi-calendar3 intro-icon" style="font-size: 4rem; color: #06b6d4;"></i>
+                        <i class="bi bi-calendar3 intro-icon-pulse" style="font-size: 4rem; color: #06b6d4;"></i>
                         <h4 style="margin-top: 20px; font-size: 1.8rem;">Calendario de Sprints</h4>
                         <p style="font-size: 1.1rem; color: #6b7280; margin-top: 10px;">Visualiza la planificación temporal de tus sprints.</p>
                         <div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #06b6d415 0%, #0891b215 100%); border-radius: 10px;">
@@ -909,8 +884,6 @@ function iniciarGuia(seccion) {
     intro.onafterchange(function() {
         moverBotonSkipAlFooter();
 
-        
-        // Marcar tooltip del calendario para posicionamiento especial
         const currentStep = this._currentStep;
         const tooltip = document.querySelector('.introjs-tooltip');
         if (tooltip && guia.steps[currentStep] && guia.steps[currentStep].element) {
@@ -923,7 +896,6 @@ function iniciarGuia(seccion) {
             }
         }
         
-        // Segundo intento para ocultar skip en último paso
         setTimeout(() => moverBotonSkipAlFooter(), 50);
     });
                 
@@ -1017,7 +989,6 @@ function moverBotonSkipAlFooter() {
         skipButton.style.display = 'none';
         skipButton.style.visibility = 'hidden';
         skipButton.style.opacity = '0';
-        console.log('🚫 Botón skip oculto - último paso detectado');
         return;
     }
     
@@ -1027,7 +998,6 @@ function moverBotonSkipAlFooter() {
         skipButton.style.opacity = '1';
         skipButton.remove();
         tooltipButtons.insertBefore(skipButton, tooltipButtons.firstChild);
-        console.log('✅ Botón skip movido al footer');
     }
 }
 
@@ -1089,7 +1059,7 @@ function ejecutarTourCompleto() {
                                 <i class="bi bi-arrow-right-circle" style="font-size: 3rem; color: #667eea;"></i>
                             </div>
                             <h5 style="margin-top: 15px;">Cambiando de sección...</h5>
-                            <p style="color: #6b7280;">Un momento mientras navegamos</p>
+                            <p style="color: #6b7280;">Avancemos a la siguiente sección</p>
                         </div>
                     `,
                     position: 'floating'
@@ -1155,6 +1125,10 @@ function ejecutarTourCompleto() {
         setTimeout(() => {
             cambiarSeccionParaGuia('backlog');
         }, 500);
+
+        axios.post('/marcar-tour-completado', {
+            completed: true
+        })
         
         Swal.fire({
             ...getSwalConfig(),
@@ -1204,54 +1178,51 @@ function cambiarSeccionParaGuia(nombreGuia) {
 }
 
 @if(!auth()->user()->tour_completed)
-        $(document).ready(function () {
-            console.log('Tour no completado, mostrando guía de inicio...');
-            
-            setTimeout(() => {
-                const darkMode = isDarkMode();
+    $(document).ready(function () {
+        console.log('Tour no completado, mostrando guía de inicio...');
 
-                Swal.fire({
-                    ...getSwalConfig(),
-                    title: '👋 ¡Bienvenido!',
-                    html: `
-                        <div style="text-align: center;">
-                            <p style="font-size: 1.05rem; margin: 20px 0; ${darkMode ? 'color: #d1d5db;' : ''}">
-                                ¿Deseas hacer un recorrido rápido por las funciones del sistema?
-                            </p>
-                            <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 20px; border-radius: 12px; margin: 20px 0;">
-                                <p style="margin: 0; ${darkMode ? 'color: #f3f4f6;' : ''}">
-                                    📚 Aprenderás a usar:<br>
-                                    <strong>Backlog • Sprints • Tablero • Reuniones • Calendario</strong>
-                                </p>
-                            </div>
-                            <p style="color: #6b7280; font-size: 0.9rem;">
-                                ⏱️ Solo tomará 3-4 minutos
+        setTimeout(() => {
+            const darkMode = isDarkMode();
+
+            Swal.fire({
+                ...getSwalConfig(),
+                title: '👋 ¡Bienvenido!',
+                html: `
+                    <div style="text-align: center;">
+                        <p style="font-size: 1.05rem; margin: 20px 0; ${darkMode ? 'color: #d1d5db;' : ''}">
+                            ¿Deseas hacer un recorrido rápido por las funciones del sistema?
+                        </p>
+                        <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 20px; border-radius: 12px; margin: 20px 0;">
+                            <p style="margin: 0; ${darkMode ? 'color: #f3f4f6;' : ''}">
+                                📚 Aprenderás a usar:<br>
+                                <strong>Backlog • Sprints • Tablero • Reuniones • Calendario</strong>
                             </p>
                         </div>
-                    `,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: '<i class="bi bi-rocket-takeoff"></i> ¡Sí, mostrar el tour!',
-                    cancelButtonText: 'Ahora no'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        ejecutarTourCompleto();
-
-                        axios.post('/marcar-tour-completado', {
-                            completed: true
-                        })
+                        <p style="color: #6b7280; font-size: 0.9rem;">
+                            ⏱️ Solo tomará 3-4 minutos
+                        </p>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '<i class="bi bi-rocket-takeoff"></i> ¡Sí, mostrar el tour!',
+                cancelButtonText: 'Ahora no'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ejecutarTourCompleto();
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    axios.post('/marcar-tour-completado', { completed: true })
                         .then(response => {
                             console.log(response.data.message || 'Tour marcado como completado');
                         })
                         .catch(error => {
                             console.error('Error al marcar el tour como completado:', error);
                         });
-                    }
-                });
-            }, 1500);
-        });
+                }
+            });
+        }, 1500);
+    });
 @endif
-
 
 window.iniciarGuia = iniciarGuia;
 window.mostrarGuia = mostrarGuia;

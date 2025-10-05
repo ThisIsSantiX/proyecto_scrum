@@ -278,4 +278,10 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    public function configuracion()
+    {
+        return view('pages.profile.settings');
+    }
+
 }

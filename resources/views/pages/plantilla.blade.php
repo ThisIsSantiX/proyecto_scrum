@@ -1,14 +1,15 @@
-@extends('layouts.layout.layout')   
+    @extends('layouts.layout.layout')   
 
+    @section('title', 'Configuracion - WorkScrum')
 
-@section('css')
+    @section('css')
 
-@endsection
+    @endsection
 
-@section('content')
-    
-@endsection
+    @section('content')
+        
+    @endsection
 
-@section('js')
+    @section('js')
 
-@endsection
+    @endsection
