@@ -15,11 +15,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
+use App\Models\RoleUser;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
 use App\Http\Controllers\DailyScrumController;
 use App\Http\Controllers\GithubController;
+
 
 
 /*
@@ -93,6 +95,13 @@ Route::get('/auth/google/callback', function () {
             'estado'    => 1,
             'password'  => bcrypt(Str::random(16)), // contraseña aleatoria
         ]);
+
+        RoleUser::create([
+            'user_id' => $user->id,
+            'role_id' => 4,
+            'estado'  => 1,
+            'uid'     => Str::uuid(),
+        ]);
     }
 
     // Iniciar sesión
@@ -132,6 +141,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/usuarios/eliminar/{uid}', [UserController::class, 'destroy'])->name('deleteUsuario');
     Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
     Route::delete('/usuarios/{uid}/foto', [UserController::class, 'deleteFotoPerfil'])->name('deleteFotoUsuario');
+    Route::post('/marcar-tour-completado', [UserController::class, 'marcarTour'])->name('usuario.marcarTour');
+
 });
 
 //  Rutas para la gestion de proyectos ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -147,6 +158,7 @@ Route::delete('/proyectos/delete/{uid}', [ProyectoController::class, 'destroy'])
 Route::get('/proyectos/recientes', [ProyectoController::class, 'proyectosRecientes'])->middleware('auth')->name('proyectos.recientes');
 Route::post('/proyectos/{uid}/registrar-acceso', [ProyectoController::class, 'registrarAcceso'])
     ->name('proyectos.registrar-acceso');
+    
 
 // Rutas para la gestion del backlog
 Route::get('/proyectos/backlog/{uid}', [ProductBacklogController::class, 'index'])
@@ -173,12 +185,15 @@ Route::delete('/roles/{uid}', [RolesController::class, 'destroy'])->name('delete
 Route::delete('/roles/{id}', [RolesController::class, 'destroy'])->name('roles.destroy');
 Route::get('/roles/{id}/delete', [RolesController::class, 'destroy'])->name('roles.delete');
 
-    // Dashboard Routes
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('auth')
-        ->name('dashboard');
+// Dashboard Routes
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('dashboard');
 
-    Route::get('/dashboard/proyectos', [DashboardController::class, 'getProyectos'])->name('getProyectos');
+Route::get('/dashboard/proyectos', [DashboardController::class, 'getProyectos'])->name('getProyectos');
+Route::post('/onboarding/completado', [DashboardController::class, 'marcarOnboardingCompletado'])
+->middleware('auth')
+->name('onboarding.completado');
 
 
     // Authentication Routes

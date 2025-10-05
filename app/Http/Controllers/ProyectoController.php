@@ -83,7 +83,7 @@ class ProyectoController extends Controller
             $proyecto->estado = 1; // Activo por defecto
             $proyecto->uid = Str::uuid(); // Generar UUID único
             $proyecto->visibilidad = $request->visibilidad;
-            $proyecto->progreso = $request->progreso;
+            $proyecto->progreso = $request->progreso ?? 'planificacion';
             $proyecto->fecha_inicio = $request->fecha_inicio;
             $proyecto->fecha_fin = $request->fecha_fin;
 

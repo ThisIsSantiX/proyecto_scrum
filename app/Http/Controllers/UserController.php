@@ -239,6 +239,27 @@ class UserController extends Controller
         ->with('success', 'Perfil actualizado correctamente.');
 }
 
+public function marcarTour(Request $request)
+{
+    try {
+        $userId = auth()->id();
+
+        DB::table('users')
+            ->where('id', $userId)
+            ->update(['tour_completed' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tour marcado como completado correctamente'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al actualizar el estado del tour: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
 
 
 }    

@@ -10,7 +10,6 @@
                 <div class="card-body py-2 pb-0">
                     <h5 class="mb-2 mt-2 fw-semibold d-flex justify-content-between align-items-center">
                         <span class="text-muted fw-bold">{{ $proyecto->nombre }}</span>
-
                         <!-- Botón para recoger/expandir -->
                         <button class="btn btn-sm btn-primary" type="button"
                             data-bs-toggle="collapse" data-bs-target="#navOpciones"
@@ -44,7 +43,6 @@
 
     <!-- Contenedor dinámico -->
     <div id="contenido-tab" class="mt-3">
-
         <!-- Vista: Trabajo pendiente -->
         <div id="vista-pendiente">
             <div class="row g-3">
@@ -197,12 +195,7 @@
                 </div>
             </div>
         </div>
-
-
     </div>
-
-
-
 
     <!-- Modal para Nueva Historia de Usuario -->
     <div class="modal fade" id="modalHistoria" tabindex="-1" aria-labelledby="modalHistoriaLabel" aria-hidden="true">
@@ -992,6 +985,9 @@
 </div>
 
 @endsection
+
+@include('pages.proyectos.backlog.tourbacklog')
+
 
 @section('css')
 <style>
