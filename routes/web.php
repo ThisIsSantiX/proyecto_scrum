@@ -124,11 +124,16 @@ Route::fallback(function () {
 });
 
 // perfil ---------------------------------------------------------------------------------------------------------------------------------------------------
+Route::get('/perfil/configuracion', [UserController::class, 'configuracion'])->name('configuracion');
+
 Route::get('/perfil/{username}', [UserController::class, 'profile'])
     ->middleware('auth')
     ->name('user.profile');
 
 Route::put('/perfil/update', [UserController::class, 'updateProfile'])->name('profile.update');
+Route::get('/perfil/configuracion', [UserController::class, 'configuracion'])->name('configuracion');
+
+
 
 // Rutas para gestión de usuarios
 Route::middleware(['auth', 'admin'])->group(function () {
