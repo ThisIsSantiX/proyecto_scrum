@@ -141,7 +141,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/usuarios/eliminar/{uid}', [UserController::class, 'destroy'])->name('deleteUsuario');
     Route::get('/showRoles', [UserController::class, 'showRoles'])->name('showRoles');
     Route::delete('/usuarios/{uid}/foto', [UserController::class, 'deleteFotoPerfil'])->name('deleteFotoUsuario');
-    Route::post('/marcar-tour-completado', [UserController::class, 'marcarTour'])->name('usuario.marcarTour');
 
 });
 
@@ -173,6 +172,7 @@ Route::delete('/proyectos/backlog/{uid}/delete', [ProductBacklogController::clas
 Route::post('/criterios/{historiaUid}/store', [CriteriosAceptacionController::class, 'store'])->name('storeCriterios');
 Route::put('/criterios/{uid}/update',[CriteriosAceptacionController::class,'update'])->name('updateCriterios');
 Route::delete('/criterio/{uid}/delete',[CriteriosAceptacionController::class,'destroy'])->name('deleteCriterios');
+Route::post('/marcar-tour-completado', [UserController::class, 'marcarTour'])->name('usuario.marcarTour');
 
 //Roles---------------------------------------------------------------------------------------------------------------------------------------------------
 
