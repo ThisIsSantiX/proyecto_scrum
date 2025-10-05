@@ -28,6 +28,8 @@ return new class extends Migration
             $table->text('uid');
             $table->text('google_id')->nullable();
             $table->string('avatar')->nullable();
+            $table->boolean('onboarding_completado')->default(false);
+            $table->boolean('tour_completed')->default(false);
             $table->timestamps();
         });
 

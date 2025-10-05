@@ -63,7 +63,6 @@
             </div>
         </div>
     </div>
-
     <!-- Chips / Filtros -->
     <div class="d-flex justify-content-center gap-2 mb-5">
         <span class="badge rounded-pill bg-body-secondary text-body px-3 py-2">
@@ -143,14 +142,11 @@
                     </ul>
 
                     <div class="tab-content flex-grow-1">
-                        <div class="tab-pane fade show active" id="all">
-                            <div class="alert alert-light d-flex align-items-start border rounded-3">
-                                <span class="badge bg-danger me-2">2</span>
-                                <div>
-                                    <strong>Hola {{ Auth::user()->nombre ?? Auth::user()->username }}, ¡Bienvenido a Scrum!</strong><br>
-                                    Estamos encantados de tenerte a bordo. Disfruta.
-                                    <div class="mt-1"><small class="text-muted">21 de agosto</small></div>
-                                </div>
+                        <div class="tab-pane fade" id="all">
+                            <div class="empty-state py-4 text-center">
+                                <i class="bi bi-bell-slash fs-1 mb-3"></i>
+                                <p class="mb-0">No tienes notificaciones</p>
+                                <small>No hay notificaciones para mostrar</small>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="mentions">
@@ -256,10 +252,19 @@
     </div>
     <!-- ------------------------- -->
 
+
+
     @endsection
+    @include('pages.dashboard.onboarding')
 
     @section('js')
     <script>
+
+        const notyf = new Notyf({
+            duration: 3000,
+            position: { x: 'right', y: 'top' }
+        });
+
         let invitacionActual = null;
 
         //cargar invitaciones en las notificaciones

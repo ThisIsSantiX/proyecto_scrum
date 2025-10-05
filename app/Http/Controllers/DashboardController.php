@@ -6,12 +6,12 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-
 class DashboardController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+
 
     public function index()
     {
@@ -30,8 +30,27 @@ class DashboardController extends Controller
             $saludo = "Buenas noches";
         }
 
+        // Verificar si el usuario tiene proyectos
+        $tieneProyectos = DB::table('proyectos')
+            ->where('id_owner', auth()->id())
+            ->exists();
+        
+        // Verificar si completó el onboarding
+        $onboardingCompletado = auth()->user()->onboarding_completado;
 
-        return view('pages.dashboard.index', compact('fecha', 'saludo'));
+        return view('pages.dashboard.index', compact('fecha', 'saludo', 'tieneProyectos', 'onboardingCompletado'));
+    }
+    
+    public function marcarOnboardingCompletado()
+    {
+        DB::table('users')
+            ->where('id', auth()->id())
+            ->update(['onboarding_completado' => true]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Onboarding completado'
+        ]);
     }
 
     public function getProyectos()
