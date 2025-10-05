@@ -35,7 +35,12 @@ class SprintBacklogController extends Controller
             'progreso' => 'required|string',
             // 'asignado_a' => 'required|array', // IDs de miembros_equipos
             // 'asignado_a.*' => 'integer'
-        ]);
+        ],
+        [
+            'id_item_backlog.required' => 'La historia de usuario es requerida para agregarla al sprint.',
+            'progreso.required' => 'Debe de selecionar un estado.' 
+        ]
+    );
 
         try {
             DB::beginTransaction();

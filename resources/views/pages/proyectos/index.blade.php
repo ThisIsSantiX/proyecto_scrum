@@ -54,29 +54,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Recientes Section -->
-            <div id="recientesSection" style="display:none;">
-                <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <div class="header-title">
-                            <h4 class="card-title">Proyectos Recientes</h4>
-                        </div>
-                        <button class="btn btn-sm btn-outline-primary" id="btnVerTodos">Ver todos</button>
-                    </div>
-                    <div class="card-body">
-                        <div id="recientesLoading" class="text-center py-5" style="display:none;">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Cargando...</span>
-                            </div>
-                            <p class="mt-2 text-muted">Cargando proyectos recientes...</p>
-                        </div>
-                        <div id="recientesEmpty" class="text-center py-5" style="display:none;">
-                            <h5 class="text-muted">No hay proyectos recientes</h5>
-                        </div>
-                        <div id="recientesContainer" class="row g-4"></div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -184,7 +161,7 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label text-muted">Nombre del proyecto</label>
-                                        <input type="text" class="form-control" id="detalleNombre" value="Diseño estándar">
+                                        <input type="text" class="form-control" id="detalleNombre" value="Diseño estándar" maxlength="50">
                                     </div>
 
                                     <div class="col-md-6">
@@ -222,7 +199,7 @@
 
                                     <div class="col-12">
                                         <label class="form-label text-muted">Descripción</label>
-                                        <textarea class="form-control" rows="3" id="detalleDescripcionInput">Este es un proyecto de diseño estándar que incluye la creación de interfaces modernas y funcionales.</textarea>
+                                        <textarea class="form-control" rows="3" id="detalleDescripcionInput" maxlength="255">Este es un proyecto de diseño estándar que incluye la creación de interfaces modernas y funcionales.</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -377,7 +354,7 @@
             <!-- Footer -->
             <div class="modal-footer border-top">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" id="btnSaveUser" class="btn btn-primary">Guardar</button>
+                <button type="button" id="btnSaveUser" class="btn btn-primary">Invitar</button>
             </div>
         </div>
     </div>
@@ -808,33 +785,6 @@
                 });
         }
 
-        //====================
-        //FUNCION PARA CARGAR LOS PROYECTOS RECIENTES
-        //====================
-        $('#btnRecientes').on('click', function(e) {
-            e.preventDefault();
-
-            window.history.pushState({
-                view: 'recientes'
-            }, '', '{{ route("proyectos.index") }}?view=recientes');
-
-            $(".card:has(#projectsContainer)").hide();
-            $("#recientesSection").show();
-            loadRecientes();
-
-        });
-
-        $('#btnVerTodos').on('click', function(e) {
-            e.preventDefault();
-
-            window.history.pushState({
-                view: 'todos'
-            }, '', '{{ route("proyectos.index") }}');
-
-            $('#recientesSection').hide();
-            $(".card:has(#projectsContainer)").show();
-        });
-
         // **NUEVO: Manejar el botón "atrás" del navegador**
         window.addEventListener('popstate', function(event) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -849,28 +799,6 @@
                 $(".card:has(#projectsContainer)").show();
             }
         });
-
-        function loadRecientes() {
-            $("#recientesLoading").show();
-            $("#recientesEmpty").hide();
-            $("#recientesContainer").empty();
-
-            axios.get('{{ route("proyectos.recientes") }}')
-                .then(function(response) {
-                    $("#recientesLoading").hide();
-                    if (response.data.success && response.data.data.length > 0) {
-                        renderRecientes(response.data.data);
-                    } else {
-                        $("#recientesEmpty").show();
-                    }
-                })
-                .catch(function(error) {
-                    console.log(error);
-                    $("#recientesLoading").hide();
-                    $("#recientesEmpty").show();
-                    $("#recientesEmpty").text("Error al cargar proyectos recientes");
-                });
-        }
 
         function renderRecientes(recientes) {
             const container = $('#recientesContainer');

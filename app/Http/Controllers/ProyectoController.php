@@ -73,7 +73,10 @@ class ProyectoController extends Controller
                 'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio'
             ], [
                 'nombre.required' => 'El nombre del proyecto es obligatorio.',
-                'nombre.max' => 'El nombre del proyecto no debe exceder los 50 caracteres.'
+                'nombre.max' => 'El nombre del proyecto no debe exceder los 50 caracteres.',
+                'descripcion.max' => 'La descripcion no debe de exceder los 255 caracteres.',
+                'fecha_fin.after_or_equal' => 'La fecha de fin no puede ser menor a la fecha de inicio.'
+
             ]);
 
             $proyecto = new Proyecto();
@@ -218,7 +221,13 @@ class ProyectoController extends Controller
                 'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
                 'visibilidad' => 'required|integer|in:0,1',
                 'progreso' => 'nullable|string|max:20'
-            ]);
+            ],
+            [
+                'nombre.required' => 'El nombre del proyecto es requerido.',
+                'nombre.max' => 'El nombre del proyecto no debe exceder los 50 caracteres.',
+                'descripcion.max' => 'La descripcion no debe de exceder los 255 caracteres.'
+            ]
+        );
 
             // Buscar proyecto por uid
             $proyecto = Proyecto::where('uid', $request->uid)->firstOrFail();

@@ -60,11 +60,21 @@ class ProductBacklogController extends Controller
         // Validar los campos del request
         $validated = $request->validate([
             'titulo' => 'required|string|max:50',
-            'descripcion' => 'nullable|string|255',
-            'prioridad' => 'nullable|integer|min:1',
-            'valor_historia' => 'nullable|integer|min:1',
+            'descripcion' => 'nullable|string|max:255',
+            'prioridad' => 'nullable|string|min:1',
+            'valor_historia' => 'nullable|integer|min:1|max:100',
             'progreso' => 'required|string',
-        ]);
+        ],
+        [
+            'titulo.required' => 'El titulo de la historia de usuario es requerida.',
+            'titulo.max' => 'La historia de usuario no debe de tener mas de 50 caracteres.',
+            'descripcion.max' => 'La descripcion de la historia no puede tener mas de 255 caracteres.',
+            'valor_historia.integer' => 'El valor de la historia debe ser un número entero.',
+            'valor_historia.min' => 'El valor de la historia no puede ser menor que 1.',
+            'valor_historia.max' => 'El valor de la historia no puede ser mayor que 100.',
+            'progreso.required' => 'El progreso de la historia es requerido.'
+        ]
+    );
 
         try {
             // Buscar el proyecto por UID
