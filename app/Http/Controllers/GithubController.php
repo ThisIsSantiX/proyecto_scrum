@@ -8,6 +8,7 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Models\RoleUser;
 
 
 class GithubController extends Controller
@@ -49,13 +50,20 @@ class GithubController extends Controller
 
             $user = User::create([
                 'username'  => $username,
-                'nombre'    => $username, // 👈 nombre = username
-                'apellido'  => '',        // 👈 vacío
+                'nombre'    => $username, 
+                'apellido'  => '',        
                 'email'     => $githubUser->getEmail(),
                 'password'  => bcrypt(Str::random(16)),
                 'estado'    => 1,
                 'foto_url'  => $githubUser->getAvatar(),
                 'uid'       => (string) Str::uuid(),
+            ]);
+
+            RoleUser::create([
+                'user_id' => $user->id,
+                'role_id' => 4,
+                'estado'  => 1,
+                'uid'     => Str::uuid(),
             ]);
         }
 

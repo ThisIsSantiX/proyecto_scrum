@@ -79,10 +79,11 @@
                                         accept="image/*" 
                                         onchange="handlePhotoChange(event)">
                                     <div class="row g-3">
-                                        <div class="col-12">
+                                    <!---nombre de usuario --->
+                                    <div class="col-12">
                                             <label for="username" class="form-label fw-semibold">
                                                 <i class="bi bi-person-badge me-1"></i>
-                                                Nombre de usuario
+                                                Nickname de usuario
                                             </label>
                                             <input type="text" 
                                                 class="form-control" 
@@ -93,10 +94,11 @@
                                                 required>
                                         </div>
 
+                                    <!---nombre --->
                                         <div class="col-12">
                                             <label for="apellido" class="form-label fw-semibold">
                                                 <i class="bi bi-person-badge me-1"></i>
-                                                Apellido de usuario
+                                                Nombre de usuario
                                             </label>
                                             <input type="text" 
                                                 class="form-control" 
@@ -106,7 +108,7 @@
                                                 placeholder="Ingresa tu nombre"
                                                 required>
                                         </div>
-
+                                        <!---apellido --->
                                         <div class="col-12">
                                             <label for="apellido" class="form-label fw-semibold">
                                                 <i class="bi bi-person-badge me-1"></i>
@@ -119,7 +121,7 @@
                                                 value="{{ old('apellido', $user->apellido) }}"
                                                 placeholder="Ingresa tu apellido">
                                         </div>
-
+                                        <!---correo --->
                                         <div class="col-12">
                                             <label for="email" class="form-label fw-semibold">
                                                 <i class="bi bi-envelope me-1"></i>
@@ -301,9 +303,15 @@
 }
 </style>
 @endsection
-
 @section('js')
 <script>
+
+    const notyf = new Notyf({
+    duration: 3000,
+    position: { x: 'right', y: 'top' }
+});
+
+//toggler de formulario
     function toggleEditMode() {
         const displayMode = document.getElementById('displayMode');
         const editMode = document.getElementById('editMode');
@@ -316,28 +324,129 @@
             editMode.style.display = 'block';
         }
     }
+// Validación de todos los campos
+function validarCampos() {
+    let campos = [
+        { id: "username", nombre: "nickname de usuario", requerido: true, max: 50 },
+        { id: "nombre", nombre: "Nombre", requerido: true, max: 50 },
+        { id: "apellido", nombre: "Apellido", requerido: false, max: 50 }, // ahora no requerido
+        { id: "email", nombre: "Correo electrónico", requerido: true, max: 255 }
+    ];
 
+    let cambios = false; // bandera para detectar si hubo cambios
+
+    for (let campo of campos) {
+        let input = document.getElementById(campo.id);
+        if (!input) continue; 
+
+        let valor = input.value.trim();
+        let original = input.defaultValue.trim(); // valor original cargado en el input
+
+        // Verificamos si hubo algún cambio
+        if (valor !== original) {
+            cambios = true;
+        }
+
+        // Requerido
+        if (campo.requerido && valor === "") {
+            notyf.error(`${campo.nombre} es obligatorio`);
+            input.focus();
+            return false;
+        }
+        // Requerido
+        if (campo.requerido && valor === "") {
+            notyf.error(`${campo.username} es obligatorio`);
+            input.focus();
+            return false;
+        }
+         // Validación de email
+        if (campo.id === "email" && valor !== "") {
+            let regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!regex.test(valor)) {
+                notyf.error("El correo electrónico no es válido");
+                input.focus();
+                return false;
+            }
+        }
+
+        // Longitud máxima
+        if (valor.length > campo.max) {
+            notyf.error(`${campo.nombre} no puede tener más de ${campo.max} caracteres`);
+            input.focus();
+            return false;
+        }
+
+         if (valor.length > campo.max) {
+            notyf.error(`${campo.username} no puede tener más de ${campo.max} caracteres`);
+            input.focus();
+            return false;
+        }
+    }
+
+    // Si no hubo cambios en ningún campo
+    if (!cambios) {
+        notyf.error("Debes actualizar al menos un campo");
+        return false;
+    }
+
+    return true;
+}
+
+//ver foto
+    function verFoto(url, uid) {
+        const isOwner = {{ auth()->check() && auth()->user()->uid === $user->uid ? 'true' : 'false' }};
+        Swal.fire({
+            html: `
+                <div style="width:400px;height:400px;margin:auto;display:flex;align-items:center;justify-content:center;position:relative;">
+                    <img src="${url}" 
+                        alt="Foto de perfil" 
+                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;"> 
+                </div>
+            `,
+            showCloseButton: true,
+            showConfirmButton: false,
+            background: '#000000cc',
+            width: 'auto',
+            padding: 0
+        });
+    }
+
+    // Interceptar envío del formulario con Notyf
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById("formProfileUpdate");
+
+        // Inicializamos notyf
+        const notyf = new Notyf({
+            duration: 3000,
+            position: { x: 'right', y: 'top' }
+        });
+
+        if (form) {
+            form.addEventListener("submit", function(e) {
+                e.preventDefault(); 
+
+                if (validarCampos()) {
+                    // Mensaje de éxito con Notyf
+                    notyf.success('Usuario actualizado correctamente!');
+
+                    // 🔹 Luego enviamos el formulario realmente
+                    setTimeout(() => form.submit(), 3100);
+                }
+            });
+        }
+    });
+// cargar foto
     function handlePhotoChange(event) {
         const file = event.target.files[0];
         if (file) {
-            // Validar tamaño (máximo 5MB)
             if (file.size > 5 * 1024 * 1024) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Archivo muy grande',
-                    text: 'La imagen no debe superar los 5MB'
-                });
+                notyf.error('La imagen no debe superar los 5MB');
                 event.target.value = '';
                 return;
             }
             
-            // Validar tipo
             if (!file.type.startsWith('image/')) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Formato inválido',
-                    text: 'Por favor selecciona una imagen válida'
-                });
+                notyf.error('Por favor selecciona una imagen válida');
                 event.target.value = '';
                 return;
             }
@@ -349,27 +458,5 @@
             reader.readAsDataURL(file);
         }
     }
-
-    function verFoto(url, uid) {
-        const isOwner = {{ auth()->check() && auth()->user()->uid === $user->uid ? 'true' : 'false' }};
-        
-    Swal.fire({
-            html: `
-                <div style="width:400px;height:400px;margin:auto;display:flex;align-items:center;justify-content:center;position:relative;">
-                    <img src="${url}" 
-                        alt="Foto de perfil" 
-                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;"> 
-                    
-                </div>
-            `,
-            showCloseButton: true,
-            showConfirmButton: false,
-            background: '#000000cc',
-            width: 'auto',
-            padding: 0
-        });
-
-    }
-
 </script>
 @endsection
