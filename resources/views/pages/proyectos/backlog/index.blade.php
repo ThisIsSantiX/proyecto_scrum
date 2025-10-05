@@ -3242,7 +3242,20 @@
                     $('input[name="asignado_a[]"]').remove();
                     window.cargarHistorias();
                 })
-                .catch(err => notyf.error(err.response?.data?.error || "Error al guardar en Sprint Backlog"));
+                .catch(error => {
+                    if(error.response && error.response.status === 422){
+                        const errores = error.response.data.errors;
+                        let mensajes = '';
+                        for(const campo in errores){
+                            if(errores.hasOwnProperty(campo)){
+                                mensajes += `${errores[campo][0]}<br>`;
+                            }
+                        }
+                        notyf.error(mensajes);
+                    }else{
+                        console.log(error);
+                    }
+                });
         });
     });
 
