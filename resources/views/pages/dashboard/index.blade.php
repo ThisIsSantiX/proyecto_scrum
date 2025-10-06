@@ -51,27 +51,29 @@
         <h2 class="fw-bold">{{ $saludo }}, {{ Auth::user()->nombre ?? Auth::user()->username }}</h2>
     </div>
 
-    <!-- Barra de búsqueda -->
+    <!-- Buscador deshabilitado -->
     <div class="row justify-content-center mb-4">
         <div class="col-md-8">
-            <div class="input-group shadow-sm rounded-pill">
-                <span class="input-group-text bg-transparent border-0">
+            <div class="input-group shadow-sm rounded-pill opacity-75">
+                <span class="input-group-text bg-transparent border-0 text-muted">
                     <i class="bi bi-search"></i>
                 </span>
-                <input type="text" class="form-control border-0" placeholder="Tareas de búsqueda, proyectos y notas">
+                <input type="text" class="form-control border-0 text-muted" placeholder="Función no disponible" disabled>
                 <span class="input-group-text bg-transparent border-0 text-muted">Ctrl K</span>
             </div>
         </div>
     </div>
-    <!-- Chips / Filtros -->
-    <div class="d-flex justify-content-center gap-2 mb-5">
-        <span class="badge rounded-pill bg-body-secondary text-body px-3 py-2">
-            <i class="bi bi-people me-1"></i> Equipo del Proyecto de Santiago
+
+    <!-- Chips / Filtros deshabilitados -->
+    <div class="d-flex justify-content-center gap-2 mb-5 opacity-75">
+        <span class="badge rounded-pill bg-body-secondary text-body px-3 py-2" style="cursor: not-allowed;">
+            <i class="bi bi-people me-1"></i> Equipo del Proyecto (No disponible)
         </span>
-        <span class="badge rounded-pill bg-body-secondary text-body px-3 py-2">
-            <i class="bi bi-clock-history me-1"></i> Ver todos los recientes
+        <span class="badge rounded-pill bg-body-secondary text-body px-3 py-2" style="cursor: not-allowed;">
+            <i class="bi bi-clock-history me-1"></i> Ver todos los recientes (No disponible)
         </span>
     </div>
+
 
     <!-- Secciones -->
     <div class="row g-4 ps-5 pe-5 align-items-stretch">
@@ -84,8 +86,11 @@
                     <i class="bi bi-check-circle me-2">
                     </i> Tareas</h6>
                     <div class="text-center p-4">
-                        <p class="text-muted mb-1">No hay tareas asignadas a usted</p>
-                        <small class="text-muted">También puedes fijar tareas para verlas aquí</small>
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-exclamation-triangle display-6 d-block mb-2"></i>
+                            <p class="mb-1 fw-semibold">Función no disponible</p>
+                            <small>Disponible próximamente</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -142,7 +147,7 @@
                     </ul>
 
                     <div class="tab-content flex-grow-1">
-                        <div class="tab-pane fade" id="all">
+                        <div class="tab-pane fade show active" id="all">
                             <div class="empty-state py-4 text-center">
                                 <i class="bi bi-bell-slash fs-1 mb-3"></i>
                                 <p class="mb-0">No tienes notificaciones</p>

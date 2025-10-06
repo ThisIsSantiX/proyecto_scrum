@@ -22,7 +22,6 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SprintBacklogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
-use App\Http\Controllers\ProductBacklogController;
 use App\Http\Controllers\DailyScrumController;
 use App\Http\Controllers\GithubController;
 
@@ -131,6 +130,8 @@ Route::get('/perfil/configuracion', [UserController::class, 'configuracion'])->n
 Route::get('/perfil/{username}', [UserController::class, 'profile'])->middleware('auth')->name('user.profile');
 Route::put('/perfil/update', [UserController::class, 'updateProfile'])->name('profile.update');
 Route::get('/perfil/configuracion', [UserController::class, 'configuracion'])->name('configuracion');
+Route::post('/marcar-tour-completado', [UserController::class, 'marcarTour'])->name('marcar.tour.completado');
+
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/user/update-settings', [UserController::class, 'updateSettings'])->name('user.update-settings');
