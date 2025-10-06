@@ -22,6 +22,7 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SprintBacklogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
+use App\Http\Controllers\ProductBacklogController;
 use App\Http\Controllers\DailyScrumController;
 use App\Http\Controllers\GithubController;
 
