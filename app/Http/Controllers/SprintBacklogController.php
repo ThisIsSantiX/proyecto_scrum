@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\User;
+use Carbon\Carbon;
+
 
 class SprintBacklogController extends Controller
 {
@@ -217,6 +219,291 @@ class SprintBacklogController extends Controller
             return response()->json([
                 "message" => "Error: " . $e->getMessage()
             ]);
+        }
+    }
+
+    public function getSprintActivo($proyectoUID)
+    {
+        try {
+            // Obtener proyecto
+            $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+            
+            if (!$proyecto) {
+                return response()->json(['success' => false, 'sprint' => null], 404);
+            }
+
+            // Buscar sprint con progreso = 'Iniciado'
+            $sprint = DB::table('sprints')
+                ->where('id_proyecto', $proyecto->id)
+                ->where('progreso', 'Iniciado')
+                ->where('estado', 1) // Activo
+                ->first();
+
+            if ($sprint) {
+                return response()->json([
+                    'success' => true,
+                    'sprint' => $sprint
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'sprint' => null,
+                'message' => 'No hay sprints iniciados'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'sprint' => null,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtiene las estadísticas completas de un sprint
+     */
+    public function getEstadisticasSprint($proyectoUID, $sprintUID)
+    {
+        try {
+            // Obtener proyecto
+            $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+            
+            if (!$proyecto) {
+                return response()->json(['success' => false, 'message' => 'Proyecto no encontrado'], 404);
+            }
+
+            // Obtener sprint
+            $sprint = DB::table('sprints')
+                ->where('uid', $sprintUID)
+                ->where('id_proyecto', $proyecto->id)
+                ->first();
+
+            if (!$sprint) {
+                return response()->json(['success' => false, 'message' => 'Sprint no encontrado'], 404);
+            }
+
+            // Obtener historias del sprint
+            $historias = DB::table('product_backlog as pb')
+                ->join('sprint_backlog as sb', 'pb.id', '=', 'sb.id_item_backlog')
+                ->where('sb.id_sprint', $sprint->id)
+                ->select(
+                    'pb.*',
+                    'sb.progreso as sprint_progreso',
+                    'sb.id as sprint_backlog_id'
+                )
+                ->get()
+                ->map(function($item) {
+                    // Usar el progreso del sprint_backlog
+                    $item->progreso = $item->sprint_progreso;
+                    return $item;
+                });
+
+            // Calcular métricas
+            $totalHistorias = $historias->count();
+            $historiasCompletadas = $historias->where('progreso', 'Terminado')->count();
+            $historiasEnProgreso = $historias->where('progreso', 'En progreso')->count();
+            $historiasEnRevision = $historias->where('progreso', 'En revision')->count();
+            $historiasPorHacer = $historias->where('progreso', 'Por hacer')->count();
+
+            // Calcular velocity (suma de puntos de historias completadas)
+            $velocity = $historias->where('progreso', 'Terminado')->sum('valor_historia');
+
+            // Distribución por estado
+            $porEstado = [
+                'Por hacer' => $historiasPorHacer,
+                'En progreso' => $historiasEnProgreso,
+                'En revision' => $historiasEnRevision,
+                'Terminado' => $historiasCompletadas
+            ];
+
+            // Distribución por prioridad
+            $porPrioridad = [
+                'Alta' => $historias->where('prioridad', 'Alta')->count(),
+                'Media' => $historias->where('prioridad', 'Media')->count(),
+                'Baja' => $historias->where('prioridad', 'Baja')->count()
+            ];
+
+            // Calcular burndown chart
+            $burndown = $this->calcularBurndown($sprint, $historias);
+
+            // Calcular velocity diario (simulado)
+            $velocityDiario = $this->calcularVelocityDiario($sprint, $historias);
+
+            return response()->json([
+                'success' => true,
+                'sprint' => $sprint,
+                'historias' => $historias->values(),
+                'total_historias' => $totalHistorias,
+                'historias_completadas' => $historiasCompletadas,
+                'historias_en_progreso' => $historiasEnProgreso,
+                'historias_en_revision' => $historiasEnRevision,
+                'historias_por_hacer' => $historiasPorHacer,
+                'velocity' => $velocity,
+                'por_estado' => $porEstado,
+                'por_prioridad' => $porPrioridad,
+                'burndown' => $burndown,
+                'velocity_diario' => $velocityDiario
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener estadísticas',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Calcula los datos del burndown chart
+     */
+    private function calcularBurndown($sprint, $historias)
+    {
+        $fechaInicio = Carbon::parse($sprint->fecha_inicio);
+        $fechaFin = Carbon::parse($sprint->fecha_fin);
+        $diasTotales = $fechaInicio->diffInDays($fechaFin);
+        
+        // Puntos totales del sprint
+        $puntosTotal = $historias->sum('valor_historia');
+        $puntosCompletados = $historias->where('progreso', 'Terminado')->sum('valor_historia');
+        $puntosRestantes = $puntosTotal - $puntosCompletados;
+
+        $labels = [];
+        $ideal = [];
+        $real = [];
+
+        // Generar labels y línea ideal
+        for ($i = 0; $i <= $diasTotales; $i++) {
+            $fecha = $fechaInicio->copy()->addDays($i);
+            $labels[] = $fecha->format('d/m');
+            
+            // Línea ideal (decremento lineal)
+            $puntosIdeal = $puntosTotal - ($puntosTotal / $diasTotales) * $i;
+            $ideal[] = round($puntosIdeal, 2);
+        }
+
+        // Línea real (simulada basándose en el progreso actual)
+        $diasTranscurridos = $fechaInicio->diffInDays(Carbon::now());
+        if ($diasTranscurridos > $diasTotales) {
+            $diasTranscurridos = $diasTotales;
+        }
+
+        for ($i = 0; $i <= $diasTotales; $i++) {
+            if ($i <= $diasTranscurridos) {
+                // Calcular progreso proporcional hasta el día actual
+                $progresoEstimado = ($puntosCompletados / max($diasTranscurridos, 1)) * $i;
+                $real[] = max(0, round($puntosTotal - $progresoEstimado, 2));
+            } else {
+                // Proyección futura
+                $real[] = null;
+            }
+        }
+
+        // Asegurar que el último valor real sea el actual
+        if ($diasTranscurridos < $diasTotales) {
+            $real[$diasTranscurridos] = $puntosRestantes;
+        }
+
+        return [
+            'labels' => $labels,
+            'ideal' => $ideal,
+            'real' => array_filter($real, function($v) { return $v !== null; })
+        ];
+    }
+
+    /**
+     * Calcula el velocity diario
+     */
+    private function calcularVelocityDiario($sprint, $historias)
+    {
+        $fechaInicio = Carbon::parse($sprint->fecha_inicio);
+        $fechaFin = Carbon::parse($sprint->fecha_fin);
+        $diasTotales = $fechaInicio->diffInDays($fechaFin);
+        
+        $labels = [];
+        $valores = [];
+
+        // Simulación de velocity diario
+        // En un caso real, deberías tener un registro de cuándo se completó cada historia
+        $puntosCompletados = $historias->where('progreso', 'Terminado')->sum('valor_historia');
+        $diasTranscurridos = $fechaInicio->diffInDays(Carbon::now());
+        
+        if ($diasTranscurridos > $diasTotales) {
+            $diasTranscurridos = $diasTotales;
+        }
+
+        for ($i = 0; $i <= min($diasTranscurridos, 10); $i++) {
+            $fecha = $fechaInicio->copy()->addDays($i);
+            $labels[] = $fecha->format('d/m');
+            
+            // Distribución aproximada de puntos completados por día
+            if ($diasTranscurridos > 0) {
+                $valores[] = round(($puntosCompletados / $diasTranscurridos) * ($i > 0 ? 1 : 0), 1);
+            } else {
+                $valores[] = 0;
+            }
+        }
+
+        return [
+            'labels' => $labels,
+            'valores' => $valores
+        ];
+    }
+
+    /**
+     * Obtiene el resumen de múltiples sprints (para comparación)
+     */
+    public function getResumenSprints($proyectoUID)
+    {
+        try {
+            $proyecto = DB::table('proyectos')->where('uid', $proyectoUID)->first();
+            
+            if (!$proyecto) {
+                return response()->json(['success' => false, 'message' => 'Proyecto no encontrado'], 404);
+            }
+
+            $sprints = DB::table('sprints')
+                ->where('id_proyecto', $proyecto->id)
+                ->orderBy('fecha_inicio', 'desc')
+                ->get();
+
+            $resumen = [];
+
+            foreach ($sprints as $sprint) {
+                $historias = DB::table('product_backlog as pb')
+                    ->join('sprint_backlog as sb', 'pb.id', '=', 'sb.id_item_backlog')
+                    ->where('sb.id_sprint', $sprint->id)
+                    ->select('pb.*', 'sb.progreso as sprint_progreso')
+                    ->get();
+
+                $completadas = $historias->where('sprint_progreso', 'Terminado')->count();
+                $velocity = $historias->where('sprint_progreso', 'Terminado')->sum('valor_historia');
+
+                $resumen[] = [
+                    'nombre' => $sprint->nombre,
+                    'uid' => $sprint->uid,
+                    'progreso' => $sprint->progreso,
+                    'total_historias' => $historias->count(),
+                    'completadas' => $completadas,
+                    'velocity' => $velocity,
+                    'fecha_inicio' => $sprint->fecha_inicio,
+                    'fecha_fin' => $sprint->fecha_fin
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'sprints' => $resumen
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener resumen',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

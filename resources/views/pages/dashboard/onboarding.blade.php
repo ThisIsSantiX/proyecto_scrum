@@ -366,9 +366,26 @@ function saltarOnboarding() {
         color: isDark ? '#f1f1f1' : '#000',
         reverseButtons: true
     }).then(result => {
+        if (result.isConfirmed) {
+            axios.post('/onboarding/completado')
+                .then(response => {
+                    console.log('On boarding completado');
+                    cerrarOnboarding()
+                })
+                .catch(error => {
+                    console.error('Error al marcar onboarding:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo completar la acción',
+                        confirmButtonColor: '#3b82f6',
+                        background: isDark ? '#1e1e2d' : '#fff',
+                        color: isDark ? '#f1f1f1' : '#000'
+                    });
+                });
+        }
     });
 }
-
 function siguientePaso() {
     if (pasoActual === 2) {
         crearProyecto();

@@ -33,6 +33,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="javascript:void(0)" data-target="calendario">Calendario</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="javascript:void(0)" data-target="estadisticas">Estadisticas</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -192,6 +195,18 @@
                         <div id="calendar" class="card p-3" style="min-height: 80vh;"></div>
                     </div>
 
+                </div>
+            </div>
+        </div>
+        <div id="estadisticas" style="display: none;">
+            <div id="estadisticasPlaceholder">
+                <div class="d-flex flex-column align-items-center justify-content-center py-5 text-muted">
+                    <i class="bi bi-graph-down" style="font-size: 4rem;"></i>
+                    <h3 class="mt-4 mb-2 fw-semibold" style="font-size: 2rem;">¡No hay ningún sprint iniciado!</h3>
+                    <p class="lead mb-0" style="font-size: 1.25rem;">
+                        Para ver las estadísticas, inicia un sprint desde la sección 
+                        <a class="fw-bold text-primary" href="javascript:void(0)" onclick="mostrarSeccion('vista-pendiente')">Sprints</a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -987,6 +1002,7 @@
 @endsection
 
 @include('pages.proyectos.backlog.tourbacklog')
+@include('pages.proyectos.backlog.estadisticas')
 
 
 @section('css')
@@ -1922,7 +1938,6 @@
                         let estado = hoy < fi ? ["Por hacer", "badge bg-secondary"] : hoy <= ff ? ["En progreso", "badge bg-warning text-dark"] : ["Finalizado", "badge bg-success"];
                         return `<li class="list-group-item d-flex justify-content-between align-items-start"><div><div class="fw-bold">${sprint.nombre}</div><small class="text-muted">${fi.toLocaleDateString()} - ${ff.toLocaleDateString()}</small></div><span class="${estado[1]}">${estado[0]}</span></li>`;
                     }).join('');
-                calendar.removeAllEvents();
                 sprints.forEach(addSprintToCalendar);
                 mostrarCalendario();
             })
@@ -3633,6 +3648,15 @@
         );
         const activeLink = document.querySelector(`.nav-link[data-target="${id}"]`);
         if (activeLink) activeLink.classList.add('active');
+
+        // SI se muestra estadísticas, verificar sprint
+        if (id === 'estadisticas') {
+            const proyectoUid = document.querySelector('input[name="proyecto_uid"]')?.value || 
+                            document.getElementById('proyecto_uid')?.value;
+            if (proyectoUid) {
+                verificarYCargarEstadisticas(proyectoUid);
+            }
+        }
     }
 
     // Tabs: manejar clicks solo si tienen data-target
@@ -3647,7 +3671,7 @@
     });
 
 
-    // 👉 Verificar si hay sprint activo al cargar
+    // Verificar si hay sprint activo al cargar
     document.addEventListener('DOMContentLoaded', function() {
         const proyectoUID = document.getElementById('uid_proyecto').value;
 
@@ -3671,6 +3695,55 @@
                 mostrarSeccion('vista-pendiente');
             });
     });
+
+    let estadisticasCargadas = false; // Variable para controlar si ya se cargaron
+
+    function verificarYCargarEstadisticas(proyectoUid) {
+        // Solo mostrar spinner si es la primera vez
+        if (!estadisticasCargadas) {
+            document.getElementById('estadisticas').innerHTML = `
+                <div class="text-center p-3">
+                    <div class="spinner-border"></div>
+                    <p class="mt-2">Cargando estadísticas...</p>
+                </div>
+            `;
+        }
+
+        axios.get(`/proyectos/${proyectoUid}/sprints/activo`)
+            .then(response => {
+                if (response.data.success && response.data.sprint) {
+                    // HAY SPRINT: Cargar vista completa
+                    cargarVistaEstadisticas(proyectoUid, response.data.sprint);
+                    estadisticasCargadas = true;
+                } else {
+                    // NO HAY SPRINT: Mostrar placeholder
+                    document.getElementById('estadisticas').innerHTML = `
+                        <div class="d-flex flex-column align-items-center justify-content-center py-5 text-muted">
+                            <i class="bi bi-stats" style="font-size: 4rem;"></i>
+                            <h3 class="mt-4 mb-2 fw-semibold" style="font-size: 2rem;">¡No hay ningún sprint iniciado!</h3>
+                            <p class="lead mb-0" style="font-size: 1.25rem;">
+                                Para ver las estadísticas, inicia un sprint desde la sección 
+                                <a class="fw-bold text-primary" href="javascript:void(0)" onclick="mostrarSeccion('vista-pendiente')">Sprints</a>
+                            </p>
+                        </div>
+                    `;
+                    estadisticasCargadas = false; // Resetear porque no hay sprint
+                }
+            })
+            .catch(error => {
+                console.error('Error al verificar sprint:', error);
+                document.getElementById('estadisticas').innerHTML = `
+                    <div class="d-flex flex-column align-items-center justify-content-center py-5 text-muted">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 4rem;"></i>
+                        <h3 class="mt-4 mb-2 fw-semibold" style="font-size: 2rem;">Error al cargar estadísticas</h3>
+                        <p class="lead mb-0" style="font-size: 1.25rem;">
+                            No se pudieron obtener los datos del sprint
+                        </p>
+                    </div>
+                `;
+                estadisticasCargadas = false; // Resetear en caso de error
+            });
+    }
 
     function enableRightDropdowns(scope) {
         // scope = tarjeta nueva, o todo el documento si no pasas nada
@@ -3799,6 +3872,13 @@
                             reuniones = response.data.data.filter(reunion =>
                                 reunion.id_proyectos == proyectoID
                             );
+
+                             // Agregar cada reunión al calendario
+                            reuniones.forEach(reunion => {
+                                addReunionToCalendar(reunion);
+                            });
+
+
                             mostrarReuniones();
                         } else {
                             notyf.error(response.data.message ||
@@ -3813,6 +3893,20 @@
                         $('#loadingRow').hide();
                     });
             }
+
+            function addReunionToCalendar(reunion) {
+                const start = reunion.fecha;
+
+                calendar.addEvent({
+                    title: 'Reunion Programada',
+                    start: start,
+                    allDay: false, 
+                    backgroundColor: '#0d6efd', 
+                    borderColor: '#0d6efd'
+                });
+            }
+
+
 
             // Cargar proyectos disponibles
             function cargarProyectos() {

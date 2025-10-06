@@ -22,7 +22,7 @@ class ResetPasswordMail extends Mailable
 
     public function build()
     {
-        return $this->subject('🔐 Restablece tu contraseña en WorkScrum')
+        return $this->subject('Restablece tu contraseña en WorkScrum')
                 ->view('pages.auth.reset')
                 ->with([
             'user' => $this->user,
