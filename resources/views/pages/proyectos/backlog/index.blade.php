@@ -117,7 +117,7 @@
                 </p>
             </div>
         </div>
-
+            
         <div id="reuniones" style="display: none;">
             <div class="container-fluid">
                 <div class="row">
@@ -131,10 +131,10 @@
                                     <i class="fas fa-plus me-2"></i>Nueva Reunión
                                 </button>
                             </div>
-
+                            
                             <!-- Contenido de Reuniones -->
                             <div class="card-body px-0">
-                                <div class="table-responsive">
+                                <div class="table-responsive"> 
                                     <table class="table table-striped" id="dailyScrumTable" role="grid" data-bs-toggle="data-table">
                                         <thead>
                                             <tr class="ligth">
@@ -158,7 +158,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-
+                                
                                 <!-- Paginación -->
                                 <nav aria-label="Page navigation" class="mt-3" id="paginationContainer"
                                     style="display: none;">
@@ -1332,9 +1332,9 @@
                 let fotoSrc = "";
 
                 if (historia.foto_url) {
-                    fotoSrc = historia.foto_url.startsWith("http") ?
-                        historia.foto_url :
-                        `/storage/${historia.foto_url}`;
+                    fotoSrc = historia.foto_url.startsWith("http")
+                        ? historia.foto_url
+                        : `/storage/${historia.foto_url}`;
                 }
 
                 // Si ya es un ui-avatar guardado en la BD, no aplicamos random ni fallback
@@ -2269,43 +2269,43 @@
                 if (res.data.success) {
                     notyf.success(res.data.message || 'Historia actualizada correctamente');
                     $('#modalHistoriaEditTablero').modal('hide');
-
+                    
                     // Actualización dinámica sin recargar
                     const tarjetaActual = document.querySelector(`[data-product-uid="${historiaUID}"]`);
                     if (tarjetaActual) {
                         // Normaliza el progreso actual y nuevo
                         let progresoActual = tarjetaActual.closest('.kanban-items')?.id?.replace('items-', '') || '';
                         let progresoNuevo = datos.progreso;
-
+                        
                         // Normaliza progreso nuevo
-                        if (["Por hacer", "to_do"].includes(progresoNuevo)) progresoNuevo = "por-hacer";
-                        if (["En progreso", "in_progress"].includes(progresoNuevo)) progresoNuevo = "en-progreso";
-                        if (["Completado", "done", "Terminado"].includes(progresoNuevo)) progresoNuevo = "terminado";
-                        if (["En revision", "in_revision", "en-revision"].includes(progresoNuevo)) progresoNuevo = "en-revision";
-
+                        if (["Por hacer","to_do"].includes(progresoNuevo)) progresoNuevo = "por-hacer";
+                        if (["En progreso","in_progress"].includes(progresoNuevo)) progresoNuevo = "en-progreso";
+                        if (["Completado","done","Terminado"].includes(progresoNuevo)) progresoNuevo = "terminado";
+                        if (["En revision","in_revision","en-revision"].includes(progresoNuevo)) progresoNuevo = "en-revision";
+                        
                         // Si cambió de columna
                         if (progresoActual !== progresoNuevo) {
                             // Obtiene la columna actual antes de eliminar
                             const columnaActual = tarjetaActual.closest('.kanban-items');
-
+                            
                             // Remueve de la columna actual
                             tarjetaActual.remove();
-
+                            
                             // Renderiza en la nueva columna
                             if (res.data.item) {
                                 renderKanbanItem(res.data.item);
                             }
-
+                            
                             // Verifica si la columna anterior quedó vacía
                             if (columnaActual) {
                                 const tarjetasRestantes = columnaActual.querySelectorAll('.kanban-item');
                                 const btnCrear = columnaActual.querySelector('.btn-crear-rapido-container');
-
+                                
                                 if (tarjetasRestantes.length === 0 && !columnaActual.querySelector('.empty-column')) {
                                     const emptyDiv = document.createElement('div');
                                     emptyDiv.className = 'empty-column';
                                     emptyDiv.innerHTML = '<i class="bi bi-inbox"></i><p>No hay elementos</p>';
-
+                                    
                                     if (btnCrear) {
                                         columnaActual.insertBefore(emptyDiv, btnCrear);
                                     } else {
@@ -2318,24 +2318,24 @@
                             // Actualiza título
                             const tituloEl = tarjetaActual.querySelector('.kanban-title');
                             if (tituloEl) tituloEl.textContent = datos.titulo;
-
+                            
                             // Actualiza valor historia
                             const valorEl = tarjetaActual.querySelector('.kanban-item-footer p');
                             if (valorEl) valorEl.textContent = datos.valor_historia || '';
-
+                            
                             // Actualiza prioridad
                             const prioridadEl = tarjetaActual.querySelector('.kanban-item-footer small');
                             if (prioridadEl) prioridadEl.textContent = datos.prioridad || '';
                         }
-
+                        
                         // Actualiza contadores
                         actualizarContadores();
-
+                        
                         // Re-habilita drag and drop
                         enableDragAndDrop();
                     }
                 } else {
-                    console.error('Error completo:', res);
+                    console.error('Error completo:', res); 
                     console.error('Datos enviados:', datos);
                     notyf.error(res.data.message || 'Error al actualizar la historia');
                 }
@@ -2379,29 +2379,29 @@
                     .then(res => {
                         if (res.data.success) {
                             notyf.success(res.data.message || 'Historia eliminada correctamente');
-
+                            
                             // Eliminación dinámica sin recargar
                             const tarjeta = document.querySelector(`[data-product-uid="${historiaUID}"]`);
                             if (tarjeta) {
                                 const itemsContainer = tarjeta.closest('.kanban-items');
                                 const containerId = itemsContainer?.id || '';
-
+                                
                                 // Animación de salida
                                 tarjeta.style.transition = 'opacity 0.3s, transform 0.3s';
                                 tarjeta.style.opacity = '0';
                                 tarjeta.style.transform = 'scale(0.9)';
-
+                                
                                 setTimeout(() => {
                                     tarjeta.remove();
-
+                                    
                                     // Verifica si la columna quedó vacía
                                     if (itemsContainer) {
                                         const tarjetasRestantes = itemsContainer.querySelectorAll('.kanban-item');
                                         const btnCrear = itemsContainer.querySelector('.btn-crear-rapido-container');
-
+                                        
                                         if (tarjetasRestantes.length === 0 && !itemsContainer.querySelector('.empty-column')) {
                                             const emptyDiv = document.createElement('div');
-
+                                            
                                             if (btnCrear) {
                                                 itemsContainer.insertBefore(emptyDiv, btnCrear);
                                             } else {
@@ -2409,7 +2409,7 @@
                                             }
                                         }
                                     }
-
+                                    
                                     // Actualiza el contador de la columna
                                     if (containerId) {
                                         const estado = containerId.replace('items-', '');
@@ -2419,7 +2419,7 @@
                                             counter.textContent = Math.max(0, currentCount - 1);
                                         }
                                     }
-
+                                    
                                     // Actualiza contadores generales
                                     actualizarContadores();
                                 }, 300);
@@ -2706,7 +2706,7 @@
             .then(res => {
                 if (res.data.success) {
                     notyf.success('Creado correctamente');
-
+                    
                     // Remueve el formulario
                     formContainer.remove();
 
@@ -2816,11 +2816,11 @@
         `;
 
         //Evento para poder abrir la modal de asignar miembros
-        $(document).off('click', '.agregar-usuario-tablero').on('click', '.agregar-usuario-tablero', function(e) {
+        $(document).off('click','.agregar-usuario-tablero').on('click','.agregar-usuario-tablero', function (e){
             e.preventDefault
             const proyectoUID = $('#tablero').data('proyecto');
             const sprintUID = $('#tablero').data('sprint');
-            const itemUID = $(this).data('product-uid');
+            const itemUID  = $(this).data('product-uid');
 
             $('#asignar_proyecto_uid').val(proyectoUID);
             $('#asignar_sprint_uid').val(sprintUID);
@@ -2834,9 +2834,9 @@
                     const $list = $('#miembrosList').empty();
 
                     axios.get(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${itemUID}/miembros`)
-                        .then(resAsignados => {
+                        .then(resAsignados =>{
                             const asignados = resAsignados.data.miembros || [];
-                            const asignadosIds = asignados.map(m => m.id_miembro_equipo);
+                            const asignadosIds = asignados.map(m=>m.id_miembro_equipo);
                             miembros.forEach(m => {
                                 $list.append(`
                                     <div class="user-option" data-user-id="${m.me_id}">
@@ -2853,9 +2853,9 @@
         //_______________
 
         //funcion para poder asignar la tarea al usuario
-        $(document).on('click', '.user-option', function(e) {
+        $(document).on('click', '.user-option', function(e){
             const $checkbox = $(this).find('input[type="checkbox"]');
-            if (e.target.type !== 'checkbox') $checkbox.prop('checked', i => !i);
+            if(e.target.type !== 'checkbox') $checkbox.prop('checked', i => !i);
         });
         //==========================
 
@@ -2871,33 +2871,33 @@
         if (counter) counter.textContent = parseInt(counter.textContent || 0) + 1;
     }
 
-    $(document).on('click', '#btnAsignarMiembros', function() {
+    $(document).on('click', '#btnAsignarMiembros', function(){
         const proyectoUID = $('#asignar_proyecto_uid').val();
         const sprintUID = $('#asignar_sprint_uid').val();
         const itemUID = $('#asignar_item_uid').val();
-        const miembros = $('#miembrosList input:checked').map(function() {
+        const miembros = $('#miembrosList input:checked').map(function (){
             const val = $(this).closest('.user-option').data('user-id');
-            return val ? parseInt(val) : null;
+            return val ? parseInt(val): null;
         }).get().filter(id => Number.isInteger(id));
 
-        if (miembros.length === 0) {
+        if(miembros.length === 0){
             // notyf.error('Selecciona al menos un miembro');
             // return;
         }
 
-        axios.post(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${itemUID}/asignar-miembros`, {
-                miembros: miembros
-            })
-            .then(res => {
-                if (res.data.success) {
-                    notyf.success('Miembros asignados correctamente');
-                    $('#modalAsignarMiembros').modal('hide');
-                    window.refreshAllSprintBacklogs && window.refreshAllSprintBacklogs();
-                } else {
-                    notyf.error(res.data.message || 'Error al asignar miembros');
-                }
-            })
-            .catch(() => notyf.error('Error al asignar miembros'))
+        axios.post(`/proyectos/${proyectoUID}/sprints/${sprintUID}/items/${itemUID}/asignar-miembros`,{
+            miembros:miembros
+        })
+        .then(res => {
+            if(res.data.success){
+                notyf.success('Miembros asignados correctamente');
+                $('#modalAsignarMiembros').modal('hide');
+                window.refreshAllSprintBacklogs && window.refreshAllSprintBacklogs();
+            }else{
+                notyf.error(res.data.message || 'Error al asignar miembros');
+            }
+        })
+        .catch(()=>notyf.error('Error al asignar miembros'))
     });
 
     // ============================================
@@ -3108,16 +3108,16 @@
                 const isSelected = selectedUsers.includes(user.id);
 
                 // Iniciales (fallback si no hay foto)
-                const initials = user.nombre_completo ?
-                    user.nombre_completo.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) :
-                    "U";
+                const initials = user.nombre_completo
+                    ? user.nombre_completo.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+                    : "U";
 
                 // Avatar dinámico
                 let avatarHtml = "";
                 if (user.foto_url) {
-                    let fotoSrc = user.foto_url.startsWith("http") ?
-                        user.foto_url :
-                        `/storage/${user.foto_url}`;
+                    let fotoSrc = user.foto_url.startsWith("http")
+                        ? user.foto_url
+                        : `/storage/${user.foto_url}`;
                     const isUiAvatar = user.foto_url.includes("ui-avatars.com");
 
                     avatarHtml = `
@@ -3239,16 +3239,16 @@
                     window.cargarHistorias();
                 })
                 .catch(error => {
-                    if (error.response && error.response.status === 422) {
+                    if(error.response && error.response.status === 422){
                         const errores = error.response.data.errors;
                         let mensajes = '';
-                        for (const campo in errores) {
-                            if (errores.hasOwnProperty(campo)) {
+                        for(const campo in errores){
+                            if(errores.hasOwnProperty(campo)){
                                 mensajes += `${errores[campo][0]}<br>`;
                             }
                         }
                         notyf.error(mensajes);
-                    } else {
+                    }else{
                         console.log(error);
                     }
                 });
@@ -3382,82 +3382,63 @@
                                                                             }
                                                                         </span>
                                                                     `;
-                            }).join('')
-                        } <
-                        /div>
-                        ` : ` < div > < /div>` } <!-- Div vacío si no hay responsables -->
+                                                                }).join('')}
+                                                            </div>
+                                                        ` : `<div></div>` } <!-- Div vacío si no hay responsables -->
 
 
-                            <
-                            !--Dropup a la derecha-- >
-                            <
-                            div class = "dropup" >
-                            <
-                            button class = "btn btn-sm btn-secondary p-0 px-1"
-                        type = "button"
-                        data - bs - toggle = "dropdown"
-                        aria - expanded = "false"
-                        data - bs - display = "static" >
-                            <
-                            i class = "bi bi-three-dots-vertical" > < /i> <
-                            /button> <
-                            ul class = "dropdown-menu dropdown-menu-end shadow-sm" >
-                            <
-                            li >
-                            <
-                            a class = "dropdown-item editar-item editar-historia"
-                        href = "#"
-                        data - uid = "${item.uid}"
-                        data - titulo = "${item.titulo || ''}"
-                        data - descripcion = "${item.descripcion || ''}"
-                        data - prioridad = "${item.prioridad || ''}"
-                        data - valor = "${item.valor_historia || ''}"
-                        data - progreso = "${item.progreso || ''}" >
-                            <
-                            i class = "bi bi-pencil-square me-1" > < /i> Editar <
-                            /a> <
-                            /li> <
-                            li >
-                            <
-                            a class = "dropdown-item eliminar-item text-danger"
-                        href = "#"
-                        data - item - id = "${item.sprint_uid}" >
-                            <
-                            i class = "bi bi-box-arrow-left me-1" > < /i> Devolver <
-                            /a> <
-                            /li> <
-                            /ul> <
-                            /div> <
-                            /div>
+                                                        <!-- Dropup a la derecha -->
+                                                        <div class="dropup">
+                                                            <button class="btn btn-sm btn-secondary p-0 px-1" 
+                                                                    type="button" 
+                                                                    data-bs-toggle="dropdown" 
+                                                                    aria-expanded="false" 
+                                                                    data-bs-display="static">
+                                                                <i class="bi bi-three-dots-vertical"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                                <li>
+                                                                    <a class="dropdown-item editar-item editar-historia" href="#" 
+                                                                    data-uid="${item.uid}"
+                                                                    data-titulo="${item.titulo || ''}"
+                                                                    data-descripcion="${item.descripcion || ''}"
+                                                                    data-prioridad="${item.prioridad || ''}"
+                                                                    data-valor="${item.valor_historia || ''}"
+                                                                    data-progreso="${item.progreso || ''}">
+                                                                        <i class="bi bi-pencil-square me-1"></i> Editar
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a class="dropdown-item eliminar-item text-danger" href="#" data-item-id="${item.sprint_uid}">
+                                                                        <i class="bi bi-box-arrow-left me-1"></i> Devolver
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
 
-                            <
-                            /div> <
-                            /div> <
-                            /div>
-                        `;
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
                             });
 
-                            itemsHtml += ` <
-                        div class = "text-center mt-3 sprint-backlog-area p-2 rounded-2"
-                        data - sprint - id = "${sprintId}" <
-                            a href = "#"
-                        class = "text-primary fw-semibold small"
-                        data - bs - toggle = "modal"
-                        data - bs - target = "#modalRegSprBacklog"
-                        data - sprint - id = "${sprintId}" >
-                            <
-                            i class = "fas fa-plus me-1" > < /i>
-                        Agregar otro elemento
-                            <
-                            /a>
+                            itemsHtml += `
+                                    <div class="text-center mt-3 sprint-backlog-area p-2 rounded-2"
+                                        data-sprint-id="${sprintId}"
+                                        <a href="#"
+                                            class="text-primary fw-semibold small"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalRegSprBacklog"
+                                            data-sprint-id="${sprintId}">
+                                            <i class="fas fa-plus me-1"></i>
+                                            Agregar otro elemento
+                                        </a>
 
-                            <
-                            !--Lista "virtual"
-                        para que tu drop funcione aquí también-- >
-                        <
-                        div class = "sprint-backlog-list sprint-backlog-area d-none" > < /div> <
-                        /div>
-                        `;
+                                        <!-- Lista "virtual" para que tu drop funcione aquí también -->
+                                        <div class="sprint-backlog-list sprint-backlog-area d-none"></div>
+                                    </div>
+                                    `;
 
                             sprintWrapper.html(itemsHtml);
                         }
@@ -3470,19 +3451,15 @@
                 .catch(function(error) {
                     console.error('Error al cargar Sprint Backlog:', error);
 
-                    sprintWrapper.html(` <
-                        div class = "text-center text-danger py-3" >
-                        <
-                        i class = "fas fa-exclamation-triangle fs-4 mb-2 d-block" > < /i> <
-                        p class = "small mb-2" > Error al cargar los elementos del sprint < /p> <
-                            button class = "btn btn-sm btn-outline-primary retry-load"
-                        data - sprint - id = "${sprintId}" >
-                            <
-                            i class = "fas fa-redo me-1" > < /i>
-                        Intentar de nuevo
-                            <
-                            /button> <
-                            /div>
+                    sprintWrapper.html(`
+                            <div class="text-center text-danger py-3">
+                                <i class="fas fa-exclamation-triangle fs-4 mb-2 d-block"></i>
+                                <p class="small mb-2">Error al cargar los elementos del sprint</p>
+                                <button class="btn btn-sm btn-outline-primary retry-load" data-sprint-id="${sprintId}">
+                                    <i class="fas fa-redo me-1"></i>
+                                    Intentar de nuevo
+                                </button>
+                            </div>
                         `);
 
                     notyf.error("Error al cargar el Sprint Backlog");
@@ -3537,18 +3514,12 @@
             if (confirm('¿Está seguro de que desea eliminar este elemento?')) {
                 const uid = $("#id_proyecto").val();
 
-                axios.delete(` / proyectos / backlog / $ {
-                            uid
-                        }
-                        /sprints/items / $ {
-                            itemId
-                        }
-                        `)
+                axios.delete(`/proyectos/backlog/${uid}/sprints/items/${itemId}`)
                     .then(function(response) {
                         if (response.data.success) {
                             notyf.success("Elemento eliminado correctamente");
                             // Recargar el sprint backlog
-                            const sprintId = $(`.sprint - item[data - item - id = "${itemId}"] `)
+                            const sprintId = $(`.sprint-item[data-item-id="${itemId}"]`)
                                 .closest('.sprint-backlog-wrapper')
                                 .data('sprint-id');
                             if (sprintId) {
@@ -3596,49 +3567,43 @@
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    axios.delete(` / proyectos / backlog / $ {
-                            uidProyecto
-                        }
-                        /sprints/items / $ {
-                            uidHistoria
-                        }
-                        /devolver`)
+                    axios.delete(`/proyectos/backlog/${uidProyecto}/sprints/items/${uidHistoria}/devolver`)
                         .then(function(response) {
-                                if (response.data.success) {
-                                    Swal.fire(
-                                        'Devuelta!',
-                                        response.data.message,
-                                        'success'
-                                    );
+                            if (response.data.success) {
+                                Swal.fire(
+                                    'Devuelta!',
+                                    response.data.message,
+                                    'success'
+                                );
 
-                                    cargarHistorias();
+                                cargarHistorias();
 
-                                    // Recargar sprint backlog solo del sprint afectado
-                                    const sprintId = $(`.sprint-item[data-item-id="${uidHistoria}"]`)
-                                        .closest('.sprint-backlog-wrapper')
-                                        .data('sprint-id');
+                                // Recargar sprint backlog solo del sprint afectado
+                                const sprintId = $(`.sprint-item[data-item-id="${uidHistoria}"]`)
+                                    .closest('.sprint-backlog-wrapper')
+                                    .data('sprint-id');
 
-                                    if (sprintId) {
-                                        loadSprintBacklog(sprintId);
-                                    }
-                                } else {
-                                    Swal.fire(
-                                        'Error',
-                                        response.data.message || "No se pudo devolver la historia",
-                                        'error'
-                                    );
+                                if (sprintId) {
+                                    loadSprintBacklog(sprintId);
                                 }
-                            })
-                            .catch(function(error) {
-                                console.error('Error al devolver:', error);
+                            } else {
                                 Swal.fire(
                                     'Error',
-                                    "Error al devolver la historia",
+                                    response.data.message || "No se pudo devolver la historia",
                                     'error'
                                 );
-                            });
-                    }
-                });
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('Error al devolver:', error);
+                            Swal.fire(
+                                'Error',
+                                "Error al devolver la historia",
+                                'error'
+                            );
+                        });
+                }
+            });
         });
 
 
@@ -3788,134 +3753,129 @@
 
 
     // ========== MÓDULO DE REUNIONES (DAILY SCRUMS) ==========
-    $(document).ready(function() {
-        // Variables globales para reuniones
-        let reuniones = [];
-        let proyectos = [];
-        let sprints = [];
-        const proyectoUID = "{{ $proyecto->uid }}";
-        const proyectoID = "{{ $proyecto->id }}";
+        $(document).ready(function() {
+            // Variables globales para reuniones
+            let reuniones = [];
+            let proyectos = [];
+            let sprints = [];
+            const proyectoUID = "{{ $proyecto->uid }}";
+            const proyectoID = "{{ $proyecto->id }}";
 
-        // Inicializar Notyf para notificaciones
-        const notyf = new Notyf({
-            duration: 4000,
-            position: {
-                x: 'right',
-                y: 'top',
-            }
-        });
-
-        // ========== INICIALIZACIÓN ==========
-        function inicializarReuniones() {
-            cargarReuniones();
-            cargarProyectos();
-            cargarSprints();
-            configurarEventListeners();
-        }
-
-        // ========== CONFIGURACIÓN DE EVENT LISTENERS ==========
-        function configurarEventListeners() {
-            $('#saveDailyScrum').on('click', crearReunion);
-            $('#updateDailyScrum').on('click', actualizarReunion);
-            $('#createModal').on('show.bs.modal', prepararModalCrear);
-            $('#editModal').on('show.bs.modal', prepararModalEditar);
-        }
-
-        // ========== FUNCIONES DE CARGA DE DATOS ==========
-
-        // Cargar reuniones del proyecto
-        function cargarReuniones() {
-            $('#loadingRow').show();
-
-            axios.get(`/reuniones`)
-                .then(function(response) {
-                    if (response.data.success) {
-                        // Filtrar reuniones por el proyecto actual
-                        reuniones = response.data.data.filter(reunion =>
-                            reunion.id_proyectos == proyectoID
-                        );
-                        mostrarReuniones();
-                    } else {
-                        notyf.error(response.data.message ||
-                            'Error al cargar las reuniones');
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error al cargar reuniones:', error);
-                    notyf.error('Error al cargar las reuniones');
-                })
-                .finally(function() {
-                    $('#loadingRow').hide();
-                });
-        }
-
-        // Cargar proyectos disponibles
-        function cargarProyectos() {
-            proyectos = [{
-                id: proyectoID,
-                nombre: "{{ $proyecto->nombre }}"
-            }];
-
-            // Llenar select de proyectos en modales
-            $('#id_proyectos, #edit_id_proyectos').empty();
-            proyectos.forEach(proyecto => {
-                $('#id_proyectos').append(
-                    `<option value="${proyecto.id}">${proyecto.nombre}</option>`
-                );
-                $('#edit_id_proyectos').append(
-                    `<option value="${proyecto.id}">${proyecto.nombre}</option>`
-                );
+            // Inicializar Notyf para notificaciones
+            const notyf = new Notyf({
+                duration: 4000,
+                position: {
+                    x: 'right',
+                    y: 'top',
+                }
             });
-        }
 
-        // Cargar sprints del proyecto
-        function cargarSprints() {
-            axios.get(`/proyectos/${proyectoUID}/sprints/activo`)
-                .then(function(response) {
-                    sprints = response.data.sprint;
+            // ========== INICIALIZACIÓN ==========
+            function inicializarReuniones() {
+                cargarReuniones();
+                cargarProyectos();
+                cargarSprints();
+                configurarEventListeners();
+            }
 
-                    // Si solo vino un objeto, lo convertimos en un array de 1 elemento
-                    if (!Array.isArray(sprints)) {
-                        sprints = [sprints];
-                    }
+            // ========== CONFIGURACIÓN DE EVENT LISTENERS ==========
+            function configurarEventListeners() {
+                $('#saveDailyScrum').on('click', crearReunion);
+                $('#updateDailyScrum').on('click', actualizarReunion);
+                $('#createModal').on('show.bs.modal', prepararModalCrear);
+                $('#editModal').on('show.bs.modal', prepararModalEditar);
+            }
 
-                    // Llenar select de sprints en modales
-                    $('#id_sprints, #edit_id_sprints').empty();
-                    $('#id_sprints, #edit_id_sprints').append(
-                        '<option value="">Seleccionar sprint...</option>');
+            // ========== FUNCIONES DE CARGA DE DATOS ==========
+            
+            // Cargar reuniones del proyecto
+            function cargarReuniones() {
+                $('#loadingRow').show();
 
-                    if (sprints.length > 0) {
-                        sprints.forEach(sprint => {
-                            $('#id_sprints').append(
-                                `<option value="${sprint.id}">${sprint.nombre}</option>`
+                axios.get(`/reuniones`)
+                    .then(function(response) {
+                        if (response.data.success) {
+                            // Filtrar reuniones por el proyecto actual
+                            reuniones = response.data.data.filter(reunion =>
+                                reunion.id_proyectos == proyectoID
                             );
-                            $('#edit_id_sprints').append(
-                                `<option value="${sprint.id}">${sprint.nombre}</option>`
-                            );
-                        });
-                    } else {
-                        $('#id_sprints, #edit_id_sprints').append(
-                            '<option value="">No hay sprints disponibles</option>'
-                        );
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error al cargar sprints:', error);
-                    notyf.error('Error al cargar los sprints');
-                    $('#id_sprints, #edit_id_sprints').append(
-                        '<option value="">Error al cargar sprints</option>');
+                            mostrarReuniones();
+                        } else {
+                            notyf.error(response.data.message ||
+                                'Error al cargar las reuniones');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error al cargar reuniones:', error);
+                        notyf.error('Error al cargar las reuniones');
+                    })
+                    .finally(function() {
+                        $('#loadingRow').hide();
+                    });
+            }
+
+            // Cargar proyectos disponibles
+            function cargarProyectos() {
+                proyectos = [{
+                    id: proyectoID,
+                    nombre: "{{ $proyecto->nombre }}"
+                }];
+
+                // Llenar select de proyectos en modales
+                $('#id_proyectos, #edit_id_proyectos').empty();
+                proyectos.forEach(proyecto => {
+                    $('#id_proyectos').append(
+                        `<option value="${proyecto.id}">${proyecto.nombre}</option>`
+                    );
+                    $('#edit_id_proyectos').append(
+                        `<option value="${proyecto.id}">${proyecto.nombre}</option>`
+                    );
                 });
-        }
+            }
 
-        // ========== FUNCIONES DE VISUALIZACIÓN ==========
+            // Cargar sprints del proyecto
+            function cargarSprints() {
+                axios.get(`/proyectos/backlog/${proyectoUID}/sprints/show`)
+                    .then(function(response) {
+                        sprints = Array.isArray(response.data) ? response.data : [];
+                        
+                        // Llenar select de sprints en modales
+                        $('#id_sprints, #edit_id_sprints').empty();
+                        $('#id_sprints, #edit_id_sprints').append(
+                            '<option value="">Seleccionar sprint...</option>');
 
-        // Mostrar reuniones en la tabla
-        function mostrarReuniones() {
-            const tbody = $('#dailyScrumTableBody');
-            tbody.empty();
+                        if (sprints.length > 0) {
+                            sprints.forEach(sprint => {
+                                $('#id_sprints').append(
+                                    `<option value="${sprint.id}">${sprint.nombre}</option>`
+                                );
+                                $('#edit_id_sprints').append(
+                                    `<option value="${sprint.id}">${sprint.nombre}</option>`
+                                );
+                            });
+                        } else {
+                            $('#id_sprints, #edit_id_sprints').append(
+                                '<option value="">No hay sprints disponibles</option>'
+                            );
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error al cargar sprints:', error);
+                        notyf.error('Error al cargar los sprints');
+                        $('#id_sprints, #edit_id_sprints').append(
+                            '<option value="">Error al cargar sprints</option>');
+                    });
+            }
 
-            if (reuniones.length === 0) {
-                tbody.append(`
+            // ========== FUNCIONES DE VISUALIZACIÓN ==========
+            
+            // Mostrar reuniones en la tabla
+            function mostrarReuniones() {
+                const tbody = $('#dailyScrumTableBody');
+                tbody.empty();
+
+                if (reuniones.length === 0) {
+                    tbody.append(`
                         <tr>
                             <td colspan="5" class="text-center py-5">
                                 <i class="fas fa-calendar-times fs-1 text-muted d-block mb-2"></i>
@@ -3926,12 +3886,12 @@
                             </td>
                         </tr>
                     `);
-                return;
-            }
+                    return;
+                }
 
-            reuniones.forEach(reunion => {
-                const fecha = new Date(reunion.fecha).toLocaleDateString();
-                const row = `
+                reuniones.forEach(reunion => {
+                    const fecha = new Date(reunion.fecha).toLocaleDateString();
+                    const row = `
                         <tr data-uid="${reunion.uid}">
                             <td>${fecha}</td>
                             <td>${reunion.duracion} min</td>
@@ -3950,300 +3910,300 @@
                             </td>
                         </tr>
                     `;
-                tbody.append(row);
-            });
-
-            // Agregar event listeners a los botones
-            $('.view-reunion').on('click', function() {
-                const uid = $(this).data('uid');
-                verReunion(uid);
-            });
-
-            $('.edit-reunion').on('click', function() {
-                const uid = $(this).data('uid');
-                abrirModalEditar(uid);
-            });
-
-            $('.delete-reunion').on('click', function() {
-                const uid = $(this).data('uid');
-                eliminarReunion(uid);
-            });
-        }
-
-        // ========== FUNCIONES DE MODALES ==========
-
-        // Preparar modal de creación
-        function prepararModalCrear() {
-            $('#createForm')[0].reset();
-
-            // Establecer fecha actual por defecto
-            const today = new Date().toISOString().split('T')[0];
-            $('#fecha').val(today);
-
-            // Seleccionar el proyecto actual por defecto
-            $('#id_proyectos').val(proyectoID);
-
-            // Forzar recarga de sprints por si hay nuevos
-            cargarSprints();
-        }
-
-        // Preparar modal de edición
-        function prepararModalEditar() {
-            // Esta función se ejecuta cuando el modal se abre
-        }
-
-        // Abrir modal de edición
-        function abrirModalEditar(uid) {
-            const reunion = reuniones.find(r => r.uid === uid);
-
-            if (!reunion) {
-                notyf.error('No se encontró la reunión');
-                return;
-            }
-
-            // Llenar el formulario
-            $('#edit_uid').val(reunion.uid);
-            $('#edit_fecha').val(reunion.fecha);
-            $('#edit_duracion').val(reunion.duracion);
-            $('#edit_URL').val(reunion.URL || '');
-            $('#edit_id_proyectos').val(reunion.id_proyectos);
-            $('#edit_id_sprints').val(reunion.id_sprints);
-            $('#edit_observaciones').val(reunion.observaciones || '');
-            $('#edit_bloqueos_detectados').val(reunion.bloqueos_detectados || '');
-            $('#edit_acuerdos').val(reunion.acuerdos || '');
-
-            // Abrir modal
-            $('#editModal').modal('show');
-        }
-
-        // ========== FUNCIONES CRUD ==========
-
-        // Crear nueva reunión
-        function crearReunion() {
-            const btn = $('#saveDailyScrum');
-            const loading = btn.find('.btn-loading');
-            const text = btn.find('.btn-text');
-
-            // Validar formulario
-            if (!$('#createForm')[0].checkValidity()) {
-                $('#createForm')[0].reportValidity();
-                return;
-            }
-
-            // Validar que se haya seleccionado un sprint
-            if (!$('#id_sprints').val()) {
-                notyf.error('Por favor selecciona un sprint');
-                return;
-            }
-
-            // Mostrar loading
-            loading.show();
-            text.hide();
-            btn.prop('disabled', true);
-
-            // Obtener datos del formulario
-            const formData = {
-                fecha: $('#fecha').val(),
-                duracion: $('#duracion').val(),
-                URL: $('#URL').val(),
-                id_proyectos: $('#id_proyectos').val(),
-                id_sprints: $('#id_sprints').val(),
-                observaciones: $('#observaciones').val(),
-                bloqueos_detectados: $('#bloqueos_detectados').val(),
-                acuerdos: $('#acuerdos').val()
-            };
-
-            axios.post(`/proyectos/backlog/${proyectoUID}/reuniones/store`, formData)
-                .then(function(response) {
-                    if (response.data.success) {
-                        notyf.success(response.data.message);
-                        $('#createModal').modal('hide');
-                        cargarReuniones();
-                    } else {
-                        notyf.error(response.data.message ||
-                            'Error al crear la reunión');
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error al crear reunión:', error);
-
-                    if (error.response && error.response.data && error.response.data
-                        .errors) {
-                        // Mostrar errores de validación
-                        const errors = error.response.data.errors;
-                        Object.keys(errors).forEach(key => {
-                            notyf.error(errors[key][0]);
-                        });
-                    } else if (error.response && error.response.data && error
-                        .response.data.message) {
-                        notyf.error(error.response.data.message);
-                    } else {
-                        notyf.error('Error al crear la reunión');
-                    }
-                })
-                .finally(function() {
-                    // Ocultar loading
-                    loading.hide();
-                    text.show();
-                    btn.prop('disabled', false);
+                    tbody.append(row);
                 });
-        }
 
-        // Actualizar reunión existente
-        function actualizarReunion() {
-            const btn = $('#updateDailyScrum');
-            const loading = btn.find('.btn-loading');
-            const text = btn.find('.btn-text');
-
-            // Validar formulario
-            if (!$('#editForm')[0].checkValidity()) {
-                $('#editForm')[0].reportValidity();
-                return;
-            }
-
-            // Validar que se haya seleccionado un sprint
-            if (!$('#edit_id_sprints').val()) {
-                notyf.error('Por favor selecciona un sprint');
-                return;
-            }
-
-            // Mostrar loading
-            loading.show();
-            text.hide();
-            btn.prop('disabled', true);
-
-            // Obtener datos del formulario
-            const uid = $('#edit_uid').val();
-            const formData = {
-                fecha: $('#edit_fecha').val(),
-                duracion: $('#edit_duracion').val(),
-                URL: $('#edit_URL').val(),
-                id_proyectos: $('#edit_id_proyectos').val(),
-                id_sprints: $('#edit_id_sprints').val(),
-                observaciones: $('#edit_observaciones').val(),
-                bloqueos_detectados: $('#edit_bloqueos_detectados').val(),
-                acuerdos: $('#edit_acuerdos').val()
-            };
-
-            axios.put(`/proyectos/backlog/${uid}/reuniones/update`, {
-                    ...formData,
-                    uid: uid
-                })
-                .then(function(response) {
-                    if (response.data.success) {
-                        notyf.success(response.data.message);
-                        $('#editModal').modal('hide');
-                        cargarReuniones();
-                    } else {
-                        notyf.error(response.data.message ||
-                            'Error al actualizar la reunión');
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error al actualizar reunión:', error);
-
-                    if (error.response && error.response.data && error.response.data
-                        .errors) {
-                        // Mostrar errores de validación
-                        const errors = error.response.data.errors;
-                        Object.keys(errors).forEach(key => {
-                            notyf.error(errors[key][0]);
-                        });
-                    } else if (error.response && error.response.data && error
-                        .response.data.message) {
-                        notyf.error(error.response.data.message);
-                    } else {
-                        notyf.error('Error al actualizar la reunión');
-                    }
-                })
-                .finally(function() {
-                    // Ocultar loading
-                    loading.hide();
-                    text.show();
-                    btn.prop('disabled', false);
+                // Agregar event listeners a los botones
+                $('.view-reunion').on('click', function() {
+                    const uid = $(this).data('uid');
+                    verReunion(uid);
                 });
-        }
 
-        // Eliminar reunión
-        function eliminarReunion(uid) {
-            const isDark = $("body").hasClass("dark");
+                $('.edit-reunion').on('click', function() {
+                    const uid = $(this).data('uid');
+                    abrirModalEditar(uid);
+                });
 
-            // Confirmación con SweetAlert
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: "Esta acción no se puede deshacer",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: isDark ? '#444' : '#aaa',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true,
-                background: isDark ? '#1e1e2d' : '#fff',
-                color: isDark ? '#f1f1f1' : '#000'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Enviar solicitud de eliminación
-                    axios.post(`/proyectos/backlog/${uid}/reuniones/destroy`, {
-                            uid: uid
-                        })
-                        .then(function(response) {
-                            if (response.data.success) {
-                                notyf.success(response.data.message);
-                                cargarReuniones();
-                            } else {
-                                notyf.error(response.data.message ||
-                                    'Error al eliminar la reunión');
-                            }
-                        })
-                        .catch(function(error) {
-                            console.error('Error al eliminar reunión:',
-                                error);
-                            notyf.error('Error al eliminar la reunión');
-                        });
+                $('.delete-reunion').on('click', function() {
+                    const uid = $(this).data('uid');
+                    eliminarReunion(uid);
+                });
+            }
+
+            // ========== FUNCIONES DE MODALES ==========
+            
+            // Preparar modal de creación
+            function prepararModalCrear() {
+                $('#createForm')[0].reset();
+
+                // Establecer fecha actual por defecto
+                const today = new Date().toISOString().split('T')[0];
+                $('#fecha').val(today);
+
+                // Seleccionar el proyecto actual por defecto
+                $('#id_proyectos').val(proyectoID);
+
+                // Forzar recarga de sprints por si hay nuevos
+                cargarSprints();
+            }
+
+            // Preparar modal de edición
+            function prepararModalEditar() {
+                // Esta función se ejecuta cuando el modal se abre
+            }
+
+            // Abrir modal de edición
+            function abrirModalEditar(uid) {
+                const reunion = reuniones.find(r => r.uid === uid);
+
+                if (!reunion) {
+                    notyf.error('No se encontró la reunión');
+                    return;
                 }
-            });
-        }
 
-        // Ver detalles de reunión
-        function verReunion(uid) {
-            const reunion = reuniones.find(r => r.uid === uid);
+                // Llenar el formulario
+                $('#edit_uid').val(reunion.uid);
+                $('#edit_fecha').val(reunion.fecha);
+                $('#edit_duracion').val(reunion.duracion);
+                $('#edit_URL').val(reunion.URL || '');
+                $('#edit_id_proyectos').val(reunion.id_proyectos);
+                $('#edit_id_sprints').val(reunion.id_sprints);
+                $('#edit_observaciones').val(reunion.observaciones || '');
+                $('#edit_bloqueos_detectados').val(reunion.bloqueos_detectados || '');
+                $('#edit_acuerdos').val(reunion.acuerdos || '');
 
-            if (!reunion) {
-                notyf.error('No se encontró la reunión');
-                return;
+                // Abrir modal
+                $('#editModal').modal('show');
             }
 
-            // Formatear fecha
-            const fecha = new Date(reunion.fecha).toLocaleDateString();
+            // ========== FUNCIONES CRUD ==========
+            
+            // Crear nueva reunión
+            function crearReunion() {
+                const btn = $('#saveDailyScrum');
+                const loading = btn.find('.btn-loading');
+                const text = btn.find('.btn-text');
 
-            // Llenar el modal de detalles
-            $('#detail_fecha').text(fecha);
-            $('#detail_duracion').text(reunion.duracion);
-            $('#detail_proyecto').text(reunion.proyecto_nombre || 'N/A');
-            $('#detail_sprint').text(reunion.sprint_nombre || 'N/A');
+                // Validar formulario
+                if (!$('#createForm')[0].checkValidity()) {
+                    $('#createForm')[0].reportValidity();
+                    return;
+                }
 
-            // URL
-            if (reunion.URL) {
-                $('#detail_URL').attr('href', reunion.URL).text(reunion.URL);
-            } else {
-                $('#detail_URL').attr('href', '#').text('No especificada');
+                // Validar que se haya seleccionado un sprint
+                if (!$('#id_sprints').val()) {
+                    notyf.error('Por favor selecciona un sprint');
+                    return;
+                }
+
+                // Mostrar loading
+                loading.show();
+                text.hide();
+                btn.prop('disabled', true);
+
+                // Obtener datos del formulario
+                const formData = {
+                    fecha: $('#fecha').val(),
+                    duracion: $('#duracion').val(),
+                    URL: $('#URL').val(),
+                    id_proyectos: $('#id_proyectos').val(),
+                    id_sprints: $('#id_sprints').val(),
+                    observaciones: $('#observaciones').val(),
+                    bloqueos_detectados: $('#bloqueos_detectados').val(),
+                    acuerdos: $('#acuerdos').val()
+                };
+
+                axios.post(`/proyectos/backlog/${proyectoUID}/reuniones/store`, formData)
+                    .then(function(response) {
+                        if (response.data.success) {
+                            notyf.success(response.data.message);
+                            $('#createModal').modal('hide');
+                            cargarReuniones();
+                        } else {
+                            notyf.error(response.data.message ||
+                                'Error al crear la reunión');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error al crear reunión:', error);
+
+                        if (error.response && error.response.data && error.response.data
+                            .errors) {
+                            // Mostrar errores de validación
+                            const errors = error.response.data.errors;
+                            Object.keys(errors).forEach(key => {
+                                notyf.error(errors[key][0]);
+                            });
+                        } else if (error.response && error.response.data && error
+                            .response.data.message) {
+                            notyf.error(error.response.data.message);
+                        } else {
+                            notyf.error('Error al crear la reunión');
+                        }
+                    })
+                    .finally(function() {
+                        // Ocultar loading
+                        loading.hide();
+                        text.show();
+                        btn.prop('disabled', false);
+                    });
             }
 
-            // Campos de texto
-            $('#detail_observaciones').text(reunion.observaciones ||
-                'No hay observaciones');
-            $('#detail_bloqueos').text(reunion.bloqueos_detectados ||
-                'No se detectaron bloqueos');
-            $('#detail_acuerdos').text(reunion.acuerdos ||
+            // Actualizar reunión existente
+            function actualizarReunion() {
+                const btn = $('#updateDailyScrum');
+                const loading = btn.find('.btn-loading');
+                const text = btn.find('.btn-text');
+
+                // Validar formulario
+                if (!$('#editForm')[0].checkValidity()) {
+                    $('#editForm')[0].reportValidity();
+                    return;
+                }
+
+                // Validar que se haya seleccionado un sprint
+                if (!$('#edit_id_sprints').val()) {
+                    notyf.error('Por favor selecciona un sprint');
+                    return;
+                }
+
+                // Mostrar loading
+                loading.show();
+                text.hide();
+                btn.prop('disabled', true);
+
+                // Obtener datos del formulario
+                const uid = $('#edit_uid').val();
+                const formData = {
+                    fecha: $('#edit_fecha').val(),
+                    duracion: $('#edit_duracion').val(),
+                    URL: $('#edit_URL').val(),
+                    id_proyectos: $('#edit_id_proyectos').val(),
+                    id_sprints: $('#edit_id_sprints').val(),
+                    observaciones: $('#edit_observaciones').val(),
+                    bloqueos_detectados: $('#edit_bloqueos_detectados').val(),
+                    acuerdos: $('#edit_acuerdos').val()
+                };
+
+                axios.put(`/proyectos/backlog/${uid}/reuniones/update`, {
+                        ...formData,
+                        uid: uid
+                    })
+                    .then(function(response) {
+                        if (response.data.success) {
+                            notyf.success(response.data.message);
+                            $('#editModal').modal('hide');
+                            cargarReuniones();
+                        } else {
+                            notyf.error(response.data.message ||
+                                'Error al actualizar la reunión');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error al actualizar reunión:', error);
+
+                        if (error.response && error.response.data && error.response.data
+                            .errors) {
+                            // Mostrar errores de validación
+                            const errors = error.response.data.errors;
+                            Object.keys(errors).forEach(key => {
+                                notyf.error(errors[key][0]);
+                            });
+                        } else if (error.response && error.response.data && error
+                            .response.data.message) {
+                            notyf.error(error.response.data.message);
+                        } else {
+                            notyf.error('Error al actualizar la reunión');
+                        }
+                    })
+                    .finally(function() {
+                        // Ocultar loading
+                        loading.hide();
+                        text.show();
+                        btn.prop('disabled', false);
+                    });
+            }
+
+            // Eliminar reunión
+            function eliminarReunion(uid) {
+                const isDark = $("body").hasClass("dark");
+
+                // Confirmación con SweetAlert
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: "Esta acción no se puede deshacer",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: isDark ? '#444' : '#aaa',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true,
+                    background: isDark ? '#1e1e2d' : '#fff',
+                    color: isDark ? '#f1f1f1' : '#000'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Enviar solicitud de eliminación
+                        axios.post(`/proyectos/backlog/${uid}/reuniones/destroy`, {
+                                uid: uid
+                            })
+                            .then(function(response) {
+                                if (response.data.success) {
+                                    notyf.success(response.data.message);
+                                    cargarReuniones();
+                                } else {
+                                    notyf.error(response.data.message ||
+                                        'Error al eliminar la reunión');
+                                }
+                            })
+                            .catch(function(error) {
+                                console.error('Error al eliminar reunión:',
+                                    error);
+                                notyf.error('Error al eliminar la reunión');
+                            });
+                    }
+                });
+            }
+
+            // Ver detalles de reunión
+            function verReunion(uid) {
+                const reunion = reuniones.find(r => r.uid === uid);
+
+                if (!reunion) {
+                    notyf.error('No se encontró la reunión');
+                    return;
+                }
+
+                // Formatear fecha
+                const fecha = new Date(reunion.fecha).toLocaleDateString();
+
+                // Llenar el modal de detalles
+                $('#detail_fecha').text(fecha);
+                $('#detail_duracion').text(reunion.duracion);
+                $('#detail_proyecto').text(reunion.proyecto_nombre || 'N/A');
+                $('#detail_sprint').text(reunion.sprint_nombre || 'N/A');
+
+                // URL
+                if (reunion.URL) {
+                    $('#detail_URL').attr('href', reunion.URL).text(reunion.URL);
+                } else {
+                    $('#detail_URL').attr('href', '#').text('No especificada');
+                }
+
+                // Campos de texto
+                $('#detail_observaciones').text(reunion.observaciones ||
+                    'No hay observaciones');
+                $('#detail_bloqueos').text(reunion.bloqueos_detectados ||
+                    'No se detectaron bloqueos');
+                $('#detail_acuerdos').text(reunion.acuerdos ||
                 'No se registraron acuerdos');
 
-            // Abrir modal
-            $('#detailsModal').modal('show');
-        }
+                // Abrir modal
+                $('#detailsModal').modal('show');
+            }
 
-        // ========== INICIALIZAR MÓDULO ==========
-        inicializarReuniones();
-    });
+            // ========== INICIALIZAR MÓDULO ==========
+            inicializarReuniones();
+        });
 </script>
 @endsection

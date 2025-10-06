@@ -3,10 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CriteriosAceptacionController;
-use App\Http\Controllers\ProductBacklogController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\SprintController;
 use App\Http\Controllers\ProyectoController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SprintBacklogController;
 use Illuminate\Support\Facades\Auth;
@@ -19,9 +18,11 @@ use App\Models\RoleUser;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MiembrosEquipoController;
+use App\Http\Controllers\ProductBacklogController;
 use App\Http\Controllers\DailyScrumController;
 use App\Http\Controllers\GithubController;
-
+use App\Models\CriteriosAceptacion;
+use App\Models\SprintBacklogMiembro;
 
 
 /*
