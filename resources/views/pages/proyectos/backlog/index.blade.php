@@ -430,7 +430,7 @@
                         <input type="hidden" id="criterio_historia_uid">
                         <div class="mb-3">
                             <label for="criterio_descripcion" class="form-label">Descripción</label>
-                            <textarea class="form-control" id="criterio_descripcion" rows="3" maxlength="255" required placeholder="Quiero...Como...Para..."></textarea>
+                            <textarea class="form-control" id="criterio_descripcion" rows="3" maxlength="255" required></textarea>
                             <div class="form-text">Máximo 255 caracteres</div>
                         </div>
                     </form>
@@ -3158,7 +3158,7 @@
                     <div class="user-option d-flex align-items-center mb-2" data-user-id="${user.id}">
                         <input type="checkbox" class="me-2" ${isSelected ? 'checked' : ''}>
                         ${avatarHtml}
-                        <span class="ms-2">${user.nombre_completo}</span>
+                        <span class="ms-2 text-body">${user.nombre_completo}</span>
                     </div>
                 `);
             });

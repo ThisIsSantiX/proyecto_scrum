@@ -932,19 +932,19 @@ class SprintController extends Controller
             )
             ->get();
 
-        // // Agregar el usuario autenticado si no está en la lista
-        // $usuarioActual = Auth::user();
-        // if ($usuarioActual && !$miembros->contains('id', $usuarioActual->id)) {
-        //     $miembros->push([
-        //         'id'        => $usuarioActual->id,
-        //         'uid'       => $usuarioActual->uid,
-        //         'username'  => $usuarioActual->username,
-        //         'nombre'    => $usuarioActual->nombre,
-        //         'apellido'  => $usuarioActual->apellido,
-        //         'email'     => $usuarioActual->email,
-        //         'foto_url'  => $usuarioActual->foto_url,
-        //     ]);
-        // }
+        // Agregar el usuario autenticado si no está en la lista
+        $usuarioActual = Auth::user();
+        if ($usuarioActual && !$miembros->contains('id', $usuarioActual->id)) {
+            $miembros->push([
+                'id'        => $usuarioActual->id,
+                'uid'       => $usuarioActual->uid,
+                'username'  => $usuarioActual->username,
+                'nombre'    => $usuarioActual->nombre,
+                'apellido'  => $usuarioActual->apellido,
+                'email'     => $usuarioActual->email,
+                'foto_url'  => $usuarioActual->foto_url,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
