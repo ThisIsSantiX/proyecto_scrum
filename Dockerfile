@@ -54,7 +54,7 @@ CMD bash -c "\
     sed -i 's/:80>/:${PORT:-8080}>/' /etc/apache2/sites-available/000-default.conf && \
     php artisan config:clear && \
     php artisan cache:clear && \
-    php artisan migrate:fresh --force 2>&1 || true && \
+    php artisan migrate --force 2>&1 && \   
     php artisan db:seed --force 2>&1 || true && \
     chown -R www-data:www-data /var/www/html/storage && \
     chmod -R 775 /var/www/html/storage && \
