@@ -825,7 +825,33 @@ const guiasProyecto = {
                 `,
                 position: 'right'
             },
-            
+        ]
+    },
+    estadisticas: {
+        steps: [
+            {
+                intro: `
+                    <div style="text-align: center;">
+                        <i class="bi bi-graph-up intro-icon-pulse" style="font-size: 4rem; color: #f59e0b;"></i>
+                        <h4 style="margin-top: 20px; font-size: 1.8rem;">Estadísticas del Sprint</h4>
+                        <p style="font-size: 1.1rem; color: #6b7280; margin-top: 10px;">Analiza el rendimiento y progreso de tus sprints.</p>
+                        <div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #f59e0b15 0%, #d9770615 100%); border-radius: 10px; border: 2px solid rgba(245, 158, 11, 0.3);">
+                            <p style="margin: 0; font-size: 1rem;"><strong>📊 ¿Qué verás aquí?</strong></p>
+                            <ul style="text-align: left; margin: 10px 0 0 0; padding-left: 20px; font-size: 0.95rem;">
+                                <li>Métricas del sprint (total, completadas, en progreso)</li>
+                                <li>Burndown Chart para seguir el progreso</li>
+                                <li>Gráficos de distribución por estado y prioridad</li>
+                                <li>Velocity del equipo por día</li>
+                                <li>Tabla detallada de todas las historias</li>
+                            </ul>
+                        </div>
+                        <div style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                            <p style="margin: 0; font-size: 0.9rem;"><strong>⚠️ Requisito:</strong> Necesitas tener un <strong>sprint activo</strong> para visualizar estas estadísticas.</p>
+                        </div>
+                    </div>
+                `,
+                position: 'floating'
+            },
             {
                 intro: `
                     <div style="text-align: center;">
@@ -833,14 +859,14 @@ const guiasProyecto = {
                         <h4 style="margin-top: 25px; font-size: 2rem;">¡Tour Completado! 🎉</h4>
                         <p style="font-size: 1.15rem; color: #6b7280; margin-top: 15px;">Ya conoces todas las funciones principales del sistema.</p>
                         <div style="background: linear-gradient(135deg, #10b98115 0%, #05966915 100%); padding: 25px; border-radius: 15px; margin: 25px 0;">
-                            <p style="margin: 0; font-size: 1.05rem;">🎯 <strong>¡Ahora estás listo para gestionar tus proyectos con WorkScrum!</strong></p>
+                            <p style="margin: 0; font-size: 1.05rem;"><strong>¡Ahora estás listo para gestionar tus proyectos con WorkScrum!</strong></p>
                         </div>
                     </div>
                 `,
                 position: 'floating'
             }
         ]
-    },
+    }
     
 };
 
@@ -1025,6 +1051,9 @@ function iniciarTodasLasGuias() {
                     <div style="background: linear-gradient(135deg, #06b6d415 0%, #0891b215 100%); padding: 12px; border-radius: 8px; border-left: 4px solid #06b6d4;">
                         <strong style="${darkMode ? 'color: #f3f4f6;' : ''}"><i class="bi bi-calendar3"></i> 4. Calendario</strong>
                     </div>
+                    <div style="background: linear-gradient(135deg, #f59e0b15 0%, #d9770615 100%); padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <strong style="${darkMode ? 'color: #f3f4f6;' : ''}"><i class="bi bi-graph-up"></i> 5. Estadísticas</strong>
+                    </div>
                 </div>
                 <p style="color: #6b7280; font-size: 0.9rem; margin-top: 20px;">
                     ⏱️ Duración aproximada: 3-4 minutos<br>
@@ -1044,8 +1073,8 @@ function iniciarTodasLasGuias() {
 }
 
 function ejecutarTourCompleto() {
-    const guiasOrden = ['backlog', 'tablero', 'reuniones', 'calendario'];
-    
+    const guiasOrden = ['backlog', 'tablero', 'reuniones', 'calendario', 'estadisticas'];    
+
     let todosLosPasos = [];
     
     guiasOrden.forEach(seccion => {
@@ -1095,18 +1124,20 @@ function ejecutarTourCompleto() {
         setTimeout(() => moverBotonSkipAlFooter(), 50);
     });
     
-
     intro.onchange(function(targetElement) {
+
         const pasoActual = this._currentStep;
         
-        if (pasoActual >= 0 && pasoActual <= 5) {
+        if (pasoActual >= 0 && pasoActual <= 6) {
             cambiarSeccionParaGuia('backlog');
-        } else if (pasoActual >= 6 && pasoActual <= 8) {
+        } else if (pasoActual >= 7 && pasoActual <= 9) {
             cambiarSeccionParaGuia('tablero');
-        } else if (pasoActual >= 9 && pasoActual <= 11) {
+        } else if (pasoActual >= 10 && pasoActual <= 13) {
             cambiarSeccionParaGuia('reuniones');
-        } else if (pasoActual >= 12) {
+        } else if (pasoActual >= 14 && pasoActual <= 17) {
             cambiarSeccionParaGuia('calendario');
+        } else if (pasoActual >= 18) {
+            cambiarSeccionParaGuia('estadisticas');
         }
         
         setTimeout(() => {
@@ -1164,16 +1195,15 @@ function cambiarSeccionParaGuia(nombreGuia) {
         'backlog': 'vista-pendiente',
         'tablero': 'tablero',
         'reuniones': 'reuniones',
-        'calendario': 'calendario'
+        'calendario': 'calendario',
+        'estadisticas': 'estadisticas'
     };
     
     const seccionId = mapaSecciones[nombreGuia];
     
-    if (seccionId && typeof $ !== 'undefined') {
-        $('#vista-pendiente, #tablero, #reuniones, #calendario').hide();
-        $('#' + seccionId).fadeIn(300);
-        $('#navOpciones .nav-link').removeClass('active');
-        $(`#navOpciones .nav-link[data-target="${seccionId}"]`).addClass('active');
+    if (seccionId) {
+        // Usar la misma función que ya tienes implementada
+        mostrarSeccion(seccionId);
     }
 }
 

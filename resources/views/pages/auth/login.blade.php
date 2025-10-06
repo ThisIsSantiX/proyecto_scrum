@@ -42,12 +42,23 @@
                                         <div class="invalid-feedback">La contraseña es obligatoria</div>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 d-flex justify-content-between">
-                                    <div class="form-check mb-3">
+                                <div class="col-lg-12 mb-3 d-flex justify-content-end">
+                                    {{-- <div class="form-check mb-3">
                                         <input type="checkbox" class="form-check-input" id="customCheck1">
                                         <label class="form-check-label" for="customCheck1">Recuerdame</label>
-                                    </div>
-                                    <a href="{{ route('recoverypw') }}">Olvidaste tu contraseña?</a>
+                                    </div> --}}
+                                        <span class="d-inline-block" 
+                                            data-bs-toggle="popover" 
+                                            data-bs-trigger="hover focus" 
+                                            data-bs-placement="top"
+                                            data-bs-content="Esta funcionalidad estará disponible próximamente"
+                                            tabindex="0">
+                                            <a class="disabled text-muted opacity-50" 
+                                            href="javascript:void(0)" 
+                                            style="pointer-events: none; cursor: not-allowed; text-decoration: none;">
+                                                Olvidaste tu contraseña?
+                                            </a>
+                                        </span>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-center">
@@ -87,7 +98,13 @@
 
 @section('js')
     <script>
-
+        // En tu archivo JS principal o al final del blade
+document.addEventListener('DOMContentLoaded', function () {
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl);
+    });
+});
         $(document).ready(function() {
             const notyf = new Notyf({
                 duration: 3000,

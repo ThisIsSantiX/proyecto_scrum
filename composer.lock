@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c10dab313f173f5df71f747261bfc85a",
+    "content-hash": "a2084e40983fdb709d3a8a7c4ad14aec",
     "packages": [
         {
             "name": "brick/math",
@@ -1178,73 +1178,6 @@
                 }
             ],
             "time": "2025-02-03T10:55:03+00:00"
-        },
-        {
-            "name": "hofmannsven/laravel-brevo",
-            "version": "2.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/hofmannsven/laravel-brevo.git",
-                "reference": "9c246f985ce0be875977b06c865b414c1c05d4cd"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/hofmannsven/laravel-brevo/zipball/9c246f985ce0be875977b06c865b414c1c05d4cd",
-                "reference": "9c246f985ce0be875977b06c865b414c1c05d4cd",
-                "shasum": ""
-            },
-            "require": {
-                "getbrevo/brevo-php": "^1.0|^2.0",
-                "illuminate/contracts": "^8.0|^9.0|^10.0|^11.0|^12.0",
-                "php": "^8.1"
-            },
-            "require-dev": {
-                "laravel/pint": "^1.14",
-                "nunomaduro/collision": "^7.0|^8.0",
-                "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0|^10.0",
-                "phpunit/phpunit": "^10.1|^11.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "Brevo": "Hofmannsven\\Brevo\\Facades\\Brevo"
-                    },
-                    "providers": [
-                        "Hofmannsven\\Brevo\\BrevoServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Hofmannsven\\Brevo\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Sven Hofmann",
-                    "email": "info@hofmannsven.com",
-                    "homepage": "https://hofmannsven.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Laravel wrapper for Brevo's API v3 PHP library.",
-            "homepage": "https://github.com/hofmannsven/laravel-brevo",
-            "keywords": [
-                "brevo",
-                "laravel"
-            ],
-            "support": {
-                "email": "info@hofmannsven.com",
-                "issues": "https://github.com/hofmannsven/laravel-brevo/issues",
-                "source": "https://github.com/hofmannsven/laravel-brevo",
-                "wiki": "https://github.com/hofmannsven/laravel-brevo/wiki"
-            },
-            "time": "2025-05-23T13:43:17+00:00"
         },
         {
             "name": "laravel/framework",

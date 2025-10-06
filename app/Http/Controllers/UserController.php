@@ -10,7 +10,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+
 
 
 class UserController extends Controller
@@ -257,7 +261,7 @@ class UserController extends Controller
         return redirect()->route('user.profile', $user->username)
             ->with('success', 'Perfil actualizado correctamente.');
     }
-  
+
     public function marcarTour(Request $request)
     {
         try {
@@ -282,6 +286,264 @@ class UserController extends Controller
     public function configuracion()
     {
         return view('pages.profile.settings');
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $user = Auth::user();
+
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+        ], [
+            'nombre.required' => 'El nombre es obligatorio',
+            'apellido.required' => 'El apellido es obligatorio',
+            'username.required' => 'El nombre de usuario es obligatorio',
+            'username.unique' => 'Este nombre de usuario ya está en uso',
+            'email.required' => 'El correo electrónico es obligatorio',
+            'email.email' => 'El correo electrónico no es válido',
+            'email.unique' => 'Este correo electrónico ya está en uso',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        try {
+            // Actualizar usando DB directamente sin modelo
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update([
+                    'nombre' => $request->nombre,
+                    'apellido' => $request->apellido,
+                    'username' => $request->username,
+                    'email' => $request->email,
+                    'updated_at' => now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Perfil actualizado correctamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el perfil: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Actualizar foto de perfil
+     */
+    public function updatePhoto(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'foto.required' => 'Debes seleccionar una imagen',
+            'foto.image' => 'El archivo debe ser una imagen',
+            'foto.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg o gif',
+            'foto.max' => 'La imagen no debe superar los 2MB',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        try {
+            $user = Auth::user();
+
+            // Eliminar foto anterior si existe y no es externa
+            if ($user->avatar && !str_starts_with($user->avatar, 'http')) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            // Guardar nueva foto en storage/app/public/usuarios
+            $path = $request->file('foto')->store('usuarios', 'public');
+
+            // Actualizar usuario usando DB directamente
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update([
+                    'avatar' => $path,
+                    'foto_url' => null,
+                    'updated_at' => now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto actualizada correctamente',
+                'path' => $path
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la foto: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Eliminar foto de perfil
+     */
+    public function deletePhoto()
+    {
+        try {
+            $user = Auth::user();
+
+            // Eliminar foto del storage si existe y no es externa
+            if ($user->avatar && !str_starts_with($user->avatar, 'http')) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            // Actualizar usuario usando DB directamente
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update([
+                    'avatar' => null,
+                    'foto_url' => null,
+                    'updated_at' => now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto eliminada correctamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar la foto: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Cambiar contraseña
+     */
+    public function changePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        // Si la cuenta está vinculada con Google, no permitir cambio de contraseña
+        if ($user->google_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Las cuentas vinculadas con Google no pueden cambiar la contraseña'
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required',
+            'new_password' => [
+                'required',
+                'confirmed',
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+            ],
+        ], [
+            'current_password.required' => 'Debes ingresar tu contraseña actual',
+            'new_password.required' => 'Debes ingresar una nueva contraseña',
+            'new_password.confirmed' => 'Las contraseñas no coinciden',
+            'new_password.min' => 'La contraseña debe tener al menos 8 caracteres',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        // Verificar contraseña actual
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La contraseña actual es incorrecta'
+            ], 422);
+        }
+
+        // Validar que la nueva contraseña cumpla los requisitos
+        if (!preg_match('/[A-Z]/', $request->new_password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La contraseña debe contener al menos una mayúscula'
+            ], 422);
+        }
+
+        if (!preg_match('/[a-z]/', $request->new_password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La contraseña debe contener al menos una minúscula'
+            ], 422);
+        }
+
+        if (!preg_match('/[0-9]/', $request->new_password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La contraseña debe contener al menos un número'
+            ], 422);
+        }
+
+        try {
+            // Actualizar contraseña usando DB directamente
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update([
+                    'password' => Hash::make($request->new_password),
+                    'updated_at' => now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Contraseña cambiada correctamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cambiar la contraseña: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Desactivar cuenta
+     */
+    public function deactivateAccount()
+    {
+        try {
+            $user = Auth::user();
+
+            // Desactivar cuenta usando DB directamente
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update([
+                    'estado' => 0,
+                    'updated_at' => now()
+                ]);
+
+            // Cerrar sesión
+            Auth::logout();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cuenta desactivada correctamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al desactivar la cuenta: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
 }

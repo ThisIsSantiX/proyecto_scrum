@@ -3,135 +3,190 @@
 @section('title', 'Configuración de Cuenta - WorkScrum')
 
 @section('css')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
 <style>
-:root {
-    --settings-bg: #f8f9fa;
-    --settings-card-bg: #ffffff;
-    --settings-sidebar-bg: #ffffff;
-    --settings-border: #e9ecef;
-    --settings-text-primary: #212529;
-    --settings-text-secondary: #6c757d;
-    --settings-hover-bg: #f8f9fa;
-    --settings-active-bg: #e7f1ff;
-    --settings-active-color: #0d6efd;
-    --settings-shadow: rgba(0, 0, 0, 0.05);
-}
-
-body.dark {
-    --settings-bg: #1a1d23;
-    --settings-card-bg: #242830;
-    --settings-sidebar-bg: #1e2128;
-    --settings-border: #2d3139;
-    --settings-text-primary: #e9ecef;
-    --settings-text-secondary: #adb5bd;
-    --settings-hover-bg: #2d3139;
-    --settings-active-bg: #2a3441;
-    --settings-active-color: #4d9fff;
-    --settings-shadow: rgba(0, 0, 0, 0.3);
-}
-
-body {
-    background-color: var(--settings-bg);
-    color: var(--settings-text-primary);
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
 .settings-navbar {
-    background-color: var(--settings-card-bg);
-    border-bottom: 1px solid var(--settings-border);
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
 }
 
 .settings-sidebar {
-    background-color: var(--settings-sidebar-bg);
-    border-right: 1px solid var(--settings-border);
     min-height: calc(100vh - 73px);
-    padding: 1.5rem 0;
-    border-radius: 0;
+    padding: 2rem 1rem;
 }
 
-.settings-sidebar .nav-link {
-    color: var(--settings-text-secondary);
-    margin: 0.25rem 0.5rem;
-    padding: 0.75rem 1rem;
-    transition: all 0.2s ease;
+.settings-nav-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    margin-bottom: 0.5rem;
+    background: transparent;
     border: none;
-    border-radius: 0%
-}
-
-.settings-sidebar .nav-link:hover {
-    background-color: var(--settings-hover-bg);
-    color: var(--settings-text-primary);
-}
-
-.settings-sidebar .nav-link.active {
-    background-color: var(--settings-active-bg);
-    color: var(--settings-active-color);
+    border-radius: 0.5rem;
     font-weight: 500;
+    font-size: 0.9375rem;
+    text-align: left;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.settings-nav-btn:hover {
+    transform: translateX(4px);
+}
+
+.settings-nav-btn i {
+    width: 20px;
+    margin-right: 0.75rem;
+    font-size: 1rem;
 }
 
 .settings-card {
-    background-color: var(--settings-card-bg);
-    border: 1px solid var(--settings-border);
     border-radius: 0.75rem;
-    box-shadow: 0 2px 8px var(--settings-shadow);
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .settings-card-header {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--settings-border);
+    padding: 1.5rem 1.75rem;
+}
+
+.settings-card-header h5 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
 }
 
 .settings-card-body {
-    padding: 1.5rem;
+    padding: 2rem 1.75rem;
 }
 
 .settings-item {
-    padding: 1.25rem 0;
-    border-bottom: 1px solid var(--settings-border);
+    padding: 1.5rem 0;
 }
 
 .settings-item:last-child {
     border-bottom: none;
+    padding-bottom: 0;
+}
+
+.settings-item:first-child {
+    padding-top: 0;
+}
+
+.profile-photo-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-photo-actions {
+    margin-top: 1rem;
 }
 
 .form-label {
-    color: var(--settings-text-primary);
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 0.5rem;
+    font-size: 0.875rem;
 }
 
-.form-control, .form-select {
-    background-color: var(--settings-card-bg);
-    border: 1px solid var(--settings-border);
-    color: var(--settings-text-primary);
-    transition: all 0.2s ease;
+.form-control,
+.form-select {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.9375rem;
+    border-radius: 0.5rem;
 }
 
-.form-control:focus, .form-select:focus {
-    background-color: var(--settings-card-bg);
-    border-color: var(--settings-active-color);
-    color: var(--settings-text-primary);
+.form-control:focus,
+.form-select:focus {
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
 }
 
-body.dark .form-control:focus, body.dark .form-select:focus {
-    box-shadow: 0 0 0 0.2rem rgba(77, 159, 255, 0.25);
+.form-text {
+    font-size: 0.8125rem;
+    margin-top: 0.375rem;
 }
 
-.form-control::placeholder {
-    color: var(--settings-text-secondary);
+.password-requirements {
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    margin-top: 0.75rem;
 }
 
-.form-check-input {
-    background-color: var(--settings-card-bg);
-    border: 1px solid var(--settings-border);
+.requirement {
+    display: flex;
+    align-items: center;
+    padding: 0.375rem 0;
+    font-size: 0.875rem;
 }
 
-.form-check-input:checked {
-    background-color: var(--settings-active-color);
-    border-color: var(--settings-active-color);
+.requirement i {
+    margin-right: 0.625rem;
+    width: 18px;
+    font-size: 0.875rem;
+}
+
+.requirement.valid {
+    color: #198754 !important;
+}
+
+.requirement.valid i {
+    color: #198754 !important;
+}
+
+.requirement.invalid {
+    color: #6c757d !important;
+}
+
+.requirement.invalid i {
+    color: #6c757d !important;
+}
+
+.badge-status {
+    padding: 0.375rem 0.875rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    font-size: 0.8125rem;
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    font-size: 0.9375rem;
+}
+
+.btn-soft-primary {
+    background: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+    border: 1px solid transparent;
+}
+
+.btn-soft-primary:hover {
+    background: rgba(13, 110, 253, 0.2);
+    color: #0d6efd;
+}
+
+.btn-soft-danger {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid transparent;
+}
+
+.btn-soft-danger:hover {
+    background: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+}
+
+.divider {
+    height: 1px;
+    margin: 1.75rem 0;
 }
 
 .form-switch .form-check-input {
@@ -140,608 +195,333 @@ body.dark .form-control:focus, body.dark .form-select:focus {
     cursor: pointer;
 }
 
-.badge-status {
-    padding: 0.35rem 0.75rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    font-size: 0.875rem;
+@media (max-width: 768px) {
+    .settings-navbar {
+        padding: 1rem 1.25rem;
+    }
+    
+    .settings-sidebar {
+        min-height: auto;
+        padding: 1rem;
+        border-right: none;
+    }
+    
+    .settings-nav-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .settings-card-header,
+    .settings-card-body {
+        padding: 1.25rem;
+    }
+    
+    .profile-photo-preview {
+        width: 100px;
+        height: 100px;
+    }
 }
 
-.profile-photo-preview {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--settings-border);
+@media (max-width: 576px) {
+    .settings-navbar h4 {
+        font-size: 1.125rem;
+    }
+    
+    .logo-main img {
+        width: 32px !important;
+        height: 32px !important;
+    }
 }
 
-.btn-outline-custom {
-    border: 1px solid var(--settings-border);
-    color: var(--settings-text-primary);
-    background-color: transparent;
-}
-
-.btn-outline-custom:hover {
-    background-color: var(--settings-hover-bg);
-    border-color: var(--settings-border);
-    color: var(--settings-text-primary);
-}
-
-.logo-title {
-    color: var(--settings-text-primary);
-}
-
-.text-muted {
-    color: var(--settings-text-secondary) !important;
-}
-
-.divider {
-    height: 1px;
-    background-color: var(--settings-border);
-    margin: 1.5rem 0;
+#photoUpload {
+    display: none;
 }
 </style>
 @endsection
 
 @section('content')
 <div class="container-fluid p-0">
-
-    <!-- Navbar superior -->
-    <nav class="navbar navbar-expand-lg settings-navbar">
-        <div class="d-flex align-items-center w-100 justify-content-between">
-            <div class="d-flex align-items-center">
-                <div class="logo-main me-2">
+    <nav class="settings-navbar bg-white border-bottom">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+                <div class="logo-main">
                     <img src="../../assets/images/logos/workscrum.png" alt="Logo" width="40" height="40">
                 </div>
-                <h4 class="logo-title mb-0">Configuración de Cuenta</h4>
+                <h4 class="mb-0 fw-semibold">Configuración de Cuenta</h4>
             </div>
 
             @php
-                $foto = Auth::user()->foto_url;
-                $esExterno = Str::startsWith($foto, ['http://', 'https://']);
+                $foto = Auth::user()->foto_url ?? Auth::user()->avatar;
+                $esExterno = $foto && Str::startsWith($foto, ['http://', 'https://']);
             @endphp
-            <img src="{{ $esExterno ? $foto : asset('storage/' . $foto) }}"
-                 alt="User Profile"
-                 class="rounded-circle"
-                 style="width:45px; height:45px; object-fit:cover;">
+            <img src="{{ $foto ? ($esExterno ? $foto : asset('storage/' . $foto)) : asset('assets/images/default-avatar.png') }}"
+                alt="User Profile"
+                class="rounded-circle border"
+                style="width:45px; height:45px; object-fit:cover;">
         </div>
     </nav>
 
     <div class="row g-0">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 settings-sidebar">
-            <ul class="nav flex-column nav-pills px-1">
-                <li class="nav-item">
-                    <button class="nav-link active text-start w-100" data-bs-toggle="tab" data-bs-target="#cuenta">
-                        <i class="fas fa-user-cog me-2"></i> Perfil
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link text-start w-100" data-bs-toggle="tab" data-bs-target="#seguridad">
-                        <i class="fas fa-lock me-2"></i> Seguridad
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link text-start w-100" data-bs-toggle="tab" data-bs-target="#notificaciones">
-                        <i class="fas fa-bell me-2"></i> Notificaciones
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link text-start w-100" data-bs-toggle="tab" data-bs-target="#apariencia">
-                        <i class="fas fa-palette me-2"></i> Apariencia
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link text-start w-100" data-bs-toggle="tab" data-bs-target="#privacidad">
-                        <i class="fas fa-shield-alt me-2"></i> Privacidad
-                    </button>
-                </li>
-            </ul>
+        <div class="col-md-3 col-lg-2 settings-sidebar bg-white border-end">
+            <div class="d-flex flex-column">
+                <button class="settings-nav-btn active bg-primary text-white" onclick="cambiarTab('cuenta', this)">
+                    <i class="fas fa-user-cog"></i> Perfil
+                </button>
+                <button class="settings-nav-btn text-muted" onclick="cambiarTab('seguridad', this)">
+                    <i class="fas fa-lock"></i> Seguridad
+                </button>
+                <button class="settings-nav-btn text-muted" onclick="cambiarTab('apariencia', this)">
+                    <i class="fas fa-palette"></i> Apariencia
+                </button>
+                <button class="settings-nav-btn text-muted" onclick="cambiarTab('privacidad', this)">
+                    <i class="fas fa-shield-alt"></i> Privacidad
+                </button>
+            </div>
         </div>
 
-        <!-- Contenido de secciones -->
-        <div class="col-md-9 col-lg-10 tab-content p-4">
+        <div class="col-md-9 col-lg-10 p-4 p-md-5">
             
-            <!-- Perfil / Cuenta -->
-            <div class="tab-pane fade show active" id="cuenta">
-                <!-- Información Personal -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Información Personal</h5>
+            <div class="tab-pane-custom active" id="cuenta">
+                <div class="settings-card card border">
+                    <div class="settings-card-header bg-white border-bottom">
+                        <h5 class="text-body">Información Personal</h5>
                     </div>
-                    <div class="settings-card-body">
-                        <div class="row mb-4">
-                            <div class="col-12 text-center mb-4">
+                    <div class="settings-card-body bg-white">
+                        <form id="formPerfil">
+                            @csrf
+                            <div class="text-center mb-4 pb-4 border-bottom">
                                 @php
-                                    $foto = Auth::user()->foto_url;
-                                    $esExterno = Str::startsWith($foto, ['http://', 'https://']);
+                                    $foto = Auth::user()->foto_url ?? Auth::user()->avatar;
+                                    $esExterno = $foto && Str::startsWith($foto, ['http://', 'https://']);
                                 @endphp
-                                <img src="{{ $esExterno ? $foto : asset('storage/' . $foto) }}"
-                                     alt="Foto de perfil"
-                                     class="profile-photo-preview mb-3">
-                                <div>
-                                    <button class="btn btn-sm btn-outline-custom me-2">
+                                <img src="{{ $foto ? ($esExterno ? $foto : asset('storage/' . $foto)) : asset('assets/images/default-avatar.png') }}"
+                                    alt="Foto de perfil"
+                                    class="profile-photo-preview mb-3 border"
+                                    id="profilePhotoPreview">
+                                <div class="profile-photo-actions">
+                                    <input type="file" id="photoUpload" accept="image/*">
+                                    <button type="button" class="btn btn-sm btn-primary me-2" onclick="document.getElementById('photoUpload').click()">
                                         <i class="fas fa-camera me-1"></i> Cambiar foto
                                     </button>
-                                    <button class="btn btn-sm btn-outline-custom">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" id="btnEliminarFoto">
                                         <i class="fas fa-trash me-1"></i> Eliminar
                                     </button>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="nombre" class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="nombre" value="{{ Auth::user()->nombre }}" placeholder="Ingresa tu nombre">
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6">
+                                    <label for="nombre" class="form-label text-body">Nombre</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ Auth::user()->nombre }}" placeholder="Ingresa tu nombre" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="apellido" class="form-label text-body">Apellido</label>
+                                    <input type="text" class="form-control" id="apellido" name="apellido" value="{{ Auth::user()->apellido }}" placeholder="Ingresa tu apellido" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="username" class="form-label text-body">Nombre de usuario</label>
+                                    <input type="text" class="form-control" id="username" name="username" value="{{ Auth::user()->username }}" placeholder="@usuario" required>
+                                    <small class="form-text text-muted">Este es tu identificador único en la plataforma</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label text-body">Correo electrónico</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="{{ Auth::user()->email }}" placeholder="correo@ejemplo.com" required>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label for="apellido" class="form-label">Apellido</label>
-                                <input type="text" class="form-control" id="apellido" value="{{ Auth::user()->apellido }}" placeholder="Ingresa tu apellido">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="username" class="form-label">Nombre de usuario</label>
-                                <input type="text" class="form-control" id="username" value="{{ Auth::user()->username }}" placeholder="@usuario">
-                                <small class="text-muted">Este es tu identificador único en la plataforma</small>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="email" class="form-label">Correo electrónico</label>
-                                <input type="email" class="form-control" id="email" value="{{ Auth::user()->email }}" placeholder="correo@ejemplo.com">
-                            </div>
-                        </div>
 
-                        <div class="divider"></div>
+                            <div class="divider bg-secondary"></div>
 
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">Estado de la cuenta</h6>
-                                <small class="text-muted">Tu cuenta está actualmente 
-                                    @if(Auth::user()->estado == 1)
-                                        <span class="badge badge-status bg-success">Activa</span>
-                                    @else
-                                        <span class="badge badge-status bg-secondary">Inactiva</span>
-                                    @endif
-                                </small>
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <h6 class="mb-1 fw-semibold">Estado de la cuenta</h6>
+                                    <small class="text-muted">Tu cuenta está actualmente 
+                                        @if(Auth::user()->estado == 1)
+                                            <span class="badge badge-status bg-success">Activa</span>
+                                        @else
+                                            <span class="badge badge-status bg-secondary">Inactiva</span>
+                                        @endif
+                                    </small>
+                                </div>
                             </div>
-                        </div>
 
-                        @if(Auth::user()->google_id)
-                        <div class="divider"></div>
-                        <div class="d-flex align-items-center">
-                            <i class="fab fa-google me-2" style="font-size: 1.5rem;"></i>
-                            <div>
-                                <h6 class="mb-0">Cuenta vinculada con Google</h6>
-                                <small class="text-muted">ID: {{ Str::limit(Auth::user()->google_id, 20) }}</small>
+                            @if(Auth::user()->google_id)
+                            <div class="d-flex align-items-center p-3 bg-white border rounded-3 mb-4">
+                                <i class="fab fa-google me-3 text-danger" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold">Cuenta vinculada con Google</h6>
+                                    <small class="text-muted">Tu cuenta está conectada con Google</small>
+                                </div>
                             </div>
-                        </div>
-                        @endif
+                            @endif
 
-                        <div class="divider"></div>
-
-                        <div class="d-flex justify-content-end gap-2">
-                            <button class="btn btn-outline-custom">Cancelar</button>
-                            <button class="btn btn-primary">Guardar cambios</button>
-                        </div>
+                            <div class="d-flex justify-content-end gap-2 pt-3">
+                                <button type="button" class="btn btn-secondary" onclick="location.reload()">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Guardar cambios
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <!-- Información de Sistema -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Información del Sistema</h5>
+                <div class="settings-card card border">
+                    <div class="settings-card-header bg-white border-bottom">
+                        <h5 class="text-body">Información del Sistema</h5>
                     </div>
-                    <div class="settings-card-body">
-                        <div class="settings-item">
+                    <div class="settings-card-body bg-white">
+                        <div class="settings-item border-bottom">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="mb-1">ID de Usuario (UID)</h6>
-                                    <small class="text-muted">Identificador único del sistema</small>
-                                </div>
-                                <code class="text-muted">{{ Auth::user()->uid ?? 'No asignado' }}</code>
-                            </div>
-                        </div>
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Fecha de registro</h6>
+                                    <h6 class="mb-1 fw-semibold">Fecha de registro</h6>
                                     <small class="text-muted">Miembro desde</small>
                                 </div>
-                                <span class="text-muted">{{ Auth::user()->created_at->format('d/m/Y') }}</span>
+                                <span class="text-muted fw-medium">{{ Auth::user()->created_at->format('d/m/Y') }}</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seguridad -->
-            <div class="tab-pane fade" id="seguridad">
-                <!-- Contraseña -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Contraseña</h5>
-                    </div>
-                    <div class="settings-card-body">
+                        @if(Auth::user()->email_verified_at)
                         <div class="settings-item">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="mb-1">Cambiar contraseña</h6>
-                                    <small class="text-muted">Actualiza tu contraseña regularmente para mayor seguridad</small>
+                                    <h6 class="mb-1 fw-semibold">Email verificado</h6>
+                                    <small class="text-muted">Verificación completada</small>
                                 </div>
-                                <button class="btn btn-outline-custom">
-                                    <i class="fas fa-key me-1"></i> Cambiar
-                                </button>
-                            </div>
-                        </div>
-                        
-                        @if(!Auth::user()->google_id)
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Última actualización</h6>
-                                    <small class="text-muted">Hace 3 meses</small>
-                                </div>
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i> Verificado
+                                </span>
                             </div>
                         </div>
                         @endif
                     </div>
                 </div>
+            </div>
 
-                <!-- Autenticación de dos factores -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Autenticación de Dos Factores</h5>
+            <div class="tab-pane-custom" id="seguridad" style="display: none;">
+                <div class="settings-card card border">
+                    <div class="settings-card-header bg-white border-bottom">
+                        <h5 class="text-body">Contraseña</h5>
                     </div>
-                    <div class="settings-card-body">
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Autenticación 2FA</h6>
-                                    <small class="text-muted">Agrega una capa extra de seguridad a tu cuenta</small>
+                    <div class="settings-card-body bg-white">
+                        <form id="formPassword">
+                            @csrf
+                            @if(!Auth::user()->google_id)
+                            <div class="settings-item">
+                                <div class="mb-4">
+                                    <label for="current_password" class="form-label text-body">Contraseña actual</label>
+                                    <input type="password" class="form-control" id="current_password" name="current_password" placeholder="Ingresa tu contraseña actual" required>
                                 </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="switch2FA">
+                                
+                                <div class="mb-3">
+                                    <label for="new_password" class="form-label text-body">Nueva contraseña</label>
+                                    <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Ingresa tu nueva contraseña" required>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Aplicación de autenticación</h6>
-                                    <small class="text-muted">Google Authenticator, Authy, etc.</small>
+                                
+                                <div class="password-requirements bg-white border">
+                                    <div class="requirement invalid" id="req-length">
+                                        <i class="fas fa-circle-xmark"></i>
+                                        <span>Mínimo 8 caracteres</span>
+                                    </div>
+                                    <div class="requirement invalid" id="req-uppercase">
+                                        <i class="fas fa-circle-xmark"></i>
+                                        <span>Al menos una mayúscula</span>
+                                    </div>
+                                    <div class="requirement invalid" id="req-lowercase">
+                                        <i class="fas fa-circle-xmark"></i>
+                                        <span>Al menos una minúscula</span>
+                                    </div>
+                                    <div class="requirement invalid" id="req-number">
+                                        <i class="fas fa-circle-xmark"></i>
+                                        <span>Al menos un número</span>
+                                    </div>
                                 </div>
-                                <button class="btn btn-sm btn-outline-custom" disabled>
-                                    <i class="fas fa-mobile-alt me-1"></i> Configurar
+                                
+                                <div class="mb-4">
+                                    <label for="new_password_confirmation" class="form-label text-body">Confirmar nueva contraseña</label>
+                                    <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation" placeholder="Confirma tu nueva contraseña" required>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-key me-1"></i> Cambiar contraseña
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sesiones activas -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Sesiones Activas</h5>
-                    </div>
-                    <div class="settings-card-body">
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1"><i class="fas fa-desktop me-2"></i> Windows - Chrome</h6>
-                                    <small class="text-muted">192.168.1.100 • Activa ahora</small>
-                                </div>
-                                <span class="badge badge-status bg-success">Actual</span>
+                            @else
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Tu cuenta está vinculada con Google. La contraseña se gestiona a través de Google.
                             </div>
-                        </div>
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1"><i class="fas fa-mobile-alt me-2"></i> iPhone - Safari</h6>
-                                    <small class="text-muted">192.168.1.105 • Hace 2 horas</small>
-                                </div>
-                                <button class="btn btn-sm btn-outline-custom">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="divider"></div>
-                        <button class="btn btn-outline-custom w-100">
-                            <i class="fas fa-sign-out-alt me-2"></i> Cerrar todas las sesiones
-                        </button>
+                            @endif
+                        </form>
                     </div>
                 </div>
             </div>
 
-            <!-- Notificaciones -->
-            <div class="tab-pane fade" id="notificaciones">
-                <!-- Notificaciones por correo -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Notificaciones por Correo</h5>
+            <div class="tab-pane-custom" id="apariencia" style="display: none;">
+                <div class="settings-card card border">
+                    <div class="settings-card-header bg-white border-bottom">
+                        <h5 class="text-body">Tema de la Interfaz</h5>
                     </div>
-                    <div class="settings-card-body">
+                    <div class="settings-card-body bg-white">
                         <div class="settings-item">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="mb-1">Actualizaciones del proyecto</h6>
-                                    <small class="text-muted">Recibe notificaciones sobre cambios en tus proyectos</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="notifProyectos" checked>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Menciones y comentarios</h6>
-                                    <small class="text-muted">Cuando alguien te menciona o comenta</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="notifMenciones" checked>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Resumen semanal</h6>
-                                    <small class="text-muted">Recibe un resumen de actividad cada semana</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="notifResumen">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Boletín informativo</h6>
-                                    <small class="text-muted">Noticias, consejos y actualizaciones de la plataforma</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="notifBoletin">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Notificaciones push -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Notificaciones Push</h5>
-                    </div>
-                    <div class="settings-card-body">
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Notificaciones del navegador</h6>
-                                    <small class="text-muted">Recibe alertas en tiempo real en tu navegador</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="notifPush">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Sonido de notificación</h6>
-                                    <small class="text-muted">Reproduce un sonido al recibir notificaciones</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="notifSonido" checked>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Frecuencia -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Frecuencia de Notificaciones</h5>
-                    </div>
-                    <div class="settings-card-body">
-                        <div class="settings-item">
-                            <label for="frecuenciaNotif" class="form-label">¿Con qué frecuencia deseas recibir notificaciones?</label>
-                            <select class="form-select" id="frecuenciaNotif">
-                                <option value="tiempo-real" selected>En tiempo real</option>
-                                <option value="cada-hora">Cada hora</option>
-                                <option value="diario">Resumen diario</option>
-                                <option value="semanal">Resumen semanal</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Apariencia -->
-            <div class="tab-pane fade" id="apariencia">
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Tema de la Interfaz</h5>
-                    </div>
-                    <div class="settings-card-body">
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Modo oscuro</h6>
+                                    <h6 class="mb-1 fw-semibold">Modo oscuro</h6>
                                     <small class="text-muted">Cambia entre modo claro y oscuro</small>
                                 </div>
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="switchTema">
+                                    <input class="form-check-input" type="checkbox" id="switchTema" role="switch">
                                 </div>
                             </div>
-                        </div>
-                        <div class="settings-item">
-                            <label for="temaAuto" class="form-label">Preferencia de tema</label>
-                            <select class="form-select" id="temaAuto">
-                                <option value="manual" selected>Manual</option>
-                                <option value="sistema">Seguir configuración del sistema</option>
-                                <option value="horario">Automático según horario</option>
-                            </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- Idioma y región -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Idioma y Región</h5>
+                <div class="settings-card card border">
+                    <div class="settings-card-header bg-white border-bottom">
+                        <h5 class="text-body">Idioma y Región <small class="text-muted fw-normal">(Próximamente)</small></h5>
                     </div>
-                    <div class="settings-card-body">
+                    <div class="settings-card-body bg-white">
                         <div class="settings-item">
-                            <label for="idioma" class="form-label">Idioma de la interfaz</label>
-                            <select class="form-select" id="idioma">
+                            <label for="idioma" class="form-label text-body">Idioma de la interfaz</label>
+                            <select class="form-select" id="idioma" disabled>
                                 <option value="es" selected>Español</option>
-                                <option value="en">English</option>
-                                <option value="pt">Português</option>
-                                <option value="fr">Français</option>
-                            </select>
-                        </div>
-                        <div class="settings-item">
-                            <label for="zonaHoraria" class="form-label">Zona horaria</label>
-                            <select class="form-select" id="zonaHoraria">
-                                <option value="america-mexico" selected>América/Ciudad de México (GMT-6)</option>
-                                <option value="america-bogota">América/Bogotá (GMT-5)</option>
-                                <option value="america-argentina">América/Buenos Aires (GMT-3)</option>
-                                <option value="europe-madrid">Europa/Madrid (GMT+1)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Accesibilidad -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Accesibilidad</h5>
-                    </div>
-                    <div class="settings-card-body">
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Reducir animaciones</h6>
-                                    <small class="text-muted">Minimiza efectos de movimiento en la interfaz</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="reducirAnimaciones">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="settings-item">
-                            <label for="tamanoTexto" class="form-label">Tamaño del texto</label>
-                            <select class="form-select" id="tamanoTexto">
-                                <option value="pequeno">Pequeño</option>
-                                <option value="normal" selected>Normal</option>
-                                <option value="grande">Grande</option>
-                                <option value="muy-grande">Muy grande</option>
                             </select>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Privacidad -->
-            <div class="tab-pane fade" id="privacidad">
-                <!-- Visibilidad del perfil -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Visibilidad del Perfil</h5>
+            <div class="tab-pane-custom" id="privacidad" style="display: none;">
+                <div class="settings-card card border">
+                    <div class="settings-card-header bg-white border-bottom">
+                        <h5 class="text-body">Datos y Privacidad <small class="text-muted fw-normal">(Próximamente)</small></h5>
                     </div>
-                    <div class="settings-card-body">
+                    <div class="settings-card-body bg-white">
                         <div class="settings-item">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="mb-1">Perfil público</h6>
-                                    <small class="text-muted">Permite que otros usuarios vean tu perfil</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="perfilPublico" checked>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Mostrar correo electrónico</h6>
-                                    <small class="text-muted">Visible en tu perfil público</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="mostrarEmail">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Estado de actividad</h6>
-                                    <small class="text-muted">Muestra cuando estás en línea</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="estadoActividad" checked>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Datos y privacidad -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <h5 class="mb-0">Datos y Privacidad</h5>
-                    </div>
-                    <div class="settings-card-body">
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Descargar mis datos</h6>
+                                    <h6 class="mb-1 fw-semibold">Descargar mis datos</h6>
                                     <small class="text-muted">Obtén una copia de tu información personal</small>
                                 </div>
-                                <button class="btn btn-outline-custom">
+                                <button class="btn btn-primary" disabled>
                                     <i class="fas fa-download me-1"></i> Descargar
                                 </button>
                             </div>
                         </div>
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Análisis y cookies</h6>
-                                    <small class="text-muted">Ayúdanos a mejorar la plataforma</small>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="cookies" checked>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
-                <!-- Zona de peligro -->
-                <div class="settings-card border-danger">
-                    <div class="settings-card-header bg-danger bg-opacity-10">
-                        <h5 class="mb-0 text-danger">Zona de Peligro</h5>
+                <div class="settings-card card border-danger">
+                    <div class="settings-card-header bg-danger bg-opacity-10 border-bottom border-danger">
+                        <h5 class="text-danger">Zona de Peligro</h5>
                     </div>
-                    <div class="settings-card-body">
+                    <div class="settings-card-body bg-white">
                         <div class="settings-item">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="mb-1">Desactivar cuenta</h6>
+                                    <h6 class="mb-1 fw-semibold">Desactivar cuenta</h6>
                                     <small class="text-muted">Tu cuenta será desactivada temporalmente</small>
                                 </div>
-                                <button class="btn btn-outline-danger">
-                                    Desactivar
-                                </button>
-                            </div>
-                        </div>
-                        <div class="settings-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Eliminar cuenta</h6>
-                                    <small class="text-muted">Esta acción es permanente e irreversible</small>
-                                </div>
-                                <button class="btn btn-danger">
-                                    Eliminar cuenta
+                                <button class="btn btn-outline-danger" id="btnDesactivarCuenta">
+                                    <i class="fas fa-exclamation-triangle me-1"></i> Desactivar
                                 </button>
                             </div>
                         </div>
@@ -756,36 +536,255 @@ body.dark .form-control:focus, body.dark .form-select:focus {
 @endsection
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Switch de tema
-    const switchTema = document.getElementById('switchTema');
-    const body = document.body;
+function cambiarTab(tabId, button) {
+    document.querySelectorAll('.tab-pane-custom').forEach(pane => {
+        pane.style.display = 'none';
+        pane.classList.remove('active');
+    });
+    
+    document.querySelectorAll('.settings-nav-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-primary', 'text-white');
+        btn.classList.add('text-muted');
+    });
+    
+    document.getElementById(tabId).style.display = 'block';
+    document.getElementById(tabId).classList.add('active');
+    
+    button.classList.add('active', 'bg-primary', 'text-white');
+    button.classList.remove('text-muted');
+}
 
-    // Cargar tema guardado
-    if (localStorage.getItem('tema_config') === 'oscuro') {
-        body.classList.add('dark');
-        switchTema.checked = true;
+const notyf = new Notyf({
+    duration: 4000,
+    position: {
+        x: 'right',
+        y: 'top',
     }
+});
 
-    // Cambiar tema
-    switchTema.addEventListener('change', () => {
-        if (switchTema.checked) {
-            body.classList.add('dark');
-            localStorage.setItem('tema_config', 'oscuro');
+const switchTema = document.getElementById('switchTema');
+const body = document.body;
+
+if (localStorage.getItem('tema_config') === 'oscuro') {
+    body.classList.add('dark');
+    switchTema.checked = true;
+}
+
+switchTema.addEventListener('change', () => {
+    if (switchTema.checked) {
+        body.classList.add('dark');
+        localStorage.setItem('tema_config', 'oscuro');
+    } else {
+        body.classList.remove('dark');
+        localStorage.setItem('tema_config', 'claro');
+    }
+});
+
+const newPasswordInput = document.getElementById('new_password');
+if (newPasswordInput) {
+    newPasswordInput.addEventListener('input', () => {
+        const password = newPasswordInput.value;
+        
+        const reqLength = document.getElementById('req-length');
+        if (password.length >= 8) {
+            reqLength.classList.add('valid');
+            reqLength.classList.remove('invalid');
+            reqLength.querySelector('i').className = 'fas fa-circle-check';
         } else {
-            body.classList.remove('dark');
-            localStorage.setItem('tema_config', 'claro');
+            reqLength.classList.remove('valid');
+            reqLength.classList.add('invalid');
+            reqLength.querySelector('i').className = 'fas fa-circle-xmark';
+        }
+        
+        const reqUppercase = document.getElementById('req-uppercase');
+        if (/[A-Z]/.test(password)) {
+            reqUppercase.classList.add('valid');
+            reqUppercase.classList.remove('invalid');
+            reqUppercase.querySelector('i').className = 'fas fa-circle-check';
+        } else {
+            reqUppercase.classList.remove('valid');
+            reqUppercase.classList.add('invalid');
+            reqUppercase.querySelector('i').className = 'fas fa-circle-xmark';
+        }
+        
+        const reqLowercase = document.getElementById('req-lowercase');
+        if (/[a-z]/.test(password)) {
+            reqLowercase.classList.add('valid');
+            reqLowercase.classList.remove('invalid');
+            reqLowercase.querySelector('i').className = 'fas fa-circle-check';
+        } else {
+            reqLowercase.classList.remove('valid');
+            reqLowercase.classList.add('invalid');
+            reqLowercase.querySelector('i').className = 'fas fa-circle-xmark';
+        }
+        
+        const reqNumber = document.getElementById('req-number');
+        if (/[0-9]/.test(password)) {
+            reqNumber.classList.add('valid');
+            reqNumber.classList.remove('invalid');
+            reqNumber.querySelector('i').className = 'fas fa-circle-check';
+        } else {
+            reqNumber.classList.remove('valid');
+            reqNumber.classList.add('invalid');
+            reqNumber.querySelector('i').className = 'fas fa-circle-xmark';
         }
     });
+}
 
-    // Simulación de interacciones (sin funcionalidad real)
-    document.addEventListener('DOMContentLoaded', function() {
-        // Todos los switches y selects están listos para conectarse con Axios
-        const switches = document.querySelectorAll('.form-check-input[type="checkbox"]');
-        const selects = document.querySelectorAll('.form-select');
+function validarPassword(password) {
+    const regexLength = /.{8,}/;
+    const regexUppercase = /[A-Z]/;
+    const regexLowercase = /[a-z]/;
+    const regexNumber = /[0-9]/;
+    
+    return regexLength.test(password) && 
+           regexUppercase.test(password) && 
+           regexLowercase.test(password) && 
+           regexNumber.test(password);
+}
+
+document.getElementById('formPerfil').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await axios.post('/user/update-settings', formData);
+        notyf.success('Perfil actualizado correctamente');
+    } catch (error) {
+        notyf.error('Error al actualizar el perfil: ' + (error.response?.data?.message || 'Error desconocido'));
+    }
+});
+
+document.getElementById('photoUpload').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 2 * 1024 * 1024) {
+        notyf.error('La imagen no debe superar los 2MB');
+        e.target.value = '';
+        return;
+    }
+    
+    if (!file.type.match('image.*')) {
+        notyf.error('Solo se permiten imágenes');
+        e.target.value = '';
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('foto', file);
+    
+    try {
+        const response = await axios.post('/user/update-photo', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
         
-        // Aquí se pueden agregar los listeners para enviar datos con Axios
-        // Ejemplo: switches.forEach(sw => sw.addEventListener('change', () => { /* axios.post() */ }));
+        document.getElementById('profilePhotoPreview').src = URL.createObjectURL(file);
+        notyf.success('Foto actualizada correctamente');
+        setTimeout(() => location.reload(), 1500);
+    } catch (error) {
+        notyf.error('Error al actualizar la foto: ' + (error.response?.data?.message || 'Error desconocido'));
+    }
+});
+
+document.getElementById('btnEliminarFoto').addEventListener('click', async () => {
+    const result = await Swal.fire({
+        title: '¿Eliminar foto de perfil?',
+        text: "Esta acción no se puede deshacer",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
     });
+    
+    if (!result.isConfirmed) return;
+    
+    try {
+        await axios.post('/user/delete-photo');
+        notyf.success('Foto eliminada correctamente');
+        setTimeout(() => location.reload(), 1500);
+    } catch (error) {
+        notyf.error('Error al eliminar la foto: ' + (error.response?.data?.message || 'Error desconocido'));
+    }
+});
+
+const formPassword = document.getElementById('formPassword');
+if (formPassword) {
+    formPassword.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const newPassword = formData.get('new_password');
+        const confirmPassword = formData.get('new_password_confirmation');
+        
+        if (newPassword !== confirmPassword) {
+            notyf.error('Las contraseñas no coinciden');
+            return;
+        }
+        
+        if (!validarPassword(newPassword)) {
+            notyf.error('La contraseña no cumple con los requisitos mínimos');
+            return;
+        }
+        
+        try {
+            await axios.post('/user/change-password', {
+                current_password: formData.get('current_password'),
+                new_password: newPassword,
+                new_password_confirmation: confirmPassword
+            });
+            
+            await Swal.fire({
+                icon: 'success',
+                title: 'Contraseña cambiada',
+                text: 'Tu contraseña ha sido actualizada correctamente',
+                confirmButtonColor: '#3a57e8'
+            });
+            
+            e.target.reset();
+        } catch (error) {
+            notyf.error('Error al cambiar la contraseña: ' + (error.response?.data?.message || 'Error desconocido'));
+        }
+    });
+}
+
+document.getElementById('btnDesactivarCuenta').addEventListener('click', async () => {
+    const result = await Swal.fire({
+        title: '¿Desactivar tu cuenta?',
+        text: "Tu cuenta será desactivada temporalmente. Puedes contactar al soporte para reactivarla.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, desactivar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (!result.isConfirmed) return;
+    
+    try {
+        await axios.post('/user/deactivate-account');
+        
+        await Swal.fire({
+            icon: 'success',
+            title: 'Cuenta desactivada',
+            text: 'Serás redirigido al inicio de sesión',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        
+        setTimeout(() => {
+            window.location.href = '/logout';
+        }, 2000);
+    } catch (error) {
+        notyf.error('Error al desactivar la cuenta: ' + (error.response?.data?.message || 'Error desconocido'));
+    }
+});
 </script>
 @endsection
